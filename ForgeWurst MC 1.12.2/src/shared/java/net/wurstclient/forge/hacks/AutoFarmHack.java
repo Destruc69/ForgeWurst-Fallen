@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import net.minecraft.init.SoundEvents;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.block.*;
@@ -67,8 +68,14 @@ public final class AutoFarmHack extends Hack
 		super("AutoFarm", "Harvests and re-plants crops automatically.\n"
 			+ "Works with wheat, carrots, potatoes, beetroots,\n"
 			+ "pumpkins, melons, cacti, sugar canes and\n" + "nether warts.");
-		setCategory(Category.BLOCKS);
+		setCategory(Category.WORLD);
 		addSetting(range);
+	}
+
+	@Override
+	public String getRenderName()
+	{
+		return getName() + " [" + range.getValueString() + "]";
 	}
 	
 	@Override
@@ -140,7 +147,7 @@ public final class AutoFarmHack extends Hack
 		List<BlockPos> blocksToHarvest = new ArrayList<>();
 		List<BlockPos> blocksToReplant = new ArrayList<>();
 		
-		if(!wurst.getHax().freecamHack.isEnabled())
+		if(!wurst.getHax().freeCam.isEnabled())
 		{
 			blocksToHarvest =
 				blocks.parallelStream().filter(this::shouldBeHarvested)

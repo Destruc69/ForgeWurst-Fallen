@@ -119,7 +119,7 @@ public final class Slider extends Component
 		GL11.glVertex2i(x4, y4);
 		GL11.glEnd();
 		GL11.glColor4f(acColor[0], acColor[1], acColor[2], 0.5F);
-		GL11.glBegin(GL11.GL_LINE_LOOP);
+		GL11.glBegin(GL11.GL_QUADS);
 		GL11.glVertex2i(x3, y4);
 		GL11.glVertex2i(x3, y5);
 		GL11.glVertex2i(x4, y5);
@@ -143,21 +143,12 @@ public final class Slider extends Component
 		GL11.glVertex2d(xk2, yk1);
 		GL11.glEnd();
 		
-		// outline
-		GL11.glColor4f(0.0625F, 0.0625F, 0.0625F, 0.5F);
-		GL11.glBegin(GL11.GL_LINE_LOOP);
-		GL11.glVertex2d(xk1, yk1);
-		GL11.glVertex2d(xk1, yk2);
-		GL11.glVertex2d(xk2, yk2);
-		GL11.glVertex2d(xk2, yk1);
-		GL11.glEnd();
-		
 		// slider name & value
 		GL11.glColor4f(1, 1, 1, 1);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		FontRenderer fr = WMinecraft.getFontRenderer();
-		fr.drawString(setting.getName(), x1, y1 + 2, 0xf0f0f0);
-		fr.drawString(setting.getValueString(),
+		fr.drawStringWithShadow(setting.getName(), x1, y1 + 2, 0xf0f0f0);
+		fr.drawStringWithShadow(setting.getValueString(),
 			x2 - fr.getStringWidth(setting.getValueString()), y1 + 2, 0xf0f0f0);
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 	}

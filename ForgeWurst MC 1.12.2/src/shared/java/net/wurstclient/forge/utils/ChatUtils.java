@@ -10,6 +10,7 @@ package net.wurstclient.forge.utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
+import scala.Int;
 
 public final class ChatUtils
 {
@@ -24,7 +25,7 @@ public final class ChatUtils
 	{
 		if(enabled)
 			Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(
-				new TextComponentString("\u00a7c[\u00a76Wurst\u00a7c]\u00a7r ")
+				new TextComponentString("\u00a7c[\u00a76FALLEN\u00a7c]\u00a7r ")
 					.appendSibling(component));
 	}
 	

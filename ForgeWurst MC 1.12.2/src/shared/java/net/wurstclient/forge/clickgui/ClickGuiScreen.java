@@ -10,6 +10,7 @@ package net.wurstclient.forge.clickgui;
 import java.io.IOException;
 
 import net.minecraft.client.gui.GuiScreen;
+import org.lwjgl.LWJGLException;
 
 public final class ClickGuiScreen extends GuiScreen
 {
@@ -38,6 +39,10 @@ public final class ClickGuiScreen extends GuiScreen
 	public void drawScreen(int mouseX, int mouseY, float partialTicks)
 	{
 		super.drawScreen(mouseX, mouseY, partialTicks);
-		gui.render(mouseX, mouseY, partialTicks);
+		try {
+			gui.render(mouseX, mouseY, partialTicks);
+		} catch (LWJGLException e) {
+			e.printStackTrace();
+		}
 	}
 }

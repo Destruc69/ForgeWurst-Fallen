@@ -9,21 +9,22 @@ package net.wurstclient.forge;
 
 public enum Category
 {
-	BLOCKS("Blocks"),
-	MOVEMENT("Movement"),
 	COMBAT("Combat"),
+	MOVEMENT("Movement"),
+	WORLD("World"),
+	PLAYER("Player"),
 	RENDER("Render"),
-	CHAT("Chat"),
-	FUN("Fun"),
-	OTHER("Other");
-	
+	PATHING("Pathing"),
+	GAMES("Games");
+
+
 	private final String name;
-	
+
 	private Category(String name)
 	{
 		this.name = name;
 	}
-	
+
 	public String getName()
 	{
 		return name;

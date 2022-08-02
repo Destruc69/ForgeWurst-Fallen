@@ -89,7 +89,7 @@ public final class BlockListEditButton extends Component
 		GL11.glVertex2i(x2, y1);
 		GL11.glEnd();
 		GL11.glColor4f(acColor[0], acColor[1], acColor[2], 0.5F);
-		GL11.glBegin(GL11.GL_LINE_LOOP);
+		GL11.glBegin(GL11.GL_QUADS);
 		GL11.glVertex2i(x3, y1);
 		GL11.glVertex2i(x3, y2);
 		GL11.glVertex2i(x2, y2);

@@ -7,6 +7,7 @@
  */
 package net.wurstclient.forge;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import net.minecraft.client.Minecraft;
@@ -63,6 +64,8 @@ public final class CommandProcessor
 		}catch(CmdException e)
 		{
 			e.printToChat();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 }

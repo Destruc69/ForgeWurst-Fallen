@@ -54,13 +54,8 @@ public final class TacoCmd extends Command
 	{
 		if(event.getType() != ElementType.ALL || mc.gameSettings.showDebugInfo)
 			return;
-		
-		if(wurst.getHax().rainbowUiHack.isEnabled())
-		{
-			float[] acColor = wurst.getGui().getAcColor();
-			GL11.glColor4f(acColor[0], acColor[1], acColor[2], 1);
-		}else
-			GL11.glColor4f(1, 1, 1, 1);
+
+		GL11.glColor4f(1, 1, 1, 1);
 		
 		int tacoId = WMinecraft.getPlayer().ticksExisted % 32 / 8;
 		ResourceLocation tacoLocation = tacos[tacoId];

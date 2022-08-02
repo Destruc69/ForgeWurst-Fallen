@@ -8,8 +8,11 @@
 package net.wurstclient.forge;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.math.BlockPos;
 import net.wurstclient.forge.compatibility.WForgeRegistryEntry;
 import net.wurstclient.forge.utils.ChatUtils;
+
+import java.io.IOException;
 
 public abstract class Command extends WForgeRegistryEntry<Command>
 {
@@ -27,7 +30,7 @@ public abstract class Command extends WForgeRegistryEntry<Command>
 		this.syntax = syntax;
 	}
 	
-	public abstract void call(String[] args) throws CmdException;
+	public abstract void call(String[] args) throws CmdException, IOException;
 	
 	public final String getName()
 	{
@@ -43,7 +46,11 @@ public abstract class Command extends WForgeRegistryEntry<Command>
 	{
 		return syntax;
 	}
-	
+
+	protected BlockPos getPathToPos(BlockPos up) {
+		return up;
+	}
+
 	public abstract class CmdException extends Exception
 	{
 		public CmdException()

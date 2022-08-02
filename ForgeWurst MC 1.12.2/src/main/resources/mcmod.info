@@ -1,15 +1,15 @@
 [
 {
-  "modid": "forgewurst",
-  "name": "ForgeWurst",
-  "description": "Wurst Client for Minecraft Forge.",
+  "modid": "fallen",
+  "name": "Fallen",
+  "description": "Fallen is a utility mod for 1.12.2",
   "version": "${version}",
   "mcversion": "${mcversion}",
-  "url": "https://forge.wurstclient.net/",
-  "updateJSON": "https://forge.wurstclient.net/api/v1/update.json",
-  "authorList": ["Alexander01998"],
-  "credits": "Copyright (C) 2017 - 2019 Wurst-Imperium. All rights reserved.",
-  "logoFile": "assets/forgewurst/wurst-logo.png",
+  "url": "",
+  "updateJSON": "",
+  "authorList": [""],
+  "credits": "",
+  "logoFile": "",
   "screenshots": [],
   "dependencies": []
 }

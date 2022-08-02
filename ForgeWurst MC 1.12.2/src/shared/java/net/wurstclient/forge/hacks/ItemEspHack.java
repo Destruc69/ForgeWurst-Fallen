@@ -9,6 +9,7 @@ package net.wurstclient.forge.hacks;
 
 import java.util.ArrayList;
 
+import net.minecraft.init.SoundEvents;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.renderer.EntityRenderer;

@@ -8,6 +8,7 @@
 package net.wurstclient.fmlevents;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraftforge.fml.common.event.FMLEvent;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraftforge.fml.common.eventhandler.Event;
 

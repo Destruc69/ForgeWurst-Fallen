@@ -11,39 +11,47 @@ import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.entity.player.EntityPlayer;
 import net.wurstclient.forge.compatibility.WMinecraft;
 
-public class EntityFakePlayer extends EntityOtherPlayerMP
-{
-	public EntityFakePlayer()
-	{
+public class EntityFakePlayer extends EntityOtherPlayerMP {
+	public EntityFakePlayer() {
 		super(WMinecraft.getWorld(), WMinecraft.getPlayer().getGameProfile());
-		copyLocationAndAnglesFrom(WMinecraft.getPlayer());
-		
-		// fix inventory
-		inventory.copyInventory(WMinecraft.getPlayer().inventory);
-		getDataManager().set(EntityPlayer.PLAYER_MODEL_FLAG, WMinecraft
-			.getPlayer().getDataManager().get(EntityPlayer.PLAYER_MODEL_FLAG));
-		
-		// fix rotation
-		rotationYawHead = WMinecraft.getPlayer().rotationYawHead;
-		renderYawOffset = WMinecraft.getPlayer().renderYawOffset;
-		
-		// fix cape movement
-		chasingPosX = posX;
-		chasingPosY = posY;
-		chasingPosZ = posZ;
-		
-		// spawn
-		WMinecraft.getWorld().addEntityToWorld(getEntityId(), this);
+		try {
+			copyLocationAndAnglesFrom(WMinecraft.getPlayer());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		try {
+			// fix inventory
+			inventory.copyInventory(WMinecraft.getPlayer().inventory);
+			getDataManager().set(EntityPlayer.PLAYER_MODEL_FLAG, WMinecraft
+					.getPlayer().getDataManager().get(EntityPlayer.PLAYER_MODEL_FLAG));
+
+			// fix rotation
+			rotationYawHead = WMinecraft.getPlayer().rotationYawHead;
+			renderYawOffset = WMinecraft.getPlayer().renderYawOffset;
+
+			// fix cape movement
+			chasingPosX = posX;
+			chasingPosY = posY;
+			chasingPosZ = posZ;
+
+			// spawn
+			WMinecraft.getWorld().addEntityToWorld(getEntityId(), this);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
-	
-	public void resetPlayerPosition()
-	{
+
+	public void resetPlayerPosition() {
 		WMinecraft.getPlayer().setPositionAndRotation(posX, posY, posZ,
-			rotationYaw, rotationPitch);
+				rotationYaw, rotationPitch);
 	}
-	
-	public void despawn()
-	{
-		WMinecraft.getWorld().removeEntityFromWorld(getEntityId());
+
+	public void despawn() {
+		try {
+			WMinecraft.getWorld().removeEntityFromWorld(getEntityId());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

@@ -12,6 +12,7 @@ import java.util.Collections;
 
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.SoundEvents;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WGetAmbientOcclusionLightValueEvent;
@@ -66,8 +67,7 @@ public final class XRayHack extends Hack
 		MinecraftForge.EVENT_BUS.unregister(this);
 		mc.renderGlobal.loadRenderers();
 		
-		if(!wurst.getHax().fullbrightHack.isEnabled())
-			mc.gameSettings.gammaSetting = 0.5F;
+		mc.gameSettings.gammaSetting = 0.5F;
 	}
 	
 	@SubscribeEvent
@@ -94,7 +94,8 @@ public final class XRayHack extends Hack
 	{
 		event.setRendered(isVisible(event.getState().getBlock()));
 	}
-	
+
+
 	@SubscribeEvent
 	public void onRenderBlockModel(WRenderBlockModelEvent event)
 	{

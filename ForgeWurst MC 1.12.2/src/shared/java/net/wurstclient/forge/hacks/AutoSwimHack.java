@@ -9,6 +9,7 @@ package net.wurstclient.forge.hacks;
 
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.settings.GameSettings;
+import net.minecraft.init.SoundEvents;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
@@ -27,7 +28,13 @@ public final class AutoSwimHack extends Hack
 		setCategory(Category.MOVEMENT);
 		addSetting(mode);
 	}
-	
+
+	@Override
+	public String getRenderName()
+	{
+		return getName() + " [" + mode.getSelected().name() + "]";
+	}
+
 	@Override
 	protected void onEnable()
 	{

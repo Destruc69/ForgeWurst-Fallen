@@ -88,15 +88,6 @@ public final class Radar extends Component
 		GL11.glVertex2d(xa3, ya2);
 		GL11.glEnd();
 		
-		// outline
-		GL11.glColor4f(0.0625F, 0.0625F, 0.0625F, 0.5F);
-		GL11.glBegin(GL11.GL_LINE_LOOP);
-		GL11.glVertex2d(xa1, ya1);
-		GL11.glVertex2d(xa2, ya2);
-		GL11.glVertex2d(xa1, ya3);
-		GL11.glVertex2d(xa3, ya2);
-		GL11.glEnd();
-		
 		GL11.glPopMatrix();
 		
 		// points
@@ -112,7 +103,7 @@ public final class Radar extends Component
 				- (player.prevPosZ
 					+ (player.posZ - player.prevPosZ) * partialTicks);
 			double distance = Math.sqrt(diffX * diffX + diffZ * diffZ)
-				* (getWidth() * 0.5 / hack.getRadius());
+				* (getWidth() * 3 / hack.getRadius());
 			double neededRotation = Math.toDegrees(Math.atan2(diffZ, diffX));
 			double angle;
 			if(hack.isRotateEnabled())

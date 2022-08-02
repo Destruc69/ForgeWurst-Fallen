@@ -7,43 +7,68 @@
  */
 package net.wurstclient.forge.hacks;
 
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.compatibility.WEntity;
+import net.wurstclient.forge.settings.EnumSetting;
+import net.wurstclient.forge.utils.KeyBindingUtils;
 
-public final class AutoSprintHack extends Hack
-{
-	public AutoSprintHack()
-	{
+public final class AutoSprintHack extends Hack {
+
+	private final EnumSetting<Mode> mode =
+			new EnumSetting<>("Mode", Mode.values(), Mode.RAGE);
+
+	public AutoSprintHack() {
 		super("AutoSprint", "Makes you sprint automatically.");
 		setCategory(Category.MOVEMENT);
+		addSetting(mode);
 	}
-	
+
 	@Override
-	protected void onEnable()
+	public String getRenderName()
 	{
+		return getName() + " [" + mode.getSelected().name() + "]";
+	}
+
+	@Override
+	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
 	}
-	
+
 	@Override
-	protected void onDisable()
-	{
+	protected void onDisable() {
 		MinecraftForge.EVENT_BUS.unregister(this);
 	}
-	
+
 	@SubscribeEvent
-	public void onUpdate(WUpdateEvent event)
-	{
-		EntityPlayerSP player = event.getPlayer();
-		
-		if(WEntity.isCollidedHorizontally(player) || player.isSneaking())
-			return;
-		
-		if(player.moveForward > 0)
-			player.setSprinting(true);
+	public void onUpdate(WUpdateEvent event) {
+		if (mode.getSelected().rage) {
+			if (mc.player.moveForward != 0 || mc.player.moveStrafing != 0) {
+				mc.player.setSprinting(true);
+			}
+		} else {
+			KeyBindingUtils.setPressed(mc.gameSettings.keyBindSprint, true);
+		}
+	}
+
+	private enum Mode {
+		NORMAL("Normal", true, false),
+		RAGE("Rage", false, true);
+
+		private final String name;
+		private final boolean normal;
+		private final boolean rage;
+
+		private Mode(String name, boolean normal, boolean rage) {
+			this.name = name;
+			this.normal = normal;
+			this.rage = rage;
+		}
+
+		public String toString() {
+			return name;
+		}
 	}
 }

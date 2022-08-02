@@ -20,6 +20,7 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Enchantments;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
@@ -67,6 +68,12 @@ public final class AutoArmorHack extends Hack
 		addSetting(useEnchantments);
 		addSetting(swapWhileMoving);
 		addSetting(delay);
+	}
+
+	@Override
+	public String getRenderName()
+	{
+		return getName() + " [" + delay.getValueString() + "]";
 	}
 	
 	@Override

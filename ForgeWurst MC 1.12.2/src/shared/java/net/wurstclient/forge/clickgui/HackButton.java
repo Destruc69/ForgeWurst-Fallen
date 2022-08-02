@@ -124,19 +124,11 @@ public final class HackButton extends Component
 		}
 		GL11.glEnd();
 		
-		// outline
-		GL11.glColor4f(acColor[0], acColor[1], acColor[2], 0.5F);
-		GL11.glBegin(GL11.GL_LINE_LOOP);
-		GL11.glVertex2i(x1, y1);
-		GL11.glVertex2i(x1, y2);
-		GL11.glVertex2i(x2, y2);
-		GL11.glVertex2i(x2, y1);
-		GL11.glEnd();
-		
 		if(settings)
 		{
 			// separator
-			GL11.glBegin(GL11.GL_LINES);
+			GL11.glColor4f(acColor[0], acColor[1], acColor[2], opacity);
+			GL11.glBegin(GL11.GL_QUADS);
 			GL11.glVertex2i(x3, y1);
 			GL11.glVertex2i(x3, y2);
 			GL11.glEnd();
@@ -146,21 +138,37 @@ public final class HackButton extends Component
 			double xa3 = x2 - 1;
 			double ya1;
 			double ya2;
+
+			double xb1 = x3 + 1;
+			double xb2 = (x3 + x2) / 2.0;
+			double xb3 = x2 - 1;
+			double yb1 = y2 - 3.5;
+			double yb2 = y1 + 3;
+
+			GL11.glColor4f(acColor[0], acColor[1], acColor[2], opacity);
+			GL11.glBegin(GL11.GL_QUADS);
+			GL11.glVertex2d(xb1, yb1);
+			GL11.glVertex2d(xb2, yb1);
+			GL11.glVertex2d(xb3, yb2);
+			GL11.glEnd();
+
+
 			
 			if(settingsWindow != null && !settingsWindow.isClosing())
 			{
 				ya1 = y2 - 3.5;
 				ya2 = y1 + 3;
-				GL11.glColor4f(hSettings ? 1 : 0.85F, 0, 0, 1);
+				GL11.glColor4f(acColor[0], acColor[1], acColor[2], opacity);
 			}else
 			{
 				ya1 = y1 + 3.5;
 				ya2 = y2 - 3;
-				GL11.glColor4f(0, hSettings ? 1 : 0.85F, 0, 1);
+				GL11.glColor4f(acColor[0], acColor[1], acColor[2], opacity);
 			}
 			
 			// arrow
-			GL11.glBegin(GL11.GL_TRIANGLES);
+			GL11.glColor4f(acColor[0], acColor[1], acColor[2], opacity);
+			GL11.glBegin(GL11.GL_QUADS);
 			GL11.glVertex2d(xa1, ya1);
 			GL11.glVertex2d(xa3, ya1);
 			GL11.glVertex2d(xa2, ya2);
@@ -168,7 +176,7 @@ public final class HackButton extends Component
 			
 			// outline
 			GL11.glColor4f(0.0625F, 0.0625F, 0.0625F, 0.5F);
-			GL11.glBegin(GL11.GL_LINE_LOOP);
+			GL11.glBegin(GL11.GL_QUADS);
 			GL11.glVertex2d(xa1, ya1);
 			GL11.glVertex2d(xa3, ya1);
 			GL11.glVertex2d(xa2, ya2);
@@ -182,7 +190,7 @@ public final class HackButton extends Component
 		int fx = x1 + ((settings ? getWidth() - 11 : getWidth())
 			- fr.getStringWidth(hack.getName())) / 2;
 		int fy = y1 + 2;
-		fr.drawString(hack.getName(), fx, fy, 0xf0f0f0);
+		fr.drawStringWithShadow(hack.getName(), fx, fy, 0xf0f0f0);
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 	}
 	

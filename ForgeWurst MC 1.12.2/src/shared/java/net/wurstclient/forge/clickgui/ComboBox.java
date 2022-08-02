@@ -85,7 +85,15 @@ public final class ComboBox extends Component
 			gui.setTooltip(setting.getDescription());
 		
 		// background
-		GL11.glColor4f(bgColor[0], bgColor[1], bgColor[2], opacity);
+		GL11.glColor4f(acColor[0], acColor[1], acColor[2], 0.75f);
+		GL11.glBegin(GL11.GL_QUADS);
+		GL11.glVertex2i(x1, y1);
+		GL11.glVertex2i(x1, y2);
+		GL11.glVertex2i(x4, y2);
+		GL11.glVertex2i(x4, y1);
+		GL11.glEnd();
+
+		GL11.glColor4f(acColor[0], acColor[1], acColor[2], 0.75f);
 		GL11.glBegin(GL11.GL_QUADS);
 		GL11.glVertex2i(x1, y1);
 		GL11.glVertex2i(x1, y2);
@@ -103,7 +111,7 @@ public final class ComboBox extends Component
 		GL11.glVertex2i(x2, y1);
 		GL11.glEnd();
 		GL11.glColor4f(acColor[0], acColor[1], acColor[2], 0.5F);
-		GL11.glBegin(GL11.GL_LINE_LOOP);
+		GL11.glBegin(GL11.GL_QUADS);
 		GL11.glVertex2i(x4, y1);
 		GL11.glVertex2i(x4, y2);
 		GL11.glVertex2i(x2, y2);
@@ -111,7 +119,7 @@ public final class ComboBox extends Component
 		GL11.glEnd();
 		
 		// separator
-		GL11.glBegin(GL11.GL_LINES);
+		GL11.glBegin(GL11.GL_QUADS);
 		GL11.glVertex2i(x3, y1);
 		GL11.glVertex2i(x3, y2);
 		GL11.glEnd();
@@ -119,31 +127,23 @@ public final class ComboBox extends Component
 		double xa1 = x3 + 1;
 		double xa2 = (x3 + x2) / 2.0;
 		double xa3 = x2 - 1;
-		double ya1;
-		double ya2;
-		
-		if(popup != null && !popup.isClosing())
-		{
-			ya1 = y2 - 3.5;
-			ya2 = y1 + 3;
-			GL11.glColor4f(hBox ? 1 : 0.85F, 0, 0, 1);
-		}else
-		{
-			ya1 = y1 + 3.5;
-			ya2 = y2 - 3;
-			GL11.glColor4f(0, hBox ? 1 : 0.85F, 0, 1);
-		}
+		double ya1 = y2 - 3.5;;
+		double ya2 = y1 + 3;
+
+
+		GL11.glColor4f(hBox ? 1 : 0.85F, 0, 0, 1);
 		
 		// arrow
-		GL11.glBegin(GL11.GL_TRIANGLES);
+		GL11.glBegin(GL11.GL_QUADS);
 		GL11.glVertex2d(xa1, ya1);
 		GL11.glVertex2d(xa3, ya1);
 		GL11.glVertex2d(xa2, ya2);
 		GL11.glEnd();
 		
 		// outline
-		GL11.glColor4f(0.0625F, 0.0625F, 0.0625F, 0.5F);
-		GL11.glBegin(GL11.GL_LINE_LOOP);
+		GL11.glColor4f(bgColor[0], bgColor[1], bgColor[2], 0.75f);
+		GL11.glBegin(GL11.GL_QUADS);
+		GL11.glLineWidth(1000);
 		GL11.glVertex2d(xa1, ya1);
 		GL11.glVertex2d(xa3, ya1);
 		GL11.glVertex2d(xa2, ya2);
@@ -153,8 +153,8 @@ public final class ComboBox extends Component
 		GL11.glColor4f(1, 1, 1, 1);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		FontRenderer fr = WMinecraft.getFontRenderer();
-		fr.drawString(setting.getName(), x1, y1 + 2, 0xf0f0f0);
-		fr.drawString(setting.getSelected().toString(), x4 + 2, y1 + 2,
+		fr.drawStringWithShadow(setting.getName(), x1, y1 + 2, 0xf0f0f0);
+		fr.drawStringWithShadow(setting.getSelected().toString(), x4 + 2, y1 + 2,
 			0xf0f0f0);
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 	}
@@ -225,15 +225,6 @@ public final class ComboBox extends Component
 			if(hovering)
 				gui.setTooltip(null);
 			
-			// outline
-			GL11.glColor4f(acColor[0], acColor[1], acColor[2], 0.5F);
-			GL11.glBegin(GL11.GL_LINE_LOOP);
-			GL11.glVertex2i(x1, y1);
-			GL11.glVertex2i(x1, y2);
-			GL11.glVertex2i(x2, y2);
-			GL11.glVertex2i(x2, y1);
-			GL11.glEnd();
-			
 			Enum<?>[] values = ((ComboBox)getOwner()).setting.getValues();
 			int yi1 = y1 - 11;
 			for(Enum<?> value : values)
@@ -246,8 +237,15 @@ public final class ComboBox extends Component
 				boolean hValue = hovering && mouseY >= yi1 && mouseY < yi2;
 				
 				// background
-				GL11.glColor4f(bgColor[0], bgColor[1], bgColor[2],
-					hValue ? opacity * 1.5F : opacity);
+				GL11.glColor4f(acColor[0], acColor[1], acColor[2], 0.75f);
+				GL11.glBegin(GL11.GL_QUADS);
+				GL11.glVertex2i(x1, yi1);
+				GL11.glVertex2i(x1, yi2);
+				GL11.glVertex2i(x2, yi2);
+				GL11.glVertex2i(x2, yi1);
+				GL11.glEnd();
+
+				GL11.glColor4f(acColor[0], acColor[1], acColor[2], 0.75f);
 				GL11.glBegin(GL11.GL_QUADS);
 				GL11.glVertex2i(x1, yi1);
 				GL11.glVertex2i(x1, yi2);
