@@ -11,7 +11,9 @@ import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketUseEntity;
@@ -37,12 +39,18 @@ public final class FreeCam extends Hack {
 	private final SliderSetting speed =
 			new SliderSetting("Speed", 1, 0.05, 10, 0.05, SliderSetting.ValueDisplay.DECIMAL);
 
+	private final CheckboxSetting view =
+			new CheckboxSetting("ViewPlayer", "Make movies/trailers, just make sure its only 2 players",
+					true);
+
 	private EntityFakePlayer fakePlayer;
 
 	public FreeCam() {
 		super("FreeCam", "Go outside of your body.");
 		setCategory(Category.RENDER);
 		addSetting(old);
+		addSetting(speed);
+		addSetting(view);
 	}
 
 	@Override
@@ -163,7 +171,10 @@ public final class FreeCam extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		if (old.isChecked()) {
+		if (!old.isChecked() && view.isChecked()) {
+			old.setChecked(true);
+		}
+		if (old.isChecked() && !view.isChecked()) {
 			EntityPlayerSP player = event.getPlayer();
 
 			player.motionX = 0;
@@ -178,6 +189,15 @@ public final class FreeCam extends Hack {
 
 			if (mc.gameSettings.keyBindSneak.isKeyDown())
 				player.motionY -= speed.getValue();
+		} else if (view.isChecked() && old.isChecked()) {
+			for (Entity entity : mc.world.loadedEntityList) {
+				if (entity instanceof EntityPlayer) {
+					if (entity != mc.player) {
+						mc.player.setPosition(entity.posX + 8, entity.posY +5, entity.posZ - 2);
+						mc.player.setVelocity(0, 0, 0);
+					}
+				}
+			}
 		}
 	}
 
