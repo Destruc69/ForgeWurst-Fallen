@@ -49,45 +49,49 @@ public final class Scaffold extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		if (mc.player.isSwingInProgress) {
-			setTickLength(50 / 0.5f);
-			mc.player.setVelocity(mc.player.motionX / 2, mc.player.motionY, mc.player.motionZ / 2);
-		} else {
-			setTickLength(50);
-		}
-		BlockPos playerBlock;
-		if (BlockUtils.isScaffoldPos((playerBlock = PlayerUtils.EntityPosToFloorBlockPos(mc.player)).add(0, -1, 0))) {
-			if (BlockUtil.isValidBlock(playerBlock.add(0, -2, 0))) {
-				this.place(playerBlock.add(0, -1, 0), EnumFacing.UP);
-			} else if (BlockUtil.isValidBlock(playerBlock.add(-1, -1, 0))) {
-				this.place(playerBlock.add(0, -1, 0), EnumFacing.EAST);
-			} else if (BlockUtil.isValidBlock(playerBlock.add(1, -1, 0))) {
-				this.place(playerBlock.add(0, -1, 0), EnumFacing.WEST);
-			} else if (BlockUtil.isValidBlock(playerBlock.add(0, -1, -1))) {
-				this.place(playerBlock.add(0, -1, 0), EnumFacing.SOUTH);
-			} else if (BlockUtil.isValidBlock(playerBlock.add(0, -1, 1))) {
-				this.place(playerBlock.add(0, -1, 0), EnumFacing.NORTH);
-			} else if (BlockUtil.isValidBlock(playerBlock.add(1, -1, 1))) {
-				if (BlockUtil.isValidBlock(playerBlock.add(0, -1, 1))) {
-					this.place(playerBlock.add(0, -1, 1), EnumFacing.NORTH);
-				}
-				this.place(playerBlock.add(1, -1, 1), EnumFacing.EAST);
-			} else if (BlockUtil.isValidBlock(playerBlock.add(-1, -1, 1))) {
-				if (BlockUtil.isValidBlock(playerBlock.add(-1, -1, 0))) {
-					this.place(playerBlock.add(0, -1, 1), EnumFacing.WEST);
-				}
-				this.place(playerBlock.add(-1, -1, 1), EnumFacing.SOUTH);
-			} else if (BlockUtil.isValidBlock(playerBlock.add(1, -1, 1))) {
-				if (BlockUtil.isValidBlock(playerBlock.add(0, -1, 1))) {
-					this.place(playerBlock.add(0, -1, 1), EnumFacing.SOUTH);
-				}
-				this.place(playerBlock.add(1, -1, 1), EnumFacing.WEST);
-			} else if (BlockUtil.isValidBlock(playerBlock.add(1, -1, 1))) {
-				if (BlockUtil.isValidBlock(playerBlock.add(0, -1, 1))) {
-					this.place(playerBlock.add(0, -1, 1), EnumFacing.EAST);
-				}
-				this.place(playerBlock.add(1, -1, 1), EnumFacing.NORTH);
+		try {
+			if (mc.player.isSwingInProgress) {
+				setTickLength(50 / 0.8f);
+				mc.player.setVelocity(mc.player.motionX / 1.2, mc.player.motionY, mc.player.motionZ / 1.2);
+			} else {
+				setTickLength(50);
 			}
+			BlockPos playerBlock;
+			if (BlockUtils.isScaffoldPos((playerBlock = PlayerUtils.EntityPosToFloorBlockPos(mc.player)).add(0, -1, 0))) {
+				if (BlockUtil.isValidBlock(playerBlock.add(0, -2, 0))) {
+					this.place(playerBlock.add(0, -1, 0), EnumFacing.UP);
+				} else if (BlockUtil.isValidBlock(playerBlock.add(-1, -1, 0))) {
+					this.place(playerBlock.add(0, -1, 0), EnumFacing.EAST);
+				} else if (BlockUtil.isValidBlock(playerBlock.add(1, -1, 0))) {
+					this.place(playerBlock.add(0, -1, 0), EnumFacing.WEST);
+				} else if (BlockUtil.isValidBlock(playerBlock.add(0, -1, -1))) {
+					this.place(playerBlock.add(0, -1, 0), EnumFacing.SOUTH);
+				} else if (BlockUtil.isValidBlock(playerBlock.add(0, -1, 1))) {
+					this.place(playerBlock.add(0, -1, 0), EnumFacing.NORTH);
+				} else if (BlockUtil.isValidBlock(playerBlock.add(1, -1, 1))) {
+					if (BlockUtil.isValidBlock(playerBlock.add(0, -1, 1))) {
+						this.place(playerBlock.add(0, -1, 1), EnumFacing.NORTH);
+					}
+					this.place(playerBlock.add(1, -1, 1), EnumFacing.EAST);
+				} else if (BlockUtil.isValidBlock(playerBlock.add(-1, -1, 1))) {
+					if (BlockUtil.isValidBlock(playerBlock.add(-1, -1, 0))) {
+						this.place(playerBlock.add(0, -1, 1), EnumFacing.WEST);
+					}
+					this.place(playerBlock.add(-1, -1, 1), EnumFacing.SOUTH);
+				} else if (BlockUtil.isValidBlock(playerBlock.add(1, -1, 1))) {
+					if (BlockUtil.isValidBlock(playerBlock.add(0, -1, 1))) {
+						this.place(playerBlock.add(0, -1, 1), EnumFacing.SOUTH);
+					}
+					this.place(playerBlock.add(1, -1, 1), EnumFacing.WEST);
+				} else if (BlockUtil.isValidBlock(playerBlock.add(1, -1, 1))) {
+					if (BlockUtil.isValidBlock(playerBlock.add(0, -1, 1))) {
+						this.place(playerBlock.add(0, -1, 1), EnumFacing.EAST);
+					}
+					this.place(playerBlock.add(1, -1, 1), EnumFacing.NORTH);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -96,56 +100,60 @@ public final class Scaffold extends Hack {
 	}
 
 	public void place(BlockPos posI, EnumFacing face) {
-		Block block;
-		BlockPos pos = posI;
-		if (face == EnumFacing.UP) {
-			pos = pos.add(0, -1, 0);
-		} else if (face == EnumFacing.NORTH) {
-			pos = pos.add(0, 0, 1);
-		} else if (face == EnumFacing.SOUTH) {
-			pos = pos.add(0, 0, -1);
-		} else if (face == EnumFacing.EAST) {
-			pos = pos.add(-1, 0, 0);
-		} else if (face == EnumFacing.WEST) {
-			pos = pos.add(1, 0, 0);
-		}
-		int oldSlot = Scaffold.mc.player.inventory.currentItem;
-		int newSlot = -1;
-		for (int i = 0; i < 9; ++i) {
-			ItemStack stack = Scaffold.mc.player.inventory.getStackInSlot(i);
-			if (InventoryUtil.isItemStackNull(stack) || !(stack.getItem() instanceof ItemBlock) || !Block.getBlockFromItem((Item) stack.getItem()).getDefaultState().isFullBlock())
-				continue;
-			newSlot = i;
-			break;
-		}
-		if (newSlot == -1) {
-			return;
-		}
-		if (!(Scaffold.mc.player.getHeldItemMainhand().getItem() instanceof ItemBlock)) {
-			Scaffold.mc.player.connection.sendPacket((Packet) new CPacketHeldItemChange(newSlot));
-			Scaffold.mc.player.inventory.currentItem = newSlot;
-			Scaffold.mc.playerController.updateController();
-		}
-		if (Scaffold.mc.gameSettings.keyBindJump.isKeyDown()) {
-			Scaffold.mc.player.motionX *= 0.3;
-			Scaffold.mc.player.motionZ *= 0.3;
-			Scaffold.mc.player.jump();
-			if (TimerUtils.hasReached(100)) {
-				Scaffold.mc.player.motionY = -0.25;
-				TimerUtils.reset();
+		try {
+			Block block;
+			BlockPos pos = posI;
+			if (face == EnumFacing.UP) {
+				pos = pos.add(0, -1, 0);
+			} else if (face == EnumFacing.NORTH) {
+				pos = pos.add(0, 0, 1);
+			} else if (face == EnumFacing.SOUTH) {
+				pos = pos.add(0, 0, -1);
+			} else if (face == EnumFacing.EAST) {
+				pos = pos.add(-1, 0, 0);
+			} else if (face == EnumFacing.WEST) {
+				pos = pos.add(1, 0, 0);
 			}
+			int oldSlot = Scaffold.mc.player.inventory.currentItem;
+			int newSlot = -1;
+			for (int i = 0; i < 9; ++i) {
+				ItemStack stack = Scaffold.mc.player.inventory.getStackInSlot(i);
+				if (InventoryUtil.isItemStackNull(stack) || !(stack.getItem() instanceof ItemBlock) || !Block.getBlockFromItem((Item) stack.getItem()).getDefaultState().isFullBlock())
+					continue;
+				newSlot = i;
+				break;
+			}
+			if (newSlot == -1) {
+				return;
+			}
+			if (!(Scaffold.mc.player.getHeldItemMainhand().getItem() instanceof ItemBlock)) {
+				Scaffold.mc.player.connection.sendPacket((Packet) new CPacketHeldItemChange(newSlot));
+				Scaffold.mc.player.inventory.currentItem = newSlot;
+				Scaffold.mc.playerController.updateController();
+			}
+			if (Scaffold.mc.gameSettings.keyBindJump.isKeyDown()) {
+				Scaffold.mc.player.motionX *= 0.3;
+				Scaffold.mc.player.motionZ *= 0.3;
+				Scaffold.mc.player.jump();
+				if (TimerUtils.hasReached(200)) {
+					Scaffold.mc.player.motionY = -0.18;
+					TimerUtils.reset();
+				}
+			}
+			float[] angle = MathUtils.calcAngle(Scaffold.mc.player.getPositionEyes(mc.getRenderPartialTicks()), new Vec3d((double) ((float) pos.getX() + 0.5f), (double) ((float) pos.getY() - 0.5f), (double) ((float) pos.getZ() + 0.5f)));
+			float yawForRot = angle[0];
+			float pitchForRot = (float) MathHelper.normalizeAngle((int) ((int) angle[1]), (int) 360);
+			for (int x = 0; x < rotStrength.getValueF(); x++) {
+				mc.player.connection.sendPacket(new CPacketPlayer.Rotation(yawForRot, pitchForRot, mc.player.onGround));
+			}
+			Scaffold.mc.playerController.processRightClickBlock(Scaffold.mc.player, Scaffold.mc.world, pos, face, new Vec3d(0.5, 0.5, 0.5), EnumHand.MAIN_HAND);
+			Scaffold.mc.player.swingArm(EnumHand.MAIN_HAND);
+			Scaffold.mc.player.connection.sendPacket((Packet) new CPacketHeldItemChange(oldSlot));
+			Scaffold.mc.player.inventory.currentItem = oldSlot;
+			Scaffold.mc.playerController.updateController();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		float[] angle = MathUtils.calcAngle(Scaffold.mc.player.getPositionEyes(mc.getRenderPartialTicks()), new Vec3d((double) ((float) pos.getX() + 0.5f), (double) ((float) pos.getY() - 0.5f), (double) ((float) pos.getZ() + 0.5f)));
-		float yawForRot = angle[0];
-		float pitchForRot = (float) MathHelper.normalizeAngle((int) ((int) angle[1]), (int) 360);
-		for (int x = 0; x < rotStrength.getValueF(); x++) {
-			mc.player.connection.sendPacket(new CPacketPlayer.Rotation(yawForRot, pitchForRot, mc.player.onGround));
-		}
-		Scaffold.mc.playerController.processRightClickBlock(Scaffold.mc.player, Scaffold.mc.world, pos, face, new Vec3d(0.5, 0.5, 0.5), EnumHand.MAIN_HAND);
-		Scaffold.mc.player.swingArm(EnumHand.MAIN_HAND);
-		Scaffold.mc.player.connection.sendPacket((Packet) new CPacketHeldItemChange(oldSlot));
-		Scaffold.mc.player.inventory.currentItem = oldSlot;
-		Scaffold.mc.playerController.updateController();
 	}
 	private void setTickLength(float tickLength)
 	{

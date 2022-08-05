@@ -13,7 +13,6 @@ import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.EnumSetting;
-import net.wurstclient.forge.utils.KeyBindingUtils;
 import net.wurstclient.forge.utils.MathUtils;
 
 public final class Phase extends Hack {
@@ -56,7 +55,6 @@ public final class Phase extends Hack {
 	public void noClip() {
 		mc.player.motionY = 0;
 		mc.player.noClip = true;
-
 	}
 
 	public void teleport() {

@@ -7,7 +7,6 @@
  */
 package net.wurstclient.forge.hacks;
 
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemFood;
 import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
@@ -68,35 +67,31 @@ public final class NoSlowDown extends Hack {
 	}
 
 	public void moveLogic() {
-		if (!mc.gameSettings.keyBindSprint.isKeyDown()) {
-			dir = MathUtils.directionSpeed(0.2);
-		} else if (mc.gameSettings.keyBindSprint.isKeyDown()) {
-			dir = MathUtils.directionSpeed(0.24);
-		}
-		if (mc.player.isHandActive() && mc.player.getHeldItemMainhand().getItem() instanceof ItemFood || mc.player.getHeldItemMainhand().getItem().equals(Items.BOW)) {
-			{
-				if (mc.player.moveForward != 0 || mc.player.moveStrafing != 0) {
-					mc.player.motionX = dir[0];
-					mc.player.motionZ = dir[1];
-				}
+		if (mc.player.isHandActive() && mc.player.getHeldItemMainhand().getItem() instanceof ItemFood) {
+			if (!mc.gameSettings.keyBindSprint.isKeyDown()) {
+				dir = MathUtils.directionSpeed(0.2);
+			}
+			if (mc.player.moveForward != 0 || mc.player.moveStrafing != 0) {
+				mc.player.motionX = dir[0];
+				mc.player.motionZ = dir[1];
 			}
 		}
 	}
 
 	public void ncpPacket() {
-		if (mc.player.isHandActive() && mc.player.getHeldItemMainhand().getItem() instanceof ItemFood || mc.player.getHeldItemMainhand().getItem().equals(Items.BOW)) {
+		if (mc.player.isHandActive() && mc.player.getHeldItemMainhand().getItem() instanceof ItemFood) {
 			mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.ABORT_DESTROY_BLOCK, PlayerUtils.GetLocalPlayerPosFloored(), EnumFacing.DOWN));
 		}
 	}
 
 	public void ncp2Packet() {
-		if (mc.player.isHandActive() && mc.player.getHeldItemMainhand().getItem() instanceof ItemFood || mc.player.getHeldItemMainhand().getItem().equals(Items.BOW)) {
+		if (mc.player.isHandActive() && mc.player.getHeldItemMainhand().getItem() instanceof ItemFood) {
 			mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.RELEASE_USE_ITEM, PlayerUtils.GetLocalPlayerPosFloored(), EnumFacing.DOWN));
 		}
 	}
 
 	public void tbttPacket() {
-		if (mc.player.isHandActive() && mc.player.getHeldItemMainhand().getItem() instanceof ItemFood || mc.player.getHeldItemMainhand().getItem().equals(Items.BOW)) {
+		if (mc.player.isHandActive() && mc.player.getHeldItemMainhand().getItem() instanceof ItemFood) {
 			mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_SNEAKING));
 		} else {
 			mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));

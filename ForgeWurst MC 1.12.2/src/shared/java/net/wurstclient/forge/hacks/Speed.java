@@ -9,6 +9,7 @@ package net.wurstclient.forge.hacks;
 
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.util.Timer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -32,20 +33,23 @@ public final class Speed extends Hack {
 			new SliderSetting("TimerSpeed [NCP-FAST]", "How fast is the timer for ncp fast", 3, 1.1, 5, 0.1, SliderSetting.ValueDisplay.DECIMAL);
 
 	private enum Mode {
-		NCP("NCP", true, false, false),
-		NCPFAST("NCP-Fast", false, true, false),
-		NCPFAST2("NCP-LowHop", false, false, true);
+		NCP("NCP", true, false, false, false),
+		NCPFAST("NCP-Fast", false, true, false, false),
+		NCPFAST2("NCP-LowHop", false, false, true, false),
+		HYPIXEL("Better NCP (use this)", false, false, false, true);
 
 		private final String name;
 		private final boolean ncp;
 		private final boolean ncpfast;
 		private final boolean ncpfast2;
+		private final boolean hypixel;
 
-		private Mode(String name, boolean ncp, boolean ncpfast, boolean ncpfast2) {
+		private Mode(String name, boolean ncp, boolean ncpfast, boolean ncpfast2, boolean hypixel) {
 			this.name = name;
 			this.ncp = ncp;
 			this.ncpfast = ncpfast;
 			this.ncpfast2 = ncpfast2;
+			this.hypixel = hypixel;
 		}
 
 		public String toString() {
@@ -83,6 +87,15 @@ public final class Speed extends Hack {
 					mc.player.motionZ = dir[1];
 				}
 			}
+			if (mode.getSelected().hypixel) {
+				if (mc.player.onGround) {
+					mc.player.jump();
+				} else {
+					double[] dir = MathUtils.directionSpeed(0.19);
+					mc.player.motionX = dir[0];
+					mc.player.motionZ = dir[1];
+				}
+			}
 			if (mode.getSelected().ncpfast2) {
 				mc.player.setSprinting(true);
 				if (mc.player.onGround) {
@@ -105,6 +118,7 @@ public final class Speed extends Hack {
 					double[] dir = MathUtils.directionSpeed(0.19);
 					mc.player.motionX = dir[0];
 					mc.player.motionZ = dir[1];
+					mc.player.jump();
 				} else {
 					setTickLength(50);
 				}

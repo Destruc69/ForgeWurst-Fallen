@@ -8,6 +8,7 @@
 package net.wurstclient.forge.hacks;
 
 import net.minecraft.client.renderer.EntityRenderer;
+import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -44,6 +45,7 @@ public final class NameTags extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
+		RenderPlayer.NAME_TAG_RANGE = 999;
 		for (Entity entityPlayer : mc.world.loadedEntityList) {
 			if (entityPlayer instanceof EntityPlayer) {
 				if (entityPlayer != mc.player) {
@@ -58,9 +60,13 @@ public final class NameTags extends Hack {
 	@SubscribeEvent
 	public void onRenderWorldLast(RenderWorldLastEvent event) {
 		// GL settings
+		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
 		GL11.glLineWidth(2);
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		GL11.glEnable(GL11.GL_CULL_FACE);
+		GL11.glDisable(GL11.GL_DEPTH_TEST);
 
 		GL11.glPushMatrix();
 		GL11.glTranslated(-TileEntityRendererDispatcher.staticPlayerX,
@@ -68,8 +74,9 @@ public final class NameTags extends Hack {
 				-TileEntityRendererDispatcher.staticPlayerZ);
 
 		for (EntityPlayer player : entityPlayers) {
-			EntityRenderer.drawNameplate(WMinecraft.getFontRenderer(), player.getName(), (float) player.posX, (float) player.posY + 2, (float) player.posZ, 1, mc.player.rotationYaw, mc.player.rotationPitch, false, false);
+			EntityRenderer.drawNameplate(WMinecraft.getFontRenderer(), player.getName(), (float) player.posX, (float) player.posY + 2, (float) player.posZ, 1, player.cameraYaw, player.cameraPitch, false, player.isSneaking());
 		}
+		GL11.glPopMatrix();
 
 		// GL resets
 		GL11.glColor4f(1, 1, 1, 1);

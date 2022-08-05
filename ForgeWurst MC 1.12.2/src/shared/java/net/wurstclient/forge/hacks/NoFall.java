@@ -76,8 +76,13 @@ public final class NoFall extends Hack {
 		}
 
 		if (mode.getSelected().anti) {
+			if (mc.player.onGround) {
+				lastOnGroundX = mc.player.posX;
+				lastOnGroundY = mc.player.posY;
+				lastOnGroundZ = mc.player.posZ;
+			}
 			if (mc.player.fallDistance > fallDistance.getValueF()) {
-				mc.player.motionY = -500;
+				mc.player.setPosition(lastOnGroundX, lastOnGroundY, lastOnGroundZ);
 			}
 		}
 	}

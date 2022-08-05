@@ -10,6 +10,7 @@ package net.wurstclient.forge.hacks;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.Item;
@@ -25,6 +26,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.Timer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WPacketInputEvent;
@@ -46,10 +48,6 @@ public final class Flight extends Hack {
 	private final EnumSetting<Mode> mode =
 			new EnumSetting<>("Mode", Mode.values(), Mode.NORMAL);
 
-	double startingPosFotSlimeY;
-	double startingPosFotSlimeX;
-	double startingPosFotSlimeZ;
-
 	private enum Mode {
 		NORMAL("Normal", true, false, false, false, false, false, false, false, false),
 		HYPIXEL("Hypixel", false, true, false, false, false, false, false, false, false),
@@ -57,9 +55,9 @@ public final class Flight extends Hack {
 		ANTIKICK("AntiKick [PACKET]", false, false, false, true, false, false, false, false, false),
 		ANTIKICKMOVE("AntiKick [MOVE]", false, false, false, false, true, false, false, false, false),
 		BLINKFLY("BlinkFly", false, false, false, false, false, true, false, false, false),
-		VOIDFLY("VoidFly", false, false,false, false, false, false, true, false, false),
+		VOIDFLY("VoidFly", false, false, false, false, false, false, true, false, false),
 		TEST("Test", false, false, false, false, false, false, false, true, false),
-		SLIMEFLY("NCP-SlimeFly", false, false, false, false, false, false, false, false, true);
+		JUMPFLY("JumpFly", false, false, false, false, false, false, false, false, true);
 
 
 		private final String name;
@@ -71,9 +69,9 @@ public final class Flight extends Hack {
 		private final boolean blinkfly;
 		private final boolean voidfly;
 		private final boolean test;
-		private final boolean slimefly;
+		private final boolean jumpfly;
 
-		private Mode(String name, boolean normal, boolean hypixel, boolean mineplex, boolean antikick, boolean antikickmove, boolean blinkfly, boolean voidfly, boolean test, boolean slimefly) {
+		private Mode(String name, boolean normal, boolean hypixel, boolean mineplex, boolean antikick, boolean antikickmove, boolean blinkfly, boolean voidfly, boolean test, boolean jumpfly) {
 			this.name = name;
 			this.normal = normal;
 			this.hypixel = hypixel;
@@ -83,7 +81,7 @@ public final class Flight extends Hack {
 			this.blinkfly = blinkfly;
 			this.voidfly = voidfly;
 			this.test = test;
-			this.slimefly = slimefly;
+			this.jumpfly = jumpfly;
 		}
 
 		public String toString() {
@@ -106,9 +104,6 @@ public final class Flight extends Hack {
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
 		TimerUtils.reset();
-		startingPosFotSlimeY = mc.player.posY;
-		startingPosFotSlimeX = mc.player.posX;
-		startingPosFotSlimeZ = mc.player.posZ;
 	}
 
 	@Override
@@ -150,20 +145,14 @@ public final class Flight extends Hack {
 		if (mode.getSelected().test) {
 			testFly();
 		}
-		if (mode.getSelected().slimefly) {
-			slimeFly();
+		if (mode.getSelected().jumpfly) {
+			jumpFly();
 		}
 	}
 
-	public void slimeFly() {
-		if (mc.world.getBlockState(new BlockPos(startingPosFotSlimeX, startingPosFotSlimeY - 1, startingPosFotSlimeZ)).getBlock().equals(Blocks.SLIME_BLOCK)) {
-			if (!(mc.player.fallDistance > 0.5)) {
-				if (mc.player.onGround) {
-					mc.player.motionY = 0.5;
-				}
-			} else {
-				mc.player.motionY = 0;
-			}
+	public void jumpFly() {
+		if (mc.gameSettings.keyBindJump.isKeyDown()) {
+			mc.player.jump();
 		}
 	}
 
@@ -302,7 +291,7 @@ public final class Flight extends Hack {
 					mc.player.connection.sendPacket(new CPacketPlayer.Rotation(mc.player.rotationYaw, mc.player.rotationPitch, true));
 				}
 			}
-			if(mode.getSelected().blinkfly) {
+			if (mode.getSelected().blinkfly) {
 				if (event.getPacket() instanceof SPacketPlayerPosLook) {
 					event.setCanceled(true);
 				}
@@ -315,7 +304,7 @@ public final class Flight extends Hack {
 	@SubscribeEvent
 	public void onPacketOut(WPacketOutputEvent event) {
 		try {
-			if(mode.getSelected().blinkfly) {
+			if (mode.getSelected().blinkfly) {
 				if (event.getPacket() instanceof SPacketPlayerPosLook) {
 					event.setCanceled(true);
 				}

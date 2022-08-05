@@ -24,6 +24,8 @@ public final class HackList extends WHackList
 	public final NoFall noFall = register(new NoFall());
 	public final Speed speed = register(new Speed());
 	public final Step step = register(new Step());
+	public final Rotations rotations = register(new Rotations());
+	public final Debuger debuger = register(new Debuger());
 	public final FastFall fastFall = register(new FastFall());
 	public final Hitboxes hitboxes = register(new Hitboxes());
 	public final Discord discord = register(new Discord());

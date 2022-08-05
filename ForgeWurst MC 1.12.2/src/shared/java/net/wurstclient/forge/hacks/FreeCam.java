@@ -14,9 +14,11 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketUseEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -43,6 +45,16 @@ public final class FreeCam extends Hack {
 			new CheckboxSetting("ViewPlayer", "Make movies/trailers, just make sure its only 2 players",
 					true);
 
+	private final SliderSetting viewx =
+			new SliderSetting("View-XCoord", 4, -8, 8, 1, SliderSetting.ValueDisplay.DECIMAL);
+
+	private final SliderSetting viewy =
+			new SliderSetting("View-YCoord", 4, -8, 8, 1, SliderSetting.ValueDisplay.DECIMAL);
+
+	private final SliderSetting viewz =
+			new SliderSetting("View-ZCoord", 4, -8, 8, 1, SliderSetting.ValueDisplay.DECIMAL);
+
+
 	private EntityFakePlayer fakePlayer;
 
 	public FreeCam() {
@@ -51,6 +63,9 @@ public final class FreeCam extends Hack {
 		addSetting(old);
 		addSetting(speed);
 		addSetting(view);
+		addSetting(viewx);
+		addSetting(viewy);
+		addSetting(viewz);
 	}
 
 	@Override
@@ -193,8 +208,15 @@ public final class FreeCam extends Hack {
 			for (Entity entity : mc.world.loadedEntityList) {
 				if (entity instanceof EntityPlayer) {
 					if (entity != mc.player) {
-						mc.player.setPosition(entity.posX + 8, entity.posY +5, entity.posZ - 2);
-						mc.player.setVelocity(0, 0, 0);
+						if (entity.getName() != event.getPlayer().getName()) {
+							BlockPos isCameraInBlock = new BlockPos(entity.posX + viewx.getValueF(), entity.posY + viewy.getValueF() + 1, entity.posZ + viewz.getValueF());
+							if (mc.world.getBlockState(isCameraInBlock).getBlock().equals(Blocks.AIR)) {
+								mc.player.setPosition(entity.posX + viewx.getValueF(), entity.posY + viewy.getValueF(), entity.posZ + viewz.getValueF());
+							} else {
+								mc.player.setPosition(entity.posX + viewx.getValueF(), entity.posY + viewy.getValueF() - 1, entity.posZ + viewz.getValueF());
+							}
+							mc.player.setVelocity(0, 0, 0);
+						}
 					}
 				}
 			}

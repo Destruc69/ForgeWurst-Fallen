@@ -12,6 +12,7 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketPlayer;
@@ -37,8 +38,11 @@ import net.wurstclient.forge.utils.MathUtils;
 import net.wurstclient.forge.utils.TimerUtils;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 
 public final class Jesus extends Hack {
+
+	ArrayList<BlockPos> testpos = new ArrayList<>();
 
 	private final EnumSetting<Mode> mode =
 			new EnumSetting<>("Mode", Mode.values(), Mode.NCP);
@@ -72,17 +76,10 @@ public final class Jesus extends Hack {
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
 		if (mode.getSelected().test) {
-			if (!mc.player.collidedHorizontally) {
-				if (mc.player.isInWater()) {
-					mc.player.setVelocity(0, 0, 0);
-					mc.player.motionY = 0;
-					double[] dir = MathUtils.directionSpeed(0.2);
-					mc.player.motionX = dir[0];
-					mc.player.motionZ = dir[1];
-				}
+			if (mc.player.isInWater()) {
+				mc.player.motionY = 0.1332986475329;
 			}
 		}
-
 		if (!mc.player.collidedHorizontally) {
 			if (mode.getSelected().ncp) {
 				if (mc.player.isInWater()) {

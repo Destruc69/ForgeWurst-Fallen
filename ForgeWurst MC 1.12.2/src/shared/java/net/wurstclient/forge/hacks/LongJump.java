@@ -65,7 +65,7 @@ public final class LongJump extends Hack {
 		} else {
 			setTickLength(50);
 		}
-		if (mc.player.getDistance(startX, startY, startZ) > 4) {
+		if (mc.player.getDistance(startX, startY, startZ) > 4 && mc.player.onGround) {
 			setEnabled(false);
 		}
 	}

@@ -21,6 +21,7 @@ import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.SliderSetting;
+import net.wurstclient.forge.utils.ChatUtils;
 import net.wurstclient.forge.utils.TimerUtils;
 
 import java.util.ArrayList;
@@ -64,7 +65,7 @@ public final class Disabler extends Hack {
 					false);
 
 	private final SliderSetting pingDelay =
-			new SliderSetting("PingSpoofDelay [MS]", "Every time we reach this time we send the packet to ping spoof", 40, 0, 1000, 5, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("PingSpoofDelay [MS]", "Every time we reach this time we send the packet to ping spoof", 40, 0, 5000, 5, SliderSetting.ValueDisplay.DECIMAL);
 
 	private final CheckboxSetting fuck =
 			new CheckboxSetting("FuckTheServer", "Who cares where the server thinks we should be, just gonna ignore it (might bypass shitty ac)",
@@ -138,14 +139,14 @@ public final class Disabler extends Hack {
 		if (!pingSpoof.isChecked())
 			return;
 
-		if (!ForgeWurst.getForgeWurst().getHax().killaura.isEnabled()&& !ForgeWurst.getForgeWurst().getHax().cheststealer.isEnabled()) {
+		if (!ForgeWurst.getForgeWurst().getHax().killaura.isEnabled() && !ForgeWurst.getForgeWurst().getHax().cheststealer.isEnabled()) {
 			if (TimerUtils.getTimePassed() < pingDelay.getValueF()) {
-				TimerUtils.reset();
 				if (event.getPacket() instanceof CPacketPlayer) {
 					packets.add(event.getPacket());
 					event.setCanceled(true);
 				}
-			} else {
+			} else if (TimerUtils.getTimePassed() > pingDelay.getValueF()) {
+				TimerUtils.reset();
 				for (Packet thePacket : packets) {
 					mc.player.connection.sendPacket(thePacket);
 					packets.clear();

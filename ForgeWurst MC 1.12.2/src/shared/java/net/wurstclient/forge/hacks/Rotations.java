@@ -7,18 +7,22 @@
  */
 package net.wurstclient.forge.hacks;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraft.network.play.client.CPacketPlayer;
+import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.wurstclient.fmlevents.WPacketInputEvent;
+import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.settings.EnumSetting;
+import net.wurstclient.forge.utils.KeyBindingUtils;
 
-public final class PositionESP extends Hack {
-	public PositionESP() {
-		super("OutlineESP", "Renders entitys outlines for pitch and yaw");
+public final class Rotations extends Hack {
+	public static float yaw;
+	public static float pitch;
+	public Rotations() {
+		super("Rotations", "Renders rotations.");
 		setCategory(Category.RENDER);
 	}
 
@@ -30,15 +34,10 @@ public final class PositionESP extends Hack {
 	@Override
 	protected void onDisable() {
 		MinecraftForge.EVENT_BUS.unregister(this);
-		mc.getRenderManager().setDebugBoundingBox(false);
-		mc.getRenderManager().setRenderShadow(false);
 	}
 
 	@SubscribeEvent
-	public void onUpdate(RenderWorldLastEvent event) {
-		for (Entity entity : mc.world.loadedEntityList) {
-			mc.getRenderManager().setDebugBoundingBox(true);
-			mc.getRenderManager().setRenderShadow(true);
-		}
+	public void onUpdate(RenderPlayerEvent event) {
+		event.getRenderer().getMainModel().setRotationAngles(mc.player.limbSwing, mc.player.limbSwingAmount, event.getPartialRenderTick(), 0, 90, 1, mc.player);
 	}
 }

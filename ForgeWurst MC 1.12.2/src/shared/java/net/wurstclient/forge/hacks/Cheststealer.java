@@ -50,6 +50,7 @@ public final class Cheststealer extends Hack {
 				mc.playerController.windowClick(getState.inventorySlots.windowId, (int) slot, 0, ClickType.QUICK_MOVE, mc.player);
 				double emptySlot = InventoryUtil.getEmptySlot();
 				mc.playerController.windowClick(getState.inventorySlots.getSlot((int) emptySlot).slotNumber, (int) emptySlot,0, ClickType.QUICK_MOVE, mc.player);
+				mc.playerController.updateController();
 			}
 		} else {
 			slot = 0;

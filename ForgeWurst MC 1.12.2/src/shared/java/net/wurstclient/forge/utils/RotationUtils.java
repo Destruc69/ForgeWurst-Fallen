@@ -17,6 +17,8 @@ import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.compatibility.WVec3d;
 
+import static net.wurstclient.forge.hacks.FreeCam.normalizeAngle;
+
 @Mod.EventBusSubscriber
 public final class RotationUtils {
 	private static boolean fakeRotation;
@@ -48,6 +50,12 @@ public final class RotationUtils {
 		fakeRotation = false;
 	}
 
+	public static double[] getRotationFromVec(Vec3d vec) {
+		double xz = Math.sqrt(vec.x * vec.x + vec.z * vec.z);
+		double yaw = normalizeAngle(Math.toDegrees(Math.atan2(vec.z, vec.x)) - 90.0);
+		double pitch = normalizeAngle(Math.toDegrees(-Math.atan2(vec.y, xz)));
+		return new double[]{yaw, pitch};
+	}
 
 	public static Vec3d getEyesPos() {
 		return new Vec3d(WMinecraft.getPlayer().posX,
