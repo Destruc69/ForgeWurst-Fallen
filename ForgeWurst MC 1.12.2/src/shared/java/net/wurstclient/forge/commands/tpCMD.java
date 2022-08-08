@@ -28,12 +28,10 @@ public final class tpCMD extends Command
         if(args.length != 3)
             throw new CmdSyntaxError();
 
-        mc.player.connection.sendPacket(new CPacketPlayer.Position(Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]), mc.player.onGround));
-        mc.player.connection.sendPacket(new CPacketPlayer.Position(Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]), mc.player.onGround));
-        mc.player.connection.sendPacket(new CPacketPlayer.Position(Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]), mc.player.onGround));
-        mc.player.connection.sendPacket(new CPacketPlayer.Position(Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]), mc.player.onGround));
-        mc.player.connection.sendPacket(new CPacketPlayer.Position(Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]), mc.player.onGround));
-        mc.player.connection.sendPacket(new CPacketPlayer.Position(Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]), mc.player.onGround));
+        for (int x = 0; x < 6; x ++) {
+            mc.player.connection.sendPacket(new CPacketPlayer.Position(Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]), mc.player.onGround));
+
+        }
         mc.player.setPosition(Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]));
     }
 }

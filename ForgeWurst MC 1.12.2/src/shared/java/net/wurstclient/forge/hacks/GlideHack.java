@@ -38,7 +38,6 @@ public final class GlideHack extends Hack
 		"Won't glide when you are\n" + "too close to the ground.", 0, 0, 2,
 		0.01,
 		v -> v == 0 ? "disabled" : ValueDisplay.DECIMAL.getValueString(v));
-	
 	public GlideHack()
 	{
 		super("Glide", "Makes you glide down slowly when falling.");

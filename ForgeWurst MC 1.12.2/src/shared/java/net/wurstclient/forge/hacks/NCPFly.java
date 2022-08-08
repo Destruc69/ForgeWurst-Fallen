@@ -1,5 +1,6 @@
 package net.wurstclient.forge.hacks;
 
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.network.play.client.CPacketConfirmTeleport;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
@@ -17,9 +18,6 @@ public final class NCPFly extends Hack {
 	private final SliderSetting speed =
 			new SliderSetting("Speed", "1 = normal speed", 0.1, 0.05, 20, 0.05, SliderSetting.ValueDisplay.DECIMAL);
 
-	public static double theX;
-	public static double theZ;
-
 	public NCPFly() {
 		super("NCPFly", "Fly around with packets (ncp fly).");
 		setCategory(Category.MOVEMENT);
@@ -28,8 +26,6 @@ public final class NCPFly extends Hack {
 
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
-		theX = mc.player.posX;
-		theZ = mc.player.posZ;
 	}
 
 	protected void onDisable() {
@@ -38,34 +34,19 @@ public final class NCPFly extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		try {
-			mc.player.motionY = 0;
+		EntityPlayerSP player = mc.player;
 
-			mc.player.connection.sendPacket(new CPacketPlayer.PositionRotation(mc.player.posX + mc.player.motionX, mc.player.posY + 999, mc.player.posZ + mc.player.motionZ, mc.player.rotationYaw, mc.player.rotationPitch, mc.player.onGround));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+		player.capabilities.isFlying = false;
+		player.motionX = 0;
+		player.motionY = 0;
+		player.motionZ = 0;
+		player.jumpMovementFactor = speed.getValueF();
 
-	@SubscribeEvent
-	public void onPacketIn(WPacketInputEvent event) {
-		try {
-			SPacketPlayerPosLook sPacketPlayerPosLook = (SPacketPlayerPosLook) event.getPacket();
-			mc.player.connection.sendPacket(new CPacketConfirmTeleport(sPacketPlayerPosLook.getTeleportId()));
-			mc.player.setPosition(sPacketPlayerPosLook.getX(), sPacketPlayerPosLook.getY(), sPacketPlayerPosLook.getZ());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+		if (mc.gameSettings.keyBindJump.isKeyDown())
+			player.motionY += speed.getValueF();
+		if (mc.gameSettings.keyBindSneak.isKeyDown())
+			player.motionY -= speed.getValueF();
 
-	@SubscribeEvent
-	public void onPacketOn(WPacketOutputEvent event) {
-		try {
-			SPacketPlayerPosLook sPacketPlayerPosLook = (SPacketPlayerPosLook) event.getPacket();
-			mc.player.connection.sendPacket(new CPacketConfirmTeleport(sPacketPlayerPosLook.getTeleportId()));
-			mc.player.setPosition(sPacketPlayerPosLook.getX(), sPacketPlayerPosLook.getY(), sPacketPlayerPosLook.getZ());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY - 999, mc.player.posZ, false));
 	}
 }

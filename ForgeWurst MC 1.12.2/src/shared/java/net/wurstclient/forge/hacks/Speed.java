@@ -33,23 +33,26 @@ public final class Speed extends Hack {
 			new SliderSetting("TimerSpeed [NCP-FAST]", "How fast is the timer for ncp fast", 3, 1.1, 5, 0.1, SliderSetting.ValueDisplay.DECIMAL);
 
 	private enum Mode {
-		NCP("NCP", true, false, false, false),
-		NCPFAST("NCP-Fast", false, true, false, false),
-		NCPFAST2("NCP-LowHop", false, false, true, false),
-		HYPIXEL("Better NCP (use this)", false, false, false, true);
+		NCP("NCP", true, false, false, false, false),
+		NCPFAST("NCP-Fast", false, true, false, false, false),
+		NCPFAST2("NCP-LowHop", false, false, true, false, false),
+		HYPIXEL("Better NCP (use this)", false, false, false, true, false),
+		MINEPLEX("Minplex", false, false, false, false, true);
 
 		private final String name;
 		private final boolean ncp;
 		private final boolean ncpfast;
 		private final boolean ncpfast2;
 		private final boolean hypixel;
+		private final boolean mineplex;
 
-		private Mode(String name, boolean ncp, boolean ncpfast, boolean ncpfast2, boolean hypixel) {
+		private Mode(String name, boolean ncp, boolean ncpfast, boolean ncpfast2, boolean hypixel, boolean mineplex) {
 			this.name = name;
 			this.ncp = ncp;
 			this.ncpfast = ncpfast;
 			this.ncpfast2 = ncpfast2;
 			this.hypixel = hypixel;
+			this.mineplex = mineplex;
 		}
 
 		public String toString() {
@@ -87,14 +90,28 @@ public final class Speed extends Hack {
 					mc.player.motionZ = dir[1];
 				}
 			}
+			if (mode.getSelected().mineplex) {
+				if (mc.player.moveForward != 0 || mc.player.moveStrafing != 0) {
+					if (mc.player.onGround) {
+						mc.player.jump();
+						setTickLength(50);
+					} else if (mc.player.isAirBorne) {
+						setTickLength(50 / 2f);
+						double[] dir = MathUtils.directionSpeed(0.1);
+						mc.player.motionX = dir[0];
+						mc.player.motionZ = dir[1];
+						mc.player.setSprinting(true);
+					}
+				}
+			}
 			if (mode.getSelected().hypixel) {
+				double[] dir = MathUtils.directionSpeed(0.19);
+				mc.player.motionX = dir[0];
+				mc.player.motionZ = dir[1];
 				if (mc.player.onGround) {
 					mc.player.jump();
-				} else {
-					double[] dir = MathUtils.directionSpeed(0.19);
-					mc.player.motionX = dir[0];
-					mc.player.motionZ = dir[1];
 				}
+				mc.player.setSprinting(true);
 			}
 			if (mode.getSelected().ncpfast2) {
 				mc.player.setSprinting(true);

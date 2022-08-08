@@ -77,7 +77,7 @@ public final class RotationUtils {
 		return new Vec3d(f1 * f2, f3, f * f2);
 	}
 
-	private static float[] getNeededRotations(Vec3d vec) {
+	public static float[] getNeededRotations(Vec3d vec) {
 		Vec3d eyesPos = getEyesPos();
 
 		double diffX = WVec3d.getX(vec) - WVec3d.getX(eyesPos);

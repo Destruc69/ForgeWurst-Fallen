@@ -7,9 +7,14 @@
  */
 package net.wurstclient.forge.hacks;
 
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.EntityRenderer;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
@@ -47,8 +52,8 @@ public final class NameTags extends Hack {
 	public void onUpdate(WUpdateEvent event) {
 		RenderPlayer.NAME_TAG_RANGE = 999;
 		for (Entity entityPlayer : mc.world.loadedEntityList) {
-			if (entityPlayer instanceof EntityPlayer) {
-				if (entityPlayer != mc.player) {
+			if (entityPlayer != mc.player) {
+				if (entityPlayer instanceof EntityPlayer) {
 					if (!entityPlayers.contains(entityPlayer)) {
 						entityPlayers.add((EntityPlayer) entityPlayer);
 					}
@@ -74,8 +79,11 @@ public final class NameTags extends Hack {
 				-TileEntityRendererDispatcher.staticPlayerZ);
 
 		for (EntityPlayer player : entityPlayers) {
-			EntityRenderer.drawNameplate(WMinecraft.getFontRenderer(), player.getName(), (float) player.posX, (float) player.posY + 2, (float) player.posZ, 1, player.cameraYaw, player.cameraPitch, false, player.isSneaking());
+			for (int x = 0; x < 2; x++) {
+				drawNameplate(mc.fontRenderer, player.getName(), (float) player.posX, (float) player.posY + 2.5f, (float) player.posZ, 1, mc.player.rotationYaw, mc.player.rotationPitch, true, false);
+			}
 		}
+
 		GL11.glPopMatrix();
 
 		// GL resets
@@ -84,5 +92,43 @@ public final class NameTags extends Hack {
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glDisable(GL11.GL_LINE_SMOOTH);
+	}
+
+	public static void drawNameplate(FontRenderer fontRendererIn, String str, float x, float y, float z, int verticalShift, float viewerYaw, float viewerPitch, boolean isThirdPersonFrontal, boolean isSneaking)
+	{
+		GlStateManager.pushMatrix();
+		GlStateManager.translate(x, y, z);
+		GlStateManager.glNormal3f(0.0F, 1.0F, 0.0F);
+		GlStateManager.rotate(-viewerYaw, 0.0F, 1.0F, 0.0F);
+		GlStateManager.rotate((float)(isThirdPersonFrontal ? -1 : 1) * viewerPitch, 1.0F, 0.0F, 0.0F);
+		GlStateManager.scale(-0.050F , -0.050F, 0.050F);
+		GlStateManager.disableLighting();
+		GlStateManager.depthMask(false);
+
+		GlStateManager.disableDepth();
+
+		GlStateManager.enableBlend();
+		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+		int i = fontRendererIn.getStringWidth(str) / 2;
+		GlStateManager.disableTexture2D();
+		Tessellator tessellator = Tessellator.getInstance();
+		BufferBuilder bufferbuilder = tessellator.getBuffer();
+		bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
+		bufferbuilder.pos((double)(-i - 1), (double)(-1 + verticalShift), 0.0D).color(0.0F, 0.0F, 0.0F, 1F).endVertex();
+		bufferbuilder.pos((double)(-i - 1), (double)(8 + verticalShift), 0.0D).color(0.0F, 0.0F, 0.0F, 1F).endVertex();
+		bufferbuilder.pos((double)(i + 1), (double)(8 + verticalShift), 0.0D).color(0.0F, 0.0F, 0.0F, 1F).endVertex();
+		bufferbuilder.pos((double)(i + 1), (double)(-1 + verticalShift), 0.0D).color(0.0F, 0.0F, 0.0F, 1F).endVertex();
+		tessellator.draw();
+		GlStateManager.enableTexture2D();
+
+		fontRendererIn.drawString(str, -fontRendererIn.getStringWidth(str) / 2, verticalShift, 553648127);
+		GlStateManager.enableDepth();
+
+		GlStateManager.depthMask(true);
+		fontRendererIn.drawString(str, -fontRendererIn.getStringWidth(str) / 2, verticalShift, isSneaking ? 553648127 : -1);
+		GlStateManager.enableLighting();
+		GlStateManager.disableBlend();
+		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+		GlStateManager.popMatrix();
 	}
 }

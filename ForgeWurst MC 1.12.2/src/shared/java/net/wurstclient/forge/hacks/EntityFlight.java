@@ -12,6 +12,7 @@ import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.MinecraftForge;
@@ -71,97 +72,42 @@ public final class EntityFlight extends Hack {
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
 		try {
-			if (anti.isChecked()) {
-				if (mc.player.fallDistance > 1) {
-					if (!mc.gameSettings.keyBindJump.isKeyDown() && !mc.gameSettings.keyBindBack.isKeyDown()) {
-						if (TimerUtils.hasReached(50)) {
-							Objects.requireNonNull(mc.player.getRidingEntity()).setPosition(mc.player.posX, mc.player.posY - 0.5, mc.player.posZ);
-						} else if (TimerUtils.hasReached(100)) {
-							TimerUtils.reset();
-							Objects.requireNonNull(mc.player.getRidingEntity()).setPosition(mc.player.posX, mc.player.posY + 0.5, mc.player.posZ);
-						}
-					}
-				}
-			}
-
-			if (TimerUtils.hasReached(50)) {
-
-				TimerUtils.reset();
-
-				try {
-					if (stuck.isChecked()) {
-						for (Entity entity : mc.world.loadedEntityList) {
-							if (entity instanceof EntityBoat) {
-								if (mc.player.getDistance(entity) < 4.5) {
-									if (mc.player.getRidingEntity() == null) {
-										mc.playerController.interactWithEntity(mc.player, entity, EnumHand.MAIN_HAND);
-										lookAtPacket(entity.posX, entity.posY, entity.posZ, mc.player);
-									}
-								}
-							}
-
-							if (entity instanceof EntityHorse) {
-								if (mc.player.getDistance(entity) < 4.5) {
-									if (mc.player.getRidingEntity() == null) {
-										mc.playerController.interactWithEntity(mc.player, entity, EnumHand.MAIN_HAND);
-										lookAtPacket(entity.posX, entity.posY, entity.posZ, mc.player);
-									}
-								}
-							}
-						}
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-
 			if (mc.gameSettings.keyBindJump.isKeyDown()) {
 				Objects.requireNonNull(mc.player.getRidingEntity()).motionY += upSpeed.getValueF();
 			}
-
-			if (mc.gameSettings.keyBindBack.isKeyDown()) {
+			if (mc.gameSettings.keyBindSneak.isKeyDown()) {
 				Objects.requireNonNull(mc.player.getRidingEntity()).motionY -= downSpeed.getValueF();
 			}
-
 			if (vel.isChecked()) {
-				if (!mc.gameSettings.keyBindJump.isKeyDown() && !mc.gameSettings.keyBindSneak.isKeyDown()) {
-					Objects.requireNonNull(mc.player.getRidingEntity()).motionY = 0;
-					mc.player.getRidingEntity().setVelocity(mc.player.getRidingEntity().motionX, 0, mc.player.getRidingEntity().motionZ);
+				if (!mc.gameSettings.keyBindSneak.isKeyDown() && !mc.gameSettings.keyBindJump.isKeyDown()) {
+					Objects.requireNonNull(mc.player.getRidingEntity().motionY = 0);
+				}
+			}
+			if (anti.isChecked()) {
+				if (!mc.gameSettings.keyBindSneak.isKeyDown() && !mc.gameSettings.keyBindJump.isKeyDown()) {
+					if (mc.player.ticksExisted % 2 == 0) {
+						Objects.requireNonNull(mc.player.getRidingEntity().motionY += 0.10123);
+					} else {
+						Objects.requireNonNull(mc.player.getRidingEntity().motionY -= 0.91873);
+					}
+				}
+			}
+			if (stuck.isChecked()) {
+				for (Entity entity : mc.world.loadedEntityList) {
+					if (entity instanceof EntityBoat || entity instanceof EntityHorse) {
+						if (!mc.player.isRiding() && mc.player.getDistance(entity) < 3) {
+							for (int x = 0; x < 6; x ++) {
+								float[] rot = RotationUtils.getNeededRotations(new Vec3d(entity.lastTickPosX, entity.lastTickPosY, entity.lastTickPosZ));
+								mc.player.connection.sendPacket(new CPacketPlayer.Rotation(rot[0], rot[1], mc.player.onGround));
+							}
+							mc.playerController.interactWithEntity(mc.player, entity, EnumHand.MAIN_HAND);
+
+						}
+					}
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	public static double[] calculateLookAt(double px, double py, double pz, EntityPlayer me) {
-		double dirx = me.posX - px;
-		double diry = me.posY - py;
-		double dirz = me.posZ - pz;
-
-		double len = Math.sqrt(dirx * dirx + diry * diry + dirz * dirz);
-
-		dirx /= len;
-		diry /= len;
-		dirz /= len;
-
-		double pitch = Math.asin(diry);
-		double yaw = Math.atan2(dirz, dirx);
-
-		pitch = pitch * 180.0d / Math.PI;
-		yaw = yaw * 180.0d / Math.PI;
-
-		yaw += 90f;
-
-		return new double[]{yaw, pitch};
-	}
-
-	private static void setYawAndPitch(float yaw1, float pitch1) {
-		RotationUtils.faceVectorPacket(new Vec3d(yaw1, pitch1, 0));
-	}
-
-	private void lookAtPacket(double px, double py, double pz, EntityPlayer me) {
-		double[] v = calculateLookAt(px, py, pz, me);
-		setYawAndPitch((float) v[0], (float) v[1]);
 	}
 }

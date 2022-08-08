@@ -7,6 +7,7 @@
  */
 package net.wurstclient.forge.hacks;
 
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
@@ -14,6 +15,8 @@ import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.SliderSetting;
+
+import java.util.Objects;
 
 public final class Animations extends Hack {
 

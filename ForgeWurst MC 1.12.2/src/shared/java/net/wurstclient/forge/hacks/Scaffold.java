@@ -1,19 +1,21 @@
 package net.wurstclient.forge.hacks;
 
 import net.minecraft.block.Block;
+import net.minecraft.client.multiplayer.ClientAdvancementManager;
+import net.minecraft.command.server.CommandBanPlayer;
+import net.minecraft.command.server.CommandOp;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.client.CPacketPlayer;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.Timer;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
@@ -28,7 +30,7 @@ public final class Scaffold extends Hack {
 	Vec3d vec3d;
 
 	private final SliderSetting rotStrength =
-			new SliderSetting("RotationStrength", "How strong are the rotations?", 2, 1, 10, 1, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("RotationStrength", "How strong are the rotations?", 2, 1, 30, 1, SliderSetting.ValueDisplay.DECIMAL);
 
 	public Scaffold() {
 		super("Scaffold", "thank you phobos my beloved");
@@ -132,12 +134,9 @@ public final class Scaffold extends Hack {
 				Scaffold.mc.playerController.updateController();
 			}
 			if (Scaffold.mc.gameSettings.keyBindJump.isKeyDown()) {
-				Scaffold.mc.player.motionX *= 0.3;
-				Scaffold.mc.player.motionZ *= 0.3;
-				Scaffold.mc.player.jump();
-				if (TimerUtils.hasReached(200)) {
-					Scaffold.mc.player.motionY = -0.18;
-					TimerUtils.reset();
+				mc.player.jump();
+				if (mc.player.ticksExisted % 18 == 0) {
+					mc.player.motionY = -0.25;
 				}
 			}
 			float[] angle = MathUtils.calcAngle(Scaffold.mc.player.getPositionEyes(mc.getRenderPartialTicks()), new Vec3d((double) ((float) pos.getX() + 0.5f), (double) ((float) pos.getY() - 0.5f), (double) ((float) pos.getZ() + 0.5f)));

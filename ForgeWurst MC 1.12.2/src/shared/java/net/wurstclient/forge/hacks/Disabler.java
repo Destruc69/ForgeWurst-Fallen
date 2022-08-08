@@ -17,21 +17,14 @@ import net.wurstclient.fmlevents.WPacketInputEvent;
 import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
-import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.ChatUtils;
-import net.wurstclient.forge.utils.TimerUtils;
 
 import java.util.ArrayList;
 
 public final class Disabler extends Hack {
-
-	private final CheckboxSetting ability =
-			new CheckboxSetting("AbilitySpoof", "Sends a packet that flying is allowed",
-					false);
-	
 	private final CheckboxSetting ping =
 			new CheckboxSetting("CPacketPing cancel", "Cancels this packet, the server doesnt know the client time",
 					false);
@@ -42,14 +35,6 @@ public final class Disabler extends Hack {
 
 	private final CheckboxSetting stat =
 			new CheckboxSetting("CPacketClientStatus/CPacketClientSettings cancel", "Cancels this packet, the server knows less about clients status",
-					false);
-
-	private final CheckboxSetting spectator =
-			new CheckboxSetting("SpectatorSpoof", "Sends a packet that your a spectator",
-					false);
-
-	private final CheckboxSetting inputSpoof =
-			new CheckboxSetting("InputSpoof", "Sends a packet that makes your... its hard to explain. It spoofs your movement to its max",
 					false);
 
 	private final CheckboxSetting groundSpoof =
@@ -65,47 +50,26 @@ public final class Disabler extends Hack {
 					false);
 
 	private final SliderSetting pingDelay =
-			new SliderSetting("PingSpoofDelay [MS]", "Every time we reach this time we send the packet to ping spoof", 40, 0, 5000, 5, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("PingSpoofDelay [MS]", "Every time we reach this time we send the packet to ping spoof", 40, 0, 1000, 5, SliderSetting.ValueDisplay.DECIMAL);
 
-	private final CheckboxSetting fuck =
-			new CheckboxSetting("FuckTheServer", "Who cares where the server thinks we should be, just gonna ignore it (might bypass shitty ac)",
-					false);
-
-	private final CheckboxSetting fuck2 =
-			new CheckboxSetting("FuckTheServer 2.0", "WHO THE FUCK CARES ABOUT ANYTHING THE SERVER SAYS (cancels all spackets)",
-					false);
-
-	private final CheckboxSetting paulssettings =
-			new CheckboxSetting("PaulsSettings", "my (who is writing this) recommended settings\n" +
-					"Its a LessFlag setting, Meaning a Lite Disabler",
-					false);
 
 	ArrayList<Packet> packets = new ArrayList<>();
 
 	public Disabler() {
 		super("Disabler", "Bypass anti cheats.");
 		setCategory(Category.PLAYER);
-		addSetting(ability);
 		addSetting(ping);
 		addSetting(confirmTP);
 		addSetting(stat);
-		addSetting(spectator);
-		addSetting(inputSpoof);
 		addSetting(groundSpoof);
 		addSetting(ghostly);
 		addSetting(pingSpoof);
 		addSetting(pingDelay);
-		addSetting(fuck);
-		addSetting(fuck2);
-		addSetting(paulssettings);
 	}
 
 	@Override
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
-		if (!ForgeWurst.getForgeWurst().getHax().killaura.isEnabled() && !ForgeWurst.getForgeWurst().getHax().cheststealer.isEnabled()) {
-			TimerUtils.reset();
-		}
 	}
 
 	@Override
@@ -115,65 +79,31 @@ public final class Disabler extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		abilitySpoof();
-		spectatorSpoof();
-		inputSpoof();
 
-		if (paulssettings.isChecked()) {
-			ability.setChecked(false);
-			ping.setChecked(true);
-			spectator.setChecked(false);
-			inputSpoof.setChecked(false);
-			groundSpoof.setChecked(true);
-			ghostly.setChecked(true);
-			pingSpoof.setChecked(true);
-			pingDelay.setValue(25);
-			fuck.setChecked(false);
-			fuck2.setChecked(false);
-			stat.setChecked(true);
-			paulssettings.setChecked(false);
-		}
 	}
 	@SubscribeEvent
 	public void pingSpoof(WPacketInputEvent event) {
-		if (!pingSpoof.isChecked())
-			return;
+		try {
+			if (!pingSpoof.isChecked())
+				return;
 
-		if (!ForgeWurst.getForgeWurst().getHax().killaura.isEnabled() && !ForgeWurst.getForgeWurst().getHax().cheststealer.isEnabled()) {
-			if (TimerUtils.getTimePassed() < pingDelay.getValueF()) {
-				if (event.getPacket() instanceof CPacketPlayer) {
-					packets.add(event.getPacket());
+			if (mc.player.ticksExisted % pingDelay.getValueF() != 0) {
+				if (event.getPacket() instanceof CPacketPlayer || event.getPacket() instanceof CPacketPlayer.Rotation || event.getPacket() instanceof CPacketPlayer.Position || event.getPacket() instanceof CPacketPlayer.PositionRotation) {
 					event.setCanceled(true);
+					packets.add(event.getPacket());
 				}
-			} else if (TimerUtils.getTimePassed() > pingDelay.getValueF()) {
-				TimerUtils.reset();
-				for (Packet thePacket : packets) {
-					mc.player.connection.sendPacket(thePacket);
-					packets.clear();
+			} else {
+				for (Packet packet : packets) {
+					assert packet != null;
+					mc.player.connection.sendPacket(packet);
 				}
+				packets.clear();
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
-	public void abilitySpoof() {
-		if (!ability.isChecked())
-			return;
-		mc.player.capabilities.allowFlying = true;
-
-		mc.player.connection.sendPacket(new CPacketPlayerAbilities(mc.player.capabilities));
-	}
-
-	public void spectatorSpoof() {
-		if (!spectator.isChecked())
-			return;
-		mc.player.connection.sendPacket(new CPacketSpectate(mc.player.getUniqueID()));
-	}
-
-	public void inputSpoof() {
-		if (!inputSpoof.isChecked())
-			return;
-		mc.player.connection.sendPacket(new CPacketInput(Float.MAX_VALUE, Float.MAX_VALUE, mc.gameSettings.keyBindJump.isKeyDown(), mc.gameSettings.keyBindSneak.isKeyDown()));
-	}
 
 	@SubscribeEvent
 	public void onPacketOut(WPacketOutputEvent event) {
@@ -183,15 +113,6 @@ public final class Disabler extends Hack {
 					SPacketPlayerPosLook sPacketPlayerPosLook = (SPacketPlayerPosLook) event.getPacket();
 					mc.player.connection.sendPacket(new CPacketConfirmTeleport(sPacketPlayerPosLook.getTeleportId()));
 				}
-			}
-			if (fuck.isChecked()) {
-				if (event.getPacket() instanceof SPacketPlayerPosLook) {
-					event.setCanceled(true);
-					mc.player.connection.sendPacket(new CPacketPlayer.PositionRotation(mc.player.posX, mc.player.posY, mc.player.posZ, mc.player.rotationYaw, mc.player.rotationPitch, mc.player.onGround));
-				}
-			}
-			if (fuck2.isChecked()) {
-				event.setCanceled(true);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
