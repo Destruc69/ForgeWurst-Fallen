@@ -37,9 +37,6 @@ public final class Disabler extends Hack {
 			new CheckboxSetting("CPacketClientStatus/CPacketClientSettings cancel", "Cancels this packet, the server knows less about clients status",
 					false);
 
-	private final CheckboxSetting groundSpoof =
-			new CheckboxSetting("GroundSpoof", "Every oncoming packet is set to onground",
-					false);
 
 	private final CheckboxSetting ghostly =
 			new CheckboxSetting("Ghostly", "Dont send some packets so the AntiCheat has less info on you",
@@ -61,7 +58,6 @@ public final class Disabler extends Hack {
 		addSetting(ping);
 		addSetting(confirmTP);
 		addSetting(stat);
-		addSetting(groundSpoof);
 		addSetting(ghostly);
 		addSetting(pingSpoof);
 		addSetting(pingDelay);
@@ -87,17 +83,17 @@ public final class Disabler extends Hack {
 			if (!pingSpoof.isChecked())
 				return;
 
+			if (event.getPacket() instanceof CPacketPlayer || event.getPacket() instanceof CPacketPlayer.PositionRotation || event.getPacket() instanceof CPacketPlayer.Position || event.getPacket() instanceof CPacketPlayer.Rotation) {
+				packets.add(event.getPacket());
+				event.setCanceled(true);
+			}
+
 			if (mc.player.ticksExisted % pingDelay.getValueF() != 0) {
-				if (event.getPacket() instanceof CPacketPlayer || event.getPacket() instanceof CPacketPlayer.Rotation || event.getPacket() instanceof CPacketPlayer.Position || event.getPacket() instanceof CPacketPlayer.PositionRotation) {
-					event.setCanceled(true);
-					packets.add(event.getPacket());
-				}
-			} else {
 				for (Packet packet : packets) {
 					assert packet != null;
 					mc.player.connection.sendPacket(packet);
+					packets.clear();
 				}
-				packets.clear();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -126,20 +122,6 @@ public final class Disabler extends Hack {
 				if (event.getPacket() instanceof SPacketPlayerPosLook) {
 					SPacketPlayerPosLook sPacketPlayerPosLook = (SPacketPlayerPosLook) event.getPacket();
 					mc.player.connection.sendPacket(new CPacketConfirmTeleport(sPacketPlayerPosLook.getTeleportId()));
-				}
-			}
-			if (groundSpoof.isChecked()) {
-				if (event.getPacket() instanceof CPacketPlayer.Position) {
-					event.setCanceled(true);
-					mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY, mc.player.posZ, true));
-				}
-				if (event.getPacket() instanceof CPacketPlayer.PositionRotation) {
-					event.setCanceled(true);
-					mc.player.connection.sendPacket(new CPacketPlayer.PositionRotation(mc.player.posX, mc.player.posY, mc.player.posZ, mc.player.rotationYaw, mc.player.rotationPitch, true));
-				}
-				if (event.getPacket() instanceof CPacketPlayer.Rotation) {
-					event.setCanceled(true);
-					mc.player.connection.sendPacket(new CPacketPlayer.Rotation(mc.player.rotationYaw, mc.player.rotationPitch, true));
 				}
 			}
 			if (stat.isChecked()) {

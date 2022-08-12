@@ -8,18 +8,18 @@
 package net.wurstclient.forge.hacks;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.util.Timer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.wurstclient.fmlevents.WPacketInputEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
+import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.settings.SliderSetting;
+import net.wurstclient.forge.utils.ChatUtils;
 import net.wurstclient.forge.utils.MathUtils;
 
 import java.lang.reflect.Field;
@@ -30,29 +30,26 @@ public final class ElytraFlight extends Hack {
 			new EnumSetting<>("Mode", "Modes for ElytraFlight", Mode.values(), Mode.BOOST);
 
 	private final SliderSetting upSpeed =
-			new SliderSetting("UpSpeed", "Speed for going Up", 0.4, 0, 2, 0.00005, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("UpSpeed", "Speed for going Up", 0.4, 0, 2, 0.000005, SliderSetting.ValueDisplay.DECIMAL);
 
 	private final SliderSetting baseSpeed =
-			new SliderSetting("BaseSpeed", "Speed for going forwards, left, right and back", 0.4, 0, 2, 0.0005, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("BaseSpeed", "Speed for going forwards, left, right and back", 0.4, 0, 2, 0.00005, SliderSetting.ValueDisplay.DECIMAL);
 
 	private final SliderSetting downSpeed =
-			new SliderSetting("DownSpeed", "Speed for going down", 0.4, 0, 2, 0.00005, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("DownSpeed", "Speed for going down", 0.4, 0, 2, 0.000005, SliderSetting.ValueDisplay.DECIMAL);
 
 	private final SliderSetting fallSpeed =
-			new SliderSetting("FallSpeed", "Fall speed", 0.04, 0, 0.02, 0.00005, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("FallSpeed", "Fall speed", 0.04, 0, 0.02, 0.000005, SliderSetting.ValueDisplay.DECIMAL);
 
 	private final CheckboxSetting vel =
 			new CheckboxSetting("Velocity", "When jump and sneak are idle we keep you still in the air",
 					false);
 
-	private final SliderSetting pitch =
-			new SliderSetting("Pitch", "Always maintain the same pitch, It i will be in packets", -90, -90, 90, 0.1, SliderSetting.ValueDisplay.DECIMAL);
-
 	private final SliderSetting takeoff =
-			new SliderSetting("TakeOffTimerSpeed", 0.9, 0.1, 2, 0.01, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("TakeOffTimerSpeed", 0.9, 0.1, 2, 0.001, SliderSetting.ValueDisplay.DECIMAL);
 
 	private final SliderSetting whenfly =
-			new SliderSetting("FlyingTimerSpeed", 0.9, 0.1, 2, 0.01, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("FlyingTimerSpeed", 0.9, 0.1, 2, 0.001, SliderSetting.ValueDisplay.DECIMAL);
 
 	public ElytraFlight() {
 		super("ElytraFlight", "Fly with elytras.");
@@ -63,7 +60,6 @@ public final class ElytraFlight extends Hack {
 		addSetting(downSpeed);
 		addSetting(fallSpeed);
 		addSetting(vel);
-		addSetting(pitch);
 		addSetting(takeoff);
 		addSetting(whenfly);
 	}
@@ -87,13 +83,13 @@ public final class ElytraFlight extends Hack {
 
 	@SubscribeEvent
 	public void update(WUpdateEvent event) {
+		if (ForgeWurst.getForgeWurst().getHax().elytraBAOT.isEnabled() && baseSpeed.getValueF() > baseSpeed.getMin() + 0.8182739) {
+			baseSpeed.setValue(0.81);
+			ChatUtils.message("Dont set value to high for elytra bot");
+		}
 		if (mc.player.isElytraFlying()) {
-			if (!mc.gameSettings.keyBindJump.isKeyDown()) {
-				if (mc.player.ticksExisted % 2 == 0) {
-					mc.player.motionY = -fallSpeed.getValueF();
-				} else {
-					mc.player.motionY = -fallSpeed.getValueF() - mc.player.motionY;
-				}
+			if (!mc.gameSettings.keyBindJump.isKeyDown() && !mc.gameSettings.keyBindSneak.isKeyDown()) {
+				mc.player.motionY = -fallSpeed.getValueF();
 			}
 
 			if (mode.getSelected().boost) {
@@ -149,12 +145,10 @@ public final class ElytraFlight extends Hack {
 		if (!mc.gameSettings.keyBindJump.isKeyDown() && !mc.gameSettings.keyBindSneak.isKeyDown()) {
 			mc.player.motionY = 0;
 		}
-	}
 
-	@SubscribeEvent
-	public void pitch(WPacketInputEvent event) {
-		if (event.getPacket() instanceof CPacketPlayer.Rotation) {
-			mc.player.connection.sendPacket(new CPacketPlayer.Rotation(mc.player.rotationYaw, pitch.getValueF(), mc.player.onGround));
+		if (!mc.gameSettings.keyBindForward.isKeyDown() && !mc.gameSettings.keyBindRight.isKeyDown() && !mc.gameSettings.keyBindBack.isKeyDown() && !mc.gameSettings.keyBindLeft.isKeyDown()) {
+			mc.player.motionX = 0;
+			mc.player.motionZ = 0;
 		}
 	}
 

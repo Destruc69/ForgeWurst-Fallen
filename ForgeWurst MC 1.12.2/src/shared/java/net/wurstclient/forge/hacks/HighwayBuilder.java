@@ -161,10 +161,9 @@ public final class HighwayBuilder extends Hack {
 							mc.player.setVelocity(0, 0, 0);
 						}
 						mc.playerController.processRightClickBlock(mc.player, mc.world, blockPos, mc.player.getHorizontalFacing().getOpposite(), mc.objectMouseOver.hitVec, EnumHand.MAIN_HAND);
-						lookAtPacket(blockPos.getX(), blockPos.getY(), blockPos.getZ(), mc.player);
-						lookAtPacket(blockPos.getX(), blockPos.getY(), blockPos.getZ(), mc.player);
-						lookAtPacket(blockPos.getX(), blockPos.getY(), blockPos.getZ(), mc.player);
-						lookAtPacket(blockPos.getX(), blockPos.getY(), blockPos.getZ(), mc.player);
+						for (int u = 0; u < 5; u ++) {
+							lookAtPacket(blockPos.getX(), blockPos.getY(), blockPos.getZ(), mc.player);
+						}
 						mc.player.swingArm(EnumHand.MAIN_HAND);
 					}
 

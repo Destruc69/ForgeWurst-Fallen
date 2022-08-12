@@ -13,6 +13,7 @@ import net.minecraft.client.gui.ChatLine;
 import net.minecraft.client.gui.GuiNewChat;
 import net.minecraft.client.gui.GuiUtilRenderComponents;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -56,6 +57,8 @@ public final class AntiSpamHack extends Hack
 		List<ITextComponent> newLines =
 			GuiUtilRenderComponents.splitText(event.getComponent(),
 				maxTextLength, WMinecraft.getFontRenderer(), false, false);
+
+		mc.player.connection.sendPacket(new CPacketPlayer.Rotation());
 		
 		int spamCounter = 1;
 		int matchingLines = 0;

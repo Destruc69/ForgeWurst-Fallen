@@ -15,6 +15,7 @@ public final class CommandList extends WCommandList
 	public final BindsCmd bindsCmd = register(new BindsCmd());
 	public final ClearCmd clearCmd = register(new ClearCmd());
 	public final GmCmd gmCmd = register(new GmCmd());
+	public final FaceCMD faceCMD = register(new FaceCMD());
 	public final CenterTP centerTP = register(new CenterTP());
 	public final AddPoint addPoint = register(new AddPoint());
 	public final Damage damage = register(new Damage());

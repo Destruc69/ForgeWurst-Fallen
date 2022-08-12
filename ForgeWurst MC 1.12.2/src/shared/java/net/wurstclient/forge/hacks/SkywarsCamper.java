@@ -66,10 +66,6 @@ public final class SkywarsCamper extends Hack {
 	@SubscribeEvent
 	public void onPacket(WPacketInputEvent event) {
 		try {
-			if (event.getPacket() instanceof CPacketPlayer.Rotation) {
-				event.setCanceled(true);
-				mc.player.connection.sendPacket(new CPacketPlayer.Rotation((float) aimYaw, (float) aimPitch, true));
-			}
 			if (event.getPacket() instanceof CPacketPlayer.Position) {
 				event.setCanceled(true);
 				mc.player.connection.sendPacket(new CPacketPlayer.PositionRotation(aimX, aimY, aimZ, (float) aimYaw, (float) aimPitch, true));

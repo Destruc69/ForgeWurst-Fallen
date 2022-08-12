@@ -56,6 +56,15 @@ public final class TerrianNavv extends Hack {
 	protected void onEnable() {
 		try {
 			MinecraftForge.EVENT_BUS.register(this);
+			if (targetPos.size() > 0) {
+				targetPos.clear();
+			}
+			if (positivePos.size() > 0) {
+				positivePos.clear();
+			}
+			if (negativePos.size() > 0) {
+				negativePos.clear();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -7,20 +7,15 @@
  */
 package net.wurstclient.forge.hacks;
 
-import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.wurstclient.fmlevents.WPacketInputEvent;
-import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.settings.EnumSetting;
-import net.wurstclient.forge.utils.KeyBindingUtils;
+import net.wurstclient.forge.utils.RotationUtils;
 
 public final class Rotations extends Hack {
-	public static float yaw;
-	public static float pitch;
+
 	public Rotations() {
 		super("Rotations", "Renders rotations.");
 		setCategory(Category.RENDER);
@@ -38,6 +33,8 @@ public final class Rotations extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(RenderPlayerEvent event) {
-		event.getRenderer().getMainModel().setRotationAngles(mc.player.limbSwing, mc.player.limbSwingAmount, event.getPartialRenderTick(), 0, 90, 1, mc.player);
+		for (int x = 0; x < 3; x++) {
+			mc.player.rotationYawHead = RotationUtils.serverYaw;
+		}
 	}
 }

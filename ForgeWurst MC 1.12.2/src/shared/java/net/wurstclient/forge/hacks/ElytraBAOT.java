@@ -1,9 +1,14 @@
+/*
+ * Copyright (C) 2017 - 2019 | Wurst-Imperium | All rights reserved.
+ *
+ * This source code is subject to the terms of the GNU General Public
+ * License, version 3. If a copy of the GPL was not distributed with this
+ * file, You can obtain one at: https://www.gnu.org/licenses/gpl-3.0.txt
+ */
 package net.wurstclient.forge.hacks;
 
-import net.minecraft.block.Block;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.init.Blocks;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -12,8 +17,10 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
+import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.CheckboxSetting;
+import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.*;
 import org.lwjgl.opengl.GL11;
@@ -21,7 +28,10 @@ import org.lwjgl.opengl.GL11;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public final class HighwayNav extends Hack {
+public final class ElytraBAOT extends Hack {
+
+	double startY = 0;
+
 
 	ArrayList<BlockPos> targetPos = new ArrayList<>();
 
@@ -35,26 +45,23 @@ public final class HighwayNav extends Hack {
 	private final SliderSetting maxnodes =
 			new SliderSetting("MaxNodes", "if the node count is greater than this value we clear them", 4, 1, 10, 1, SliderSetting.ValueDisplay.DECIMAL);
 
-	private final CheckboxSetting flymode =
-			new CheckboxSetting("FlyMode", "A flying bot",
-					false);
-
 	private final CheckboxSetting stop =
 			new CheckboxSetting("Stop", "Stop all movement",
 					false);
 
-	public HighwayNav() {
-		super("HighwayNav", "Path through Highways.");
-		setCategory(Category.PATHING);
+	public ElytraBAOT() {
+		super("AutoElytra", "Addition pathfinding for ElytraFly.");
+		setCategory(Category.MOVEMENT);
 		addSetting(radiuss);
 		addSetting(maxnodes);
-		addSetting(flymode);
 		addSetting(stop);
 	}
+
 	@Override
 	protected void onEnable() {
 		try {
 			MinecraftForge.EVENT_BUS.register(this);
+			startY = mc.player.posY;
 			if (targetPos.size() > 0) {
 				targetPos.clear();
 			}
@@ -80,73 +87,78 @@ public final class HighwayNav extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		if (!stop.isChecked()) {
-			try {
-				if (targetPos.size() > maxnodes.getValueF()) {
-					targetPos.clear();
+		if (ForgeWurst.getForgeWurst().getHax().elytraFlight.isEnabled()) {
+			if (!stop.isChecked()) {
+				try {
+					if (targetPos.size() > maxnodes.getValueF()) {
+						targetPos.clear();
+					}
+					assert targetPos != null;
+					assert radiuss != null;
+					assert maxnodes != null;
+					assert positivePos != null;
+					assert negativePos != null;
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-				assert targetPos != null;
-				assert radiuss != null;
-				assert maxnodes != null;
-				assert positivePos != null;
-				assert negativePos != null;
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
 				try {
 					try {
-						assert targetPos != null;
 						try {
-							if (targetPos.size() > maxnodes.getValueF())
-								targetPos.clear();
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-						int radius = radiuss.getValueI();
-						for (int aimX = -radius; aimX < radius; aimX++) {
-							for (int aimY = -radius; aimY < radius; aimY++) {
-								for (int aimZ = -radius; aimZ < radius; aimZ++) {
-									BlockPos node = new BlockPos(mc.player.getPosition().add(aimX, aimY, aimZ).getX(), mc.player.getPosition().add(aimX, aimY, aimZ).getY(), mc.player.getPosition().add(aimX, aimY, aimZ).getZ());
-									if (mc.world.getBlockState(node.add(0, -1, 0)).getBlock().equals(Blocks.OBSIDIAN) && mc.world.getBlockState(node.add(0, 0, 0)).getBlock().equals(Blocks.AIR) &&!mc.world.getBlockState(node).getBlock().equals(Blocks.LAVA) && !mc.world.getBlockState(node).getBlock().equals(Blocks.FLOWING_LAVA) && PlayerUtils.CanSeeBlock(node)) {
-										targetPos.add(node);
-										aimX = node.getX();
-										aimY = node.getY();
-										aimZ = node.getZ();
-										positivePos.add(node);
-									} else {
-										if (PlayerUtils.CanSeeBlock(node)) {
-											negativePos.add(node);
+							assert targetPos != null;
+							try {
+								if (targetPos.size() > maxnodes.getValueF())
+									targetPos.clear();
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+							int radius = radiuss.getValueI();
+							for (int aimX = -radius; aimX < radius; aimX++) {
+								for (int aimY = -radius; aimY < radius; aimY++) {
+									for (int aimZ = -radius; aimZ < radius; aimZ++) {
+										BlockPos node = new BlockPos(mc.player.getPosition().add(aimX, aimY, aimZ).getX(), startY, mc.player.getPosition().add(aimX, aimY, aimZ).getZ());
+										if (mc.world.getBlockState(node).getBlock().equals(Blocks.AIR) && mc.world.getBlockState(node.add(0, -1, 0)).getBlock().equals(Blocks.AIR) && PlayerUtils.CanSeeBlock(node)) {
+											targetPos.add(node);
+											aimX = node.getX();
+											aimY = (int) (node.getY() + 0.5f);
+											aimZ = node.getZ();
+											positivePos.add(node);
+										} else {
+											if (PlayerUtils.CanSeeBlock(node)) {
+												negativePos.add(node);
+											}
 										}
 									}
 								}
 							}
-						}
 
-						if (mc.player.isInWater()) {
-							KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, true);
-						} else {
-							KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, false);
-						}
+							KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
 
-						mc.player.setSprinting(true);
-						KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
-
-						if (TimerUtils.hasReached(1000)) {
-							TimerUtils.reset();
-							for (BlockPos pos : targetPos) {
-								assert pos != null;
-								AxisAlignedBB bb = BlockUtils.getBoundingBox(pos);
-								assert bb != null;
-								double dd = RotationUtils.getEyesPos().distanceTo(
-										bb.getCenter());
-								double posXX = pos.getX() + (0) * dd
-										- mc.player.posX;
-								double posZZ = pos.getZ() + (0) * dd
-										- mc.player.posZ;
-
-								mc.player.rotationYaw = (float) Math.toDegrees(Math.atan2(posZZ, posXX)) - 100;
+							for (BlockPos thePos : targetPos) {
+								if (thePos.getY() > mc.player.posY) {
+									KeyBindingUtils.setPressed(mc.gameSettings.keyBindSneak, false);
+									KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, true);
+								} else if (mc.player.posY > thePos.getY()) {
+									KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, false);
+								}
 							}
+
+							if (mc.player.ticksExisted % 10 == 0) {
+								for (BlockPos pos : targetPos) {
+									assert pos != null;
+									AxisAlignedBB bb = BlockUtils.getBoundingBox(pos);
+									assert bb != null;
+									double dd = RotationUtils.getEyesPos().distanceTo(
+											bb.getCenter());
+									double posXX = pos.getX() + (0) * dd
+											- mc.player.posX;
+									double posZZ = pos.getZ() + (0) * dd
+											- mc.player.posZ;
+
+									mc.player.rotationYaw = (float) Math.toDegrees(Math.atan2(posZZ, posXX)) - 90;
+								}
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -154,19 +166,11 @@ public final class HighwayNav extends Hack {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
-				if (flymode.isChecked()) {
-					for (BlockPos blockPoss : targetPos) {
-						if (mc.player.posY < blockPoss.getY()) {
-							mc.player.motionY = 0.405;
-						}
-					}
+				try {
+
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
 		}
 	}

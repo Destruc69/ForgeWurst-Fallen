@@ -47,6 +47,6 @@ public final class NCPFly extends Hack {
 		if (mc.gameSettings.keyBindSneak.isKeyDown())
 			player.motionY -= speed.getValueF();
 
-		mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY - 999, mc.player.posZ, false));
+		mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY - mc.player.fallDistance, mc.player.posZ, true));
 	}
 }

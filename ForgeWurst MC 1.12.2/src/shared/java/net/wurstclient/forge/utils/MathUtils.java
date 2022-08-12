@@ -11,8 +11,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import org.lwjgl.input.Keyboard;
 
 public final class MathUtils {
+	public static float forward;
+	public static float side;
 	public static boolean isInteger(String s) {
 		try {
 			Integer.parseInt(s);
@@ -66,8 +69,20 @@ public final class MathUtils {
 
 	public static double[] directionSpeed(double speed) {
 		final Minecraft mc = Minecraft.getMinecraft();
-		float forward = mc.player.movementInput.moveForward;
-		float side = mc.player.movementInput.moveStrafe;
+		if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
+			forward = 1;
+		} else if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
+			forward = -1;
+		} else {
+			forward = 0;
+		}
+		if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
+			side = 1;
+		} else if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
+			side = -1;
+		} else {
+			side = 0;
+		}
 		float yaw = mc.player.prevRotationYaw
 				+ (mc.player.rotationYaw - mc.player.prevRotationYaw) * mc.getRenderPartialTicks();
 

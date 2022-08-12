@@ -7,6 +7,7 @@
  */
 package net.wurstclient.forge.hacks;
 
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Timer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -14,6 +15,7 @@ import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.compatibility.WMinecraft;
+import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.KeyBindingUtils;
 import net.wurstclient.forge.utils.MathUtils;
@@ -21,80 +23,89 @@ import net.wurstclient.forge.utils.MathUtils;
 import java.lang.reflect.Field;
 
 public final class LongJump extends Hack {
-	private final SliderSetting dirSpeed =
-			new SliderSetting("DirSpeed", "How fast we go", 1, 0.2, 4, 0.1, SliderSetting.ValueDisplay.DECIMAL);
 
-	public static double startX;
-	public static double startY;
-	public static double startZ;
+	public static double x;
+	public static double y;
+	public static double z;
+
+	public static boolean teleported;
+
+
+	private final EnumSetting<Mode> mode =
+			new EnumSetting<>("Mode", Mode.values(), Mode.AAC);
+
+	private enum Mode {
+		AAC("AAC", true, false, false),
+		MINEPLEX("Mineplex", false, true, false),
+		BLOCKMC("BlocksMC", false, false, true);
+
+		private final String name;
+		private final boolean aac;
+		private final boolean mineplex;
+		private final boolean blocksmc;
+
+		private Mode(String name, boolean aac, boolean mineplex, boolean blocksmc) {
+			this.name = name;
+			this.aac = aac;
+			this.mineplex = mineplex;
+			this.blocksmc = blocksmc;
+		}
+
+		public String toString() {
+			return name;
+		}
+	}
 
 	public LongJump() {
 		super("LongJump", "Jump far");
 		setCategory(Category.MOVEMENT);
-		addSetting(dirSpeed);
+		addSetting(mode);
 	}
 
 	@Override
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
-		try {
-			startX = mc.player.posX;
-			startY = mc.player.posY;
-			startZ = mc.player.posZ;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		x = mc.player.posX;
+		y = mc.player.posY;
+		z = mc.player.posZ;
+		teleported = false;
 	}
 
 	@Override
 	protected void onDisable() {
 		MinecraftForge.EVENT_BUS.unregister(this);
-		KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, false);
-		setTickLength(50);
 	}
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		if (mc.player.hurtTime > 0) {
-			setTickLength(50 / 0.1f);
-			mc.player.motionY = 0.405;
-			KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
-			double[] dir = MathUtils.directionSpeed(dirSpeed.getValueF());
-			mc.player.motionX = dir[0];
-			mc.player.motionZ = dir[1];
-		} else {
-			setTickLength(50);
-		}
-		if (mc.player.getDistance(startX, startY, startZ) > 4 && mc.player.onGround) {
-			setEnabled(false);
-		}
-	}
-	private void setTickLength(float tickLength)
-	{
-		try
-		{
-			Field fTimer = mc.getClass().getDeclaredField(
-					wurst.isObfuscated() ? "field_71428_T" : "timer");
-			fTimer.setAccessible(true);
-
-			if(WMinecraft.VERSION.equals("1.10.2"))
-			{
-				Field fTimerSpeed = Timer.class.getDeclaredField(
-						wurst.isObfuscated() ? "field_74278_d" : "timerSpeed");
-				fTimerSpeed.setAccessible(true);
-				fTimerSpeed.setFloat(fTimer.get(mc), 50 / tickLength);
-
-			}else
-			{
-				Field fTickLength = Timer.class.getDeclaredField(
-						wurst.isObfuscated() ? "field_194149_e" : "tickLength");
-				fTickLength.setAccessible(true);
-				fTickLength.setFloat(fTimer.get(mc), tickLength);
+		if (mode.getSelected().aac) {
+			if (mc.player.fallDistance > 0.5 && !teleported) {
+				if (mc.player.getHorizontalFacing().equals(EnumFacing.NORTH)) {
+					z = z - 5;
+				}
+				if (mc.player.getHorizontalFacing().equals(EnumFacing.EAST)) {
+					x = x + 5;
+				}
+				if (mc.player.getHorizontalFacing().equals(EnumFacing.SOUTH)) {
+					z = z + 5;
+				}
+				if (mc.player.getHorizontalFacing().equals(EnumFacing.WEST)) {
+					x = x - 5;
+				}
+				mc.player.setPosition(x, y, z);
+				teleported = true;
 			}
-
-		}catch(ReflectiveOperationException e)
-		{
-			throw new RuntimeException(e);
+		}
+		if (mode.getSelected().mineplex) {
+			mc.player.motionY += 0.0132099999999999999999999999999;
+			mc.player.jumpMovementFactor = 0.08f;
+			if (mc.player.fallDistance != 0.0f) {
+				mc.player.motionY += 0.037;
+			}
+		}
+		if (mode.getSelected().blocksmc) {
+			mc.player.jumpMovementFactor = 0.1f;
+			mc.player.motionY += 0.0132;
 		}
 	}
 }

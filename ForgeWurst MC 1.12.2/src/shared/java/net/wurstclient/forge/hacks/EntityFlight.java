@@ -97,8 +97,7 @@ public final class EntityFlight extends Hack {
 					if (entity instanceof EntityBoat || entity instanceof EntityHorse) {
 						if (!mc.player.isRiding() && mc.player.getDistance(entity) < 3) {
 							for (int x = 0; x < 6; x ++) {
-								float[] rot = RotationUtils.getNeededRotations(new Vec3d(entity.lastTickPosX, entity.lastTickPosY, entity.lastTickPosZ));
-								mc.player.connection.sendPacket(new CPacketPlayer.Rotation(rot[0], rot[1], mc.player.onGround));
+								RotationUtils.faceVectorPacket(new Vec3d(entity.lastTickPosX, entity.lastTickPosY, entity.lastTickPosZ));
 							}
 							mc.playerController.interactWithEntity(mc.player, entity, EnumHand.MAIN_HAND);
 
