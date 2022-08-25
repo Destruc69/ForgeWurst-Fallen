@@ -26,7 +26,6 @@ public final class AntiHunger extends Hack {
 	protected void onEnable() {
 		try {
 			MinecraftForge.EVENT_BUS.register(this);
-			mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SPRINTING));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -41,7 +40,6 @@ public final class AntiHunger extends Hack {
 	public void onPacket(WPacketInputEvent event) {
 		try {
 			if (event.getPacket() instanceof CPacketEntityAction) {
-				mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SPRINTING));
 				CPacketEntityAction action = (CPacketEntityAction) event.getPacket();
 				if (action.getAction() == CPacketEntityAction.Action.START_SPRINTING || action.getAction() == CPacketEntityAction.Action.STOP_SPRINTING) {
 					event.setCanceled(true);

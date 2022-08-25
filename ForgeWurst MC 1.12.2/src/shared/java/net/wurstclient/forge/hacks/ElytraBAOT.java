@@ -20,7 +20,6 @@ import net.wurstclient.forge.Category;
 import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.CheckboxSetting;
-import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.*;
 import org.lwjgl.opengl.GL11;
@@ -51,7 +50,7 @@ public final class ElytraBAOT extends Hack {
 
 	public ElytraBAOT() {
 		super("AutoElytra", "Addition pathfinding for ElytraFly.");
-		setCategory(Category.MOVEMENT);
+		setCategory(Category.PATHING);
 		addSetting(radiuss);
 		addSetting(maxnodes);
 		addSetting(stop);

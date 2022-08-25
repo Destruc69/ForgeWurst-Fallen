@@ -24,6 +24,10 @@ public final class HackList extends WHackList
 	public final NoFall noFall = register(new NoFall());
 	public final Speed speed = register(new Speed());
 	public final Step step = register(new Step());
+	public final LandClearer landClearer = register(new LandClearer());
+	public final OreFinder oreFinder = register(new OreFinder());
+	public final BowAimBot bowAimBot = register(new BowAimBot());
+	public final AutoAttack autoAttack = register(new AutoAttack());
 	public final ElytraBAOT elytraBAOT = register(new ElytraBAOT());
 	public final Rotations rotations = register(new Rotations());
 	public final Debuger debuger = register(new Debuger());

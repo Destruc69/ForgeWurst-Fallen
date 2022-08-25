@@ -7,6 +7,7 @@
  */
 package net.wurstclient.forge.hacks;
 
+import net.minecraft.block.material.EnumPushReaction;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.entity.passive.EntityHorse;
@@ -80,15 +81,15 @@ public final class EntityFlight extends Hack {
 			}
 			if (vel.isChecked()) {
 				if (!mc.gameSettings.keyBindSneak.isKeyDown() && !mc.gameSettings.keyBindJump.isKeyDown()) {
-					Objects.requireNonNull(mc.player.getRidingEntity().motionY = 0);
+					mc.player.getRidingEntity().setVelocity(mc.player.getRidingEntity().motionX, 0, mc.player.getRidingEntity().motionZ);
 				}
 			}
 			if (anti.isChecked()) {
 				if (!mc.gameSettings.keyBindSneak.isKeyDown() && !mc.gameSettings.keyBindJump.isKeyDown()) {
 					if (mc.player.ticksExisted % 2 == 0) {
-						Objects.requireNonNull(mc.player.getRidingEntity().motionY += 0.10123);
+						Objects.requireNonNull(mc.player.getRidingEntity().motionY += 0.10123 / 2);
 					} else {
-						Objects.requireNonNull(mc.player.getRidingEntity().motionY -= 0.91873);
+						Objects.requireNonNull(mc.player.getRidingEntity().motionY -= 0.91873 / 2);
 					}
 				}
 			}

@@ -11,7 +11,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
@@ -23,12 +22,11 @@ import net.wurstclient.forge.HackList;
 import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.settings.Setting;
 import net.wurstclient.forge.utils.JsonUtils;
-import net.wurstclient.forge.utils.TimerUtils;
 import org.lwjgl.LWJGLException;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -36,9 +34,13 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 
 public final class ClickGui implements Event {
+    HackList hackList;
+    String string;
+    public static ArrayList<String> textKeys = new ArrayList<>();
     private final ArrayList<Window> windows = new ArrayList<>();
     private final ArrayList<Popup> popups = new ArrayList<>();
     private final Path windowsFile;
@@ -457,9 +459,10 @@ public final class ClickGui implements Event {
 
                 // text
                 GL11.glEnable(GL11.GL_TEXTURE_2D);
-                for (int i = 0; i < lines.length; i++)
+                for (int i = 0; i < lines.length; i++) {
                     fr.drawStringWithShadow(lines[i], xt1 + 2, yt1 + 2 + i * fr.FONT_HEIGHT,
                             0xffffff);
+                }
             }
 
             GL11.glEnable(GL11.GL_CULL_FACE);
@@ -684,24 +687,21 @@ public final class ClickGui implements Event {
         int y5 = y3 - 2;
         boolean hoveringY = mouseY >= y4 && mouseY < y5;
 
-        if(window.isClosable())
-        {
+        if (window.isClosable()) {
             x3 -= 11;
             int x4 = x3 + 9;
             boolean hovering = hoveringY && mouseX >= x3 && mouseX < x4;
             renderCloseButton(x3, y4, x4, y5, hovering);
         }
 
-        if(window.isPinnable())
-        {
+        if (window.isPinnable()) {
             x3 -= 11;
             int x4 = x3 + 9;
             boolean hovering = hoveringY && mouseX >= x3 && mouseX < x4;
             renderPinButton(x3, y4, x4, y5, hovering, window.isPinned());
         }
 
-        if(window.isMinimizable())
-        {
+        if (window.isMinimizable()) {
             x3 -= 11;
             int x4 = x3 + 9;
             boolean hovering = hoveringY && mouseX >= x3 && mouseX < x4;
@@ -736,6 +736,7 @@ public final class ClickGui implements Event {
                 fontRenderer.trimStringToWidth(window.getTitle(), x3 - x1);
         fontRenderer.drawString(title, x1 + 2, y1 + 3, 0xffffff);
     }
+
 
     private void renderTitleBarButton(int x1, int y1, int x2, int y2,
                                       boolean hovering) {

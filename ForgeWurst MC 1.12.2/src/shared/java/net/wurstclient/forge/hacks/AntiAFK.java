@@ -20,33 +20,9 @@ import net.wurstclient.forge.utils.TimerUtils;
 
 public final class AntiAFK extends Hack {
 
-	private final SliderSetting delay =
-			new SliderSetting("Delay MS", 1000, 300, 2500, 100, SliderSetting.ValueDisplay.DECIMAL);
-
-	private final CheckboxSetting jump =
-			new CheckboxSetting("Jump",
-					false);
-
-	private final CheckboxSetting yaw =
-			new CheckboxSetting("Yaw",
-					false);
-
-	private final CheckboxSetting pitch =
-			new CheckboxSetting("Pitch",
-					false);
-
-	private final CheckboxSetting sneak =
-			new CheckboxSetting("Sneak",
-					false);
-
 	public AntiAFK() {
 		super("AntiAFK", "Prevents getting kicked for idling");
 		setCategory(Category.MOVEMENT);
-		addSetting(delay);
-		addSetting(jump);
-		addSetting(yaw);
-		addSetting(pitch);
-		addSetting(sneak);
 	}
 
 	@Override
@@ -61,34 +37,16 @@ public final class AntiAFK extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		if (TimerUtils.hasReached(delay.getValueI())) {
-			if (yaw.isChecked()) {
-				mc.player.rotationYaw = mc.player.rotationYaw + 5;
-			}
-
-			if (sneak.isChecked()) {
-				KeyBindingUtils.setPressed(mc.gameSettings.keyBindSneak, true);
-			}
-
-			if (pitch.isChecked()) {
-				mc.player.rotationPitch = 90;
-			}
-
-			if (jump.isChecked()) {
-				if (mc.player.onGround) {
-					mc.player.jump();
-				}
-			}
-
-			TimerUtils.reset();
+		if (mc.player.ticksExisted % 3 == 0) {
+			mc.player.rotationYaw = mc.player.rotationYaw + 5;
+			mc.player.rotationPitch = mc.player.rotationPitch + 1;
+			KeyBindingUtils.setPressed(mc.gameSettings.keyBindSneak, true);
+			KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, false);
 		} else {
-			if (sneak.isChecked()) {
-				KeyBindingUtils.setPressed(mc.gameSettings.keyBindSneak, false);
-			}
-
-			if (pitch.isChecked()) {
-				mc.player.rotationPitch = -90;
-			}
+			mc.player.rotationPitch = mc.player.rotationPitch - 1;
+			mc.player.rotationYaw = mc.player.rotationYaw - 2;
+			KeyBindingUtils.setPressed(mc.gameSettings.keyBindSneak, false);
+			KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, true);
 		}
 	}
 }

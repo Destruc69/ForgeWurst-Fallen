@@ -20,13 +20,19 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.RotationUtils;
 
 public final class AutoCrystal extends Hack {
 
+	private final SliderSetting rotStrength =
+			new SliderSetting("RotationStrength", "How strong are the rotations?", 2, 1, 30, 1, SliderSetting.ValueDisplay.DECIMAL);
+
+
 	public AutoCrystal() {
 		super("AutoCrystal", "Auto Crystal but for Killaura.");
 		setCategory(Category.COMBAT);
+		addSetting(rotStrength);
 	}
 
 	@Override
@@ -91,14 +97,18 @@ public final class AutoCrystal extends Hack {
 		}
 	}
 
-	public static void placeCrystal(BlockPos pos) {
-		RotationUtils.faceVectorPacket(new Vec3d(pos.getX(), pos.getY(), pos.getZ()));
+	public void placeCrystal(BlockPos pos) {
+		for (int x = 0; x < rotStrength.getValueF(); x ++) {
+			RotationUtils.faceVectorPacket(new Vec3d(pos.getX(), pos.getY(), pos.getZ()));
+		}
 		mc.playerController.processRightClickBlock(mc.player, mc.world, pos, EnumFacing.UP, mc.objectMouseOver.hitVec, EnumHand.MAIN_HAND);
 		mc.player.swingArm(EnumHand.MAIN_HAND);
 	}
 
-	public static void attackCrystal(EntityEnderCrystal entityEnderCrystal) {
-		RotationUtils.faceVectorPacket(new Vec3d(entityEnderCrystal.posX, entityEnderCrystal.posY, entityEnderCrystal.posZ));
+	public void attackCrystal(EntityEnderCrystal entityEnderCrystal) {
+		for (int x = 0; x < rotStrength.getValueF(); x ++) {
+			RotationUtils.faceVectorPacket(new Vec3d(entityEnderCrystal.posX, entityEnderCrystal.posY, entityEnderCrystal.posZ));
+		}
 		mc.playerController.attackEntity(mc.player, entityEnderCrystal);
 	}
 }

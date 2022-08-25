@@ -35,20 +35,32 @@ public final class LongJump extends Hack {
 			new EnumSetting<>("Mode", Mode.values(), Mode.AAC);
 
 	private enum Mode {
-		AAC("AAC", true, false, false),
-		MINEPLEX("Mineplex", false, true, false),
-		BLOCKMC("BlocksMC", false, false, true);
+		AAC("AAC1", true, false, false, false, false, false, false),
+		AAC2("AAC2", false, false, false, true, false, false, false),
+		AAC3("AAC3", false, false, false, false, true, false, false),
+		MINEPLEX("Mineplex1", false, true, false, false, false, false, false),
+		MINEPLEX2("Mineplex2", false, false, false, false, false, true, false),
+		MINEPLEX3("Mineplex3", false, false, false, false, false, false, true),
+		BLOCKMC("BlocksMC", false, false, true, false, false, false, false);
 
 		private final String name;
 		private final boolean aac;
+		private final boolean aac2;
+		private final boolean aac3;
 		private final boolean mineplex;
+		private final boolean mineplex2;
 		private final boolean blocksmc;
+		private final boolean mineplex3;
 
-		private Mode(String name, boolean aac, boolean mineplex, boolean blocksmc) {
+		private Mode(String name, boolean aac, boolean mineplex, boolean blocksmc, boolean aac2, boolean aac3, boolean mineplex2, boolean mineplex3) {
 			this.name = name;
 			this.aac = aac;
 			this.mineplex = mineplex;
 			this.blocksmc = blocksmc;
+			this.mineplex2 = mineplex2;
+			this.aac2 = aac2;
+			this.aac3 = aac3;
+			this.mineplex3 = mineplex3;
 		}
 
 		public String toString() {
@@ -96,12 +108,30 @@ public final class LongJump extends Hack {
 				teleported = true;
 			}
 		}
+		if (mode.getSelected().aac3) {
+			mc.player.motionY += 0.05999;
+		}
+		if (mode.getSelected().aac2) {
+			mc.player.motionY += 0.0132099999999999999999999999999;
+			mc.player.jumpMovementFactor = 0.08f;
+		}
 		if (mode.getSelected().mineplex) {
 			mc.player.motionY += 0.0132099999999999999999999999999;
 			mc.player.jumpMovementFactor = 0.08f;
+		}
+		if (mode.getSelected().mineplex2) {
+			mc.player.jumpMovementFactor = 0.1f;
+			if (mc.player.fallDistance > 1.5f) {
+				mc.player.jumpMovementFactor = 0f;
+				mc.player.motionY = (-10f);
+			}
 			if (mc.player.fallDistance != 0.0f) {
 				mc.player.motionY += 0.037;
 			}
+		}
+		if (mode.getSelected().mineplex3) {
+			mc.player.motionY += 0.0132099999999999999999999999999;
+			mc.player.jumpMovementFactor = 0.08f;
 		}
 		if (mode.getSelected().blocksmc) {
 			mc.player.jumpMovementFactor = 0.1f;

@@ -77,7 +77,7 @@ public final class Jesus extends Hack {
 	public void onUpdate(WUpdateEvent event) {
 		if (mode.getSelected().test) {
 			if (mc.player.isInWater()) {
-				mc.player.motionY = 0.1332986475329;
+				mc.player.motionY = 0.005;
 			}
 		}
 		if (!mc.player.collidedHorizontally) {

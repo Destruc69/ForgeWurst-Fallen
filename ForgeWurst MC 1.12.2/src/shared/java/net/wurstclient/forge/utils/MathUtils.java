@@ -8,7 +8,7 @@
 package net.wurstclient.forge.utils;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.input.Keyboard;
@@ -65,6 +65,22 @@ public final class MathUtils {
 		final double dist = MathHelper.sqrt(difX * difX + difZ * difZ);
 		return new float[]{(float) MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(difZ, difX)) - 90.0),
 				(float) MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(difY, dist)))};
+	}
+
+	public static void speed(double speed) {
+		Minecraft mc = Minecraft.getMinecraft();
+		if (mc.player.getHorizontalFacing().equals(EnumFacing.NORTH)) {
+			mc.player.motionZ -= speed;
+		}
+		if (mc.player.getHorizontalFacing().equals(EnumFacing.EAST)) {
+			mc.player.motionX += speed;
+		}
+		if (mc.player.getHorizontalFacing().equals(EnumFacing.SOUTH)) {
+			mc.player.motionZ += speed;
+		}
+		if (mc.player.getHorizontalFacing().equals(EnumFacing.WEST)) {
+			mc.player.motionX -= speed;
+		}
 	}
 
 	public static double[] directionSpeed(double speed) {

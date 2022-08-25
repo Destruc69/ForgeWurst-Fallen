@@ -33,21 +33,30 @@ public final class Speed extends Hack {
 	public final EnumSetting<Mode> mode =
 			new EnumSetting<>("Mode", Mode.values(), Mode.NCP);
 
-	private final SliderSetting timerSpeed =
-			new SliderSetting("TimerSpeed [NCP-FAST]", "How fast is the timer for ncp fast", 3, 1.1, 5, 0.1, SliderSetting.ValueDisplay.DECIMAL);
+	private final SliderSetting speed =
+			new SliderSetting("Speed", "", 3, 0.1, 5, 0.1, SliderSetting.ValueDisplay.DECIMAL);
 
 	private enum Mode {
-		NCP("NCP", true, false),
-		AAC("AAC", false, true);
+		NCP("NCP", true, false, false, false, false),
+		AAC("AAC", false, true, false, false, false),
+		MINEPLEX("Mineplex", false, false, false, true, false),
+		BASIC("Basic", false, false, true, false, false),
+		STRAFEBYPASS("StrafeBypass", false, false, false, false, true);
 
 		private final String name;
 		private final boolean ncp;
 		private final boolean aac;
+		private final boolean basic;
+		private final boolean mineplex;
+		private final boolean strafebypass;
 
-		private Mode(String name, boolean ncp, boolean aac) {
+		private Mode(String name, boolean ncp, boolean aac, boolean basic, boolean mineplex, boolean strafebypass) {
 			this.name = name;
 			this.ncp = ncp;
 			this.aac = aac;
+			this.basic = basic;
+			this.mineplex = mineplex;
+			this.strafebypass = strafebypass;
 		}
 
 		public String toString() {
@@ -59,7 +68,7 @@ public final class Speed extends Hack {
 		super("Speed", "I Show Speed");
 		setCategory(Category.MOVEMENT);
 		addSetting(mode);
-		addSetting(timerSpeed);
+		addSetting(speed);
 	}
 
 	@Override
@@ -75,15 +84,35 @@ public final class Speed extends Hack {
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
 		if (mc.player.moveForward != 0 || mc.player.moveStrafing != 0) {
+			if (mode.getSelected().basic) {
+				MathUtils.speed(speed.getValueF());
+			}
 			if (mode.getSelected().ncp) {
 				KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, false);
 				if (mc.player.onGround) {
 					mc.player.jump();
+				} else {
+					double[] dir = MathUtils.directionSpeed(0.19);
+					mc.player.setSprinting(true);
+					mc.player.motionX = dir[0];
+					mc.player.motionZ = dir[1];
 				}
-				double[] dir = MathUtils.directionSpeed(0.19);
+			}
+			if (mode.getSelected().mineplex) {
+
+			}
+			if (mode.getSelected().strafebypass) {
 				mc.player.setSprinting(true);
-				mc.player.motionX = dir[0];
-				mc.player.motionZ = dir[1];
+				if (mc.player.onGround) {
+					mc.player.motionX = 0;
+					mc.player.motionZ = 0;
+					mc.player.setVelocity(0, mc.player.motionY, 0);
+					mc.player.jump();
+				} else {
+					double[] dir = MathUtils.directionSpeed(0.19);
+					mc.player.motionX = dir[0];
+					mc.player.motionZ = dir[1];
+				}
 			}
 			if (mode.getSelected().aac) {
 				if (mc.player.onGround) {

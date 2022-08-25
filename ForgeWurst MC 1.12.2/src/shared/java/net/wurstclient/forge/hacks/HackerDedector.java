@@ -95,7 +95,7 @@ public final class HackerDedector extends Hack {
 		if (mc.world != world)
 			return;
 
-		if (TimerUtils.hasReached(500)) {
+		if (mc.player.ticksExisted % 2 == 0) {
 			if (limit == 0)
 				return;
 			limit = limit - 1;
@@ -126,7 +126,7 @@ public final class HackerDedector extends Hack {
 					if (strangeMovement.isChecked()) {
 						//Strange-Movement[A]
 						if (!isAtLimit) {
-							if (entity.lastTickPosY > lastOnGroundPosY + 1) {
+							if (entity.lastTickPosY > lastOnGroundPosY + 1.15) {
 								if (!hackers.contains(entity)) {
 									hackers.add((EntityPlayer) entity);
 								}
@@ -177,10 +177,10 @@ public final class HackerDedector extends Hack {
 						if (!isAtLimit) {
 							if (entity.motionX > 2 ||
 									entity.motionZ > 2 ||
-									entity.motionY > 0.405 ||
+									entity.motionY > 0.406 ||
 									entity.motionX < -2 ||
 									entity.motionZ < -2 ||
-									entity.motionY < -0.405) {
+									entity.motionY < -0.406) {
 								if (!hackers.contains(entity)) {
 									hackers.add((EntityPlayer) entity);
 								}
@@ -188,14 +188,14 @@ public final class HackerDedector extends Hack {
 									names.add(entity.getName());
 								}
 								limit = limit + 1;
-								ChatUtils.warning("[HD]" + " " + entity.getName() + " " + "failed Ground-Spoof[A]");
+								ChatUtils.warning("[HD]" + " " + entity.getName() + " " + "failed Motion-Speed[A]");
 							}
 						}
 					}
 					if (scaffold.isChecked()) {
 						//Scaffold[A]
 						if (!isAtLimit) {
-							if (((EntityPlayer) entity).getHeldItemMainhand().getItem() instanceof ItemBlock && !((EntityPlayer) entity).getHeldItemMainhand().getItem().equals(Blocks.AIR) && ((EntityPlayer) entity).isSwingInProgress && entity.isSprinting() && entity.motionX >= 2 || entity.motionZ >= 2 || entity.motionX <= -2 || entity.motionZ <= -2) {
+							if (((EntityPlayer) entity).getHeldItemMainhand().getItem() instanceof ItemBlock && !((EntityPlayer) entity).getHeldItemMainhand().getItem().equals(Blocks.AIR) && ((EntityPlayer) entity).isSwingInProgress && entity.isSprinting() || entity.fallDistance > 0.75) {
 								if (!hackers.contains(entity)) {
 									hackers.add((EntityPlayer) entity);
 								}
@@ -212,15 +212,15 @@ public final class HackerDedector extends Hack {
 		}
 	}
 
-	@SubscribeEvent
-	public void onRenderGUI(RenderGameOverlayEvent.Post event) {
-		String[] hackersName = names.toArray(new String[0]);
+	//@SubscribeEvent
+	//public void onRenderGUI(RenderGameOverlayEvent.Post event) {
+		//String[] hackersName = names.toArray(new String[0]);
 
-		GL11.glPushMatrix();
-		GL11.glScaled(1.55555555, 1.55555555, 1);
-		WMinecraft.getFontRenderer().drawStringWithShadow(Arrays.toString(hackersName), 8, 8, (int) 0xFF0000);
-		GL11.glPopMatrix();
-	}
+		//GL11.glPushMatrix();
+		//GL11.glScaled(1.55555555, 1.55555555, 1);
+		//WMinecraft.getFontRenderer().drawStringWithShadow(Arrays.toString(hackersName), 8, 8, (int) 0xFF0000);
+		//GL11.glPopMatrix();
+	//}
 
 	@SubscribeEvent
 	public void onRenderWorldLast(RenderWorldLastEvent event) {
@@ -240,7 +240,7 @@ public final class HackerDedector extends Hack {
 					-TileEntityRendererDispatcher.staticPlayerZ);
 
 			for (Entity e : hackers) {
-				GL11.glColor4f(1, 0, 0, 5F);
+				GL11.glColor4f(1, 0, 0, 0.2F);
 				GL11.glBegin(GL11.GL_QUADS);
 				RenderUtils.drawSolidBox(e.getEntityBoundingBox());
 				GL11.glEnd();

@@ -35,7 +35,7 @@ import java.util.ArrayList;
 public final class NoFall extends Hack {
 
 	private final SliderSetting fallDistance =
-			new SliderSetting("FallDistance", "If we exeed this value we will prevent you from falling [FOR ANTI-FALL]", 4, 1, 30, 1, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("FallDistance [ANTIFALL]", "If we exeed this value we will prevent you from falling [FOR ANTI-FALL]", 4, 1, 50, 1, SliderSetting.ValueDisplay.DECIMAL);
 
 
 	public static double lastOnGroundX;
@@ -75,6 +75,15 @@ public final class NoFall extends Hack {
 			}
 		}
 
+		if (mode.getSelected().aac) {
+			if (mc.player.fallDistance > 2) {
+				mc.player.motionZ = 0;
+				mc.player.motionX = mc.player.motionZ;
+				mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY - 10E-4, mc.player.posZ, mc.player.onGround));
+				mc.player.connection.sendPacket(new CPacketPlayer(true));
+			}
+		}
+
 		if (mode.getSelected().anti) {
 			if (mc.player.onGround) {
 				lastOnGroundX = mc.player.posX;
@@ -88,17 +97,20 @@ public final class NoFall extends Hack {
 	}
 
 	private enum Mode {
-		PACKET("Packet", true, false),
-		ANTI("Anti", false, true);
+		PACKET("Packet", true, false, false),
+		ANTI("Anti", false, true, false),
+		AAC("AAC", false, false, true);
 
 		private final String name;
 		private final boolean packet;
 		private final boolean anti;
+		private final boolean aac;
 
-		private Mode(String name, boolean packet, boolean anti) {
+		private Mode(String name, boolean packet, boolean anti, boolean aac) {
 			this.name = name;
 			this.anti = anti;
 			this.packet = packet;
+			this.aac = aac;
 		}
 
 		public String toString() {

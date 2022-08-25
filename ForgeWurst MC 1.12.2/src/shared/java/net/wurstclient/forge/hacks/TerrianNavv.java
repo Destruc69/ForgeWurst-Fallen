@@ -1,7 +1,6 @@
 package net.wurstclient.forge.hacks;
 
 import net.minecraft.block.Block;
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -81,73 +80,82 @@ public final class TerrianNavv extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		if (!stop.isChecked()) {
-			try {
-				if (targetPos.size() > maxnodes.getValueF()) {
-					targetPos.clear();
+		if (!mc.player.collidedHorizontally) {
+			//I got a tantrum bcz it kept crashing and i surrounded it with a fuck ton of trys, ignore lol
+
+			//If stop is not checked we can go
+			if (!stop.isChecked()) {
+				try {
+					//If we have reachedmax nodes we will clear them.
+					if (targetPos.size() > maxnodes.getValueF()) {
+						targetPos.clear();
+					}
+					assert targetPos != null;
+					assert radiuss != null;
+					assert maxnodes != null;
+					assert positivePos != null;
+					assert negativePos != null;
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-				assert targetPos != null;
-				assert radiuss != null;
-				assert maxnodes != null;
-				assert positivePos != null;
-				assert negativePos != null;
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
 				try {
 					try {
-						assert targetPos != null;
 						try {
-							if (targetPos.size() > maxnodes.getValueF())
-								targetPos.clear();
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-						int radius = radiuss.getValueI();
-						for (int aimX = -radius; aimX < radius; aimX++) {
-							for (int aimY = -radius; aimY < radius; aimY++) {
-								for (int aimZ = -radius; aimZ < radius; aimZ++) {
-									BlockPos node = new BlockPos(mc.player.getPosition().add(aimX, aimY, aimZ).getX(), mc.player.getPosition().add(aimX, aimY, aimZ).getY(), mc.player.getPosition().add(aimX, aimY, aimZ).getZ());
-									if (mc.world.getBlockState(node).getBlock().equals(Blocks.AIR) && mc.world.getBlockState(node.add(0, 1, 0)).getBlock().equals(Blocks.AIR) && mc.world.getBlockState(node.add(0, -1, 0)).getBlock() instanceof Block && !(mc.world.getBlockState(node.add(0, -1, 0)).getBlock().equals(Blocks.AIR)) && !mc.world.getBlockState(node).getBlock().equals(Blocks.LAVA) && !mc.world.getBlockState(node).getBlock().equals(Blocks.FLOWING_LAVA) && PlayerUtils.CanSeeBlock(node)) {
-										targetPos.add(node);
-										aimX = node.getX();
-										aimY = node.getY();
-										aimZ = node.getZ();
-										positivePos.add(node);
-									} else {
-										if (PlayerUtils.CanSeeBlock(node)) {
-											negativePos.add(node);
+							assert targetPos != null;
+							int radius = radiuss.getValueI();
+							for (int aimX = -radius; aimX < radius; aimX++) {
+								for (int aimY = -radius; aimY < radius; aimY++) {
+									for (int aimZ = -radius; aimZ < radius; aimZ++) {
+										BlockPos node = new BlockPos(mc.player.getPosition().add(aimX, aimY, aimZ).getX(), mc.player.getPosition().add(aimX, aimY, aimZ).getY(), mc.player.getPosition().add(aimX, aimY, aimZ).getZ());
+										//Checking for lava, and if we can go there.
+										if (mc.world.getBlockState(node).getBlock().equals(Blocks.AIR) && mc.world.getBlockState(node.add(0, 1, 0)).getBlock().equals(Blocks.AIR) && mc.world.getBlockState(node.add(0, -1, 0)).getBlock() instanceof Block && !(mc.world.getBlockState(node.add(0, -1, 0)).getBlock().equals(Blocks.AIR)) && !mc.world.getBlockState(node).getBlock().equals(Blocks.LAVA) && !mc.world.getBlockState(node).getBlock().equals(Blocks.FLOWING_LAVA) && PlayerUtils.CanSeeBlock(node)) {
+											targetPos.add(node);
+											aimX = node.getX();
+											aimY = node.getY();
+											aimZ = node.getZ();
+											//This is a valaid block and will be renderd
+											positivePos.add(node);
+										} else {
+											if (PlayerUtils.CanSeeBlock(node)) {
+												//If its a bad pos, we will save it to show for rendering
+												negativePos.add(node);
+											}
 										}
 									}
 								}
 							}
-						}
 
-						if (mc.player.isInWater()) {
-							KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, true);
-						} else {
-							KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, false);
-						}
-
-						mc.player.setSprinting(true);
-						KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
-
-						if (TimerUtils.hasReached(1000)) {
-							TimerUtils.reset();
-							for (BlockPos pos : targetPos) {
-								assert pos != null;
-								AxisAlignedBB bb = BlockUtils.getBoundingBox(pos);
-								assert bb != null;
-								double dd = RotationUtils.getEyesPos().distanceTo(
-										bb.getCenter());
-								double posXX = pos.getX() + (0) * dd
-										- mc.player.posX;
-								double posZZ = pos.getZ() + (0) * dd
-										- mc.player.posZ;
-
-								mc.player.rotationYaw = (float) Math.toDegrees(Math.atan2(posZZ, posXX)) - 90;
+							//Basic water handling
+							if (mc.player.isInWater()) {
+								KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, true);
+							} else {
+								KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, false);
 							}
+
+							//Keep moving forward
+							mc.player.setSprinting(true);
+							KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
+							KeyBindingUtils.setPressed(mc.gameSettings.keyBindBack, false);
+
+							//Facing to the block we are going too.
+							if (mc.player.ticksExisted % 5 == 0) {
+								TimerUtils.reset();
+								for (BlockPos pos : targetPos) {
+									assert pos != null;
+									AxisAlignedBB bb = BlockUtils.getBoundingBox(pos);
+									assert bb != null;
+									double dd = RotationUtils.getEyesPos().distanceTo(
+											bb.getCenter());
+									double posXX = pos.getX() + (0) * dd
+											- mc.player.posX;
+									double posZZ = pos.getZ() + (0) * dd
+											- mc.player.posZ;
+
+									mc.player.rotationYaw = (float) Math.toDegrees(Math.atan2(posZZ, posXX)) - 90;
+								}
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -155,20 +163,23 @@ public final class TerrianNavv extends Hack {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
-				if (flymode.isChecked()) {
-					for (BlockPos blockPoss : targetPos) {
-						if (mc.player.posY < blockPoss.getY()) {
-							mc.player.motionY = 0.405;
+				try {
+					//Basic fly logic, very shit and shouldnt be used
+					if (flymode.isChecked()) {
+						for (BlockPos blockPoss : targetPos) {
+							if (mc.player.posY < blockPoss.getY()) {
+								mc.player.motionY = 0.405;
+							}
 						}
 					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
+		} else {
+			//If were collided with a block, we may be stuck so we move back until we got on track
+			KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, false);
+			KeyBindingUtils.setPressed(mc.gameSettings.keyBindBack, true);
 		}
 	}
 
@@ -191,6 +202,7 @@ public final class TerrianNavv extends Hack {
 							-TileEntityRendererDispatcher.staticPlayerY,
 							-TileEntityRendererDispatcher.staticPlayerZ);
 
+					//Rendering positive pos
 					for (BlockPos posPos : positivePos) {
 						assert posPos != null;
 						GL11.glColor4f(0, 1, 0, 0.3F);
@@ -199,6 +211,7 @@ public final class TerrianNavv extends Hack {
 						GL11.glEnd();
 					}
 
+					//Rendering negative pos
 					for (BlockPos negPos : negativePos) {
 						assert negPos != null;
 						GL11.glColor4f(1, 0, 0, 0.3F);
@@ -246,6 +259,7 @@ public final class TerrianNavv extends Hack {
 							-TileEntityRendererDispatcher.staticPlayerY,
 							-TileEntityRendererDispatcher.staticPlayerZ);
 
+					//Drawing a line to the positive block we are following
 					for (BlockPos bpos : targetPos) {
 						assert bpos != null;
 						GL11.glColor4f(0, 0, 1, 1F);
