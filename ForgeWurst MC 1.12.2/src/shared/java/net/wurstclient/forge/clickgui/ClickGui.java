@@ -11,10 +11,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.init.Items;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.Hack;
@@ -22,8 +25,6 @@ import net.wurstclient.forge.HackList;
 import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.settings.Setting;
 import net.wurstclient.forge.utils.JsonUtils;
-import org.lwjgl.LWJGLException;
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
@@ -34,13 +35,11 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 
-public final class ClickGui implements Event {
-    HackList hackList;
-    String string;
-    public static ArrayList<String> textKeys = new ArrayList<>();
+public final class ClickGui
+{
+    Window windowww;
     private final ArrayList<Window> windows = new ArrayList<>();
     private final ArrayList<Popup> popups = new ArrayList<>();
     private final Path windowsFile;
@@ -50,29 +49,39 @@ public final class ClickGui implements Event {
     private float opacity;
     private int maxHeight;
 
+    public static double xxx;
+    public static double yyy;
+
+    public static double ballX;
+    public static double ballY;
+    public static double ballVelocityY;
+    public static double ballVelocityX;
+
     private String tooltip;
 
-    public ClickGui(Path windowsFile) {
+    public ClickGui(Path windowsFile)
+    {
         this.windowsFile = windowsFile;
     }
 
-    public void init(HackList hax) {
+    public void init(HackList hax)
+    {
         LinkedHashMap<Category, Window> windowMap = new LinkedHashMap<>();
-        for (Category category : Category.values())
+        for(Category category : Category.values())
             windowMap.put(category, new Window(category.getName()));
 
-        for (Hack hack : hax.getRegistry())
-            if (hack.getCategory() != null)
+        for(Hack hack : hax.getRegistry())
+            if(hack.getCategory() != null)
                 windowMap.get(hack.getCategory()).add(new HackButton(hack));
 
         windows.addAll(windowMap.values());
 
         Window uiSettings = new Window("UI Settings");
-        for (Setting setting : hax.clickGuiHack.getSettings().values())
+        for(Setting setting : hax.clickGuiHack.getSettings().values())
             uiSettings.add(setting.getComponent());
         windows.add(uiSettings);
 
-        for (Window window : windows)
+        for(Window window : windows)
             window.setMinimized(true);
 
         windows.add(hax.radarHack.getWindow());
@@ -80,10 +89,12 @@ public final class ClickGui implements Event {
         int x = 5;
         int y = 5;
         ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
-        for (Window window : windows) {
+        for(Window window : windows)
+        {
             window.pack();
 
-            if (x + window.getWidth() + 5 > sr.getScaledWidth()) {
+            if(x + window.getWidth() + 5 > sr.getScaledWidth())
+            {
                 x = 5;
                 y += 18;
             }
@@ -94,14 +105,17 @@ public final class ClickGui implements Event {
         }
 
         JsonObject json;
-        try (BufferedReader reader = Files.newBufferedReader(windowsFile)) {
+        try(BufferedReader reader = Files.newBufferedReader(windowsFile))
+        {
             json = JsonUtils.jsonParser.parse(reader).getAsJsonObject();
 
-        } catch (NoSuchFileException e) {
+        }catch(NoSuchFileException e)
+        {
             saveWindows();
             return;
 
-        } catch (Exception e) {
+        }catch(Exception e)
+        {
             System.out.println("Failed to load " + windowsFile.getFileName());
             e.printStackTrace();
 
@@ -109,27 +123,28 @@ public final class ClickGui implements Event {
             return;
         }
 
-        for (Window window : windows) {
+        for(Window window : windows)
+        {
             JsonElement jsonWindow = json.get(window.getTitle());
-            if (jsonWindow == null || !jsonWindow.isJsonObject())
+            if(jsonWindow == null || !jsonWindow.isJsonObject())
                 continue;
 
             JsonElement jsonX = jsonWindow.getAsJsonObject().get("x");
-            if (jsonX.isJsonPrimitive() && jsonX.getAsJsonPrimitive().isNumber())
+            if(jsonX.isJsonPrimitive() && jsonX.getAsJsonPrimitive().isNumber())
                 window.setX(jsonX.getAsInt());
 
             JsonElement jsonY = jsonWindow.getAsJsonObject().get("y");
-            if (jsonY.isJsonPrimitive() && jsonY.getAsJsonPrimitive().isNumber())
+            if(jsonY.isJsonPrimitive() && jsonY.getAsJsonPrimitive().isNumber())
                 window.setY(jsonY.getAsInt());
 
             JsonElement jsonMinimized =
                     jsonWindow.getAsJsonObject().get("minimized");
-            if (jsonMinimized.isJsonPrimitive()
+            if(jsonMinimized.isJsonPrimitive()
                     && jsonMinimized.getAsJsonPrimitive().isBoolean())
                 window.setMinimized(jsonMinimized.getAsBoolean());
 
             JsonElement jsonPinned = jsonWindow.getAsJsonObject().get("pinned");
-            if (jsonPinned.isJsonPrimitive()
+            if(jsonPinned.isJsonPrimitive()
                     && jsonPinned.getAsJsonPrimitive().isBoolean())
                 window.setPinned(jsonPinned.getAsBoolean());
         }
@@ -137,11 +152,13 @@ public final class ClickGui implements Event {
         saveWindows();
     }
 
-    private void saveWindows() {
+    private void saveWindows()
+    {
         JsonObject json = new JsonObject();
 
-        for (Window window : windows) {
-            if (window.isClosable())
+        for(Window window : windows)
+        {
+            if(window.isClosable())
                 continue;
 
             JsonObject jsonWindow = new JsonObject();
@@ -152,31 +169,27 @@ public final class ClickGui implements Event {
             json.add(window.getTitle(), jsonWindow);
         }
 
-        try (BufferedWriter writer = Files.newBufferedWriter(windowsFile)) {
+        try(BufferedWriter writer = Files.newBufferedWriter(windowsFile))
+        {
             JsonUtils.prettyGson.toJson(json, writer);
 
-        } catch (IOException e) {
+        }catch(IOException e)
+        {
             System.out.println("Failed to save " + windowsFile.getFileName());
             e.printStackTrace();
         }
     }
 
-    public void handleMouseClick(int mouseX, int mouseY, int mouseButton) {
-
-        try {
-            Minecraft.getMinecraft().player.playSound(SoundEvents.UI_BUTTON_CLICK, 1, 1);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+    public void handleMouseClick(int mouseX, int mouseY, int mouseButton)
+    {
         boolean popupClicked =
                 handlePopupMouseClick(mouseX, mouseY, mouseButton);
 
-        if (!popupClicked)
+        if(!popupClicked)
             handleWindowMouseClick(mouseX, mouseY, mouseButton);
 
-        for (Popup popup : popups)
-            if (popup.getOwner().getParent().isClosing())
+        for(Popup popup : popups)
+            if(popup.getOwner().getParent().isClosing())
                 popup.close();
 
         windows.removeIf(w -> w.isClosing());
@@ -184,8 +197,10 @@ public final class ClickGui implements Event {
     }
 
     private boolean handlePopupMouseClick(int mouseX, int mouseY,
-                                          int mouseButton) {
-        for (int i = popups.size() - 1; i >= 0; i--) {
+                                          int mouseButton)
+    {
+        for(int i = popups.size() - 1; i >= 0; i--)
+        {
             Popup popup = popups.get(i);
             Component owner = popup.getOwner();
             Window parent = owner.getParent();
@@ -199,9 +214,9 @@ public final class ClickGui implements Event {
             int x2 = x1 + popup.getWidth();
             int y2 = y1 + popup.getHeight();
 
-            if (mouseX < x1 || mouseY < y1)
+            if(mouseX < x1 || mouseY < y1)
                 continue;
-            if (mouseX >= x2 || mouseY >= y2)
+            if(mouseX >= x2 || mouseY >= y2)
                 continue;
 
             int cMouseX = mouseX - x0;
@@ -216,10 +231,12 @@ public final class ClickGui implements Event {
         return false;
     }
 
-    private void handleWindowMouseClick(int mouseX, int mouseY, int mouseButton) {
-        for (int i = windows.size() - 1; i >= 0; i--) {
+    private void handleWindowMouseClick(int mouseX, int mouseY, int mouseButton)
+    {
+        for(int i = windows.size() - 1; i >= 0; i--)
+        {
             Window window = windows.get(i);
-            if (window.isInvisible())
+            if(window.isInvisible())
                 continue;
 
             int x1 = window.getX();
@@ -228,31 +245,33 @@ public final class ClickGui implements Event {
             int y2 = y1 + window.getHeight();
             int y3 = y1 + 13;
 
-            if (mouseX < x1 || mouseY < y1)
+            if(mouseX < x1 || mouseY < y1)
                 continue;
-            if (mouseX >= x2 || mouseY >= y2)
+            if(mouseX >= x2 || mouseY >= y2)
                 continue;
 
-            if (mouseY < y3)
+            if(mouseY < y3)
                 handleTitleBarMouseClick(window, mouseX, mouseY, mouseButton);
-            else if (!window.isMinimized()) {
+            else if(!window.isMinimized())
+            {
                 window.validate();
 
                 int cMouseX = mouseX - x1;
                 int cMouseY = mouseY - y3;
 
-                if (window.isScrollingEnabled() && mouseX >= x2 - 3)
+                if(window.isScrollingEnabled() && mouseX >= x2 - 3)
                     handleScrollbarMouseClick(window, cMouseX, cMouseY,
                             mouseButton);
-                else {
-                    if (window.isScrollingEnabled())
+                else
+                {
+                    if(window.isScrollingEnabled())
                         cMouseY -= window.getScrollOffset();
 
                     handleComponentMouseClick(window, cMouseX, cMouseY,
                             mouseButton);
                 }
 
-            } else
+            }else
                 continue;
 
             windows.remove(i);
@@ -262,75 +281,87 @@ public final class ClickGui implements Event {
     }
 
     private void handleTitleBarMouseClick(Window window, int mouseX, int mouseY,
-                                          int mouseButton) {
-        if (mouseButton != 0)
+                                          int mouseButton)
+    {
+        if(mouseButton != 0)
             return;
 
-        if (mouseY < window.getY() + 2 || mouseY >= window.getY() + 11) {
+        if(mouseY < window.getY() + 2 || mouseY >= window.getY() + 11)
+        {
             window.startDragging(mouseX, mouseY);
             return;
         }
 
         int x3 = window.getX() + window.getWidth();
 
-        if (window.isClosable()) {
+        if(window.isClosable())
+        {
             x3 -= 11;
-            if (mouseX >= x3 && mouseX < x3 + 9) {
+            if(mouseX >= x3 && mouseX < x3 + 9)
+            {
                 window.close();
                 return;
             }
         }
 
-        if (window.isPinnable()) {
+        if(window.isPinnable())
+        {
             x3 -= 11;
-            if (mouseX >= x3 && mouseX < x3 + 9) {
+            if(mouseX >= x3 && mouseX < x3 + 9)
+            {
                 window.setPinned(!window.isPinned());
                 saveWindows();
                 return;
             }
         }
 
-        if (window.isMinimizable()) {
+        if(window.isMinimizable())
+        {
             x3 -= 11;
-            if (mouseX >= x3 && mouseX < x3 + 9) {
+            if(mouseX >= x3 && mouseX < x3 + 9)
+            {
                 window.setMinimized(!window.isMinimized());
                 saveWindows();
                 return;
             }
         }
+
         window.startDragging(mouseX, mouseY);
     }
 
     private void handleScrollbarMouseClick(Window window, int mouseX,
-                                           int mouseY, int mouseButton) {
-        if (mouseButton != 0)
+                                           int mouseY, int mouseButton)
+    {
+        if(mouseButton != 0)
             return;
 
-        if (mouseX >= window.getWidth() - 1)
+        if(mouseX >= window.getWidth() - 1)
             return;
 
         double outerHeight = window.getHeight() - 13;
         double innerHeight = window.getInnerHeight();
         double maxScrollbarHeight = outerHeight - 2;
         int scrollbarY =
-                (int) (outerHeight * (-window.getScrollOffset() / innerHeight) + 1);
+                (int)(outerHeight * (-window.getScrollOffset() / innerHeight) + 1);
         int scrollbarHeight =
-                (int) (maxScrollbarHeight * outerHeight / innerHeight);
+                (int)(maxScrollbarHeight * outerHeight / innerHeight);
 
-        if (mouseY < scrollbarY || mouseY >= scrollbarY + scrollbarHeight)
+        if(mouseY < scrollbarY || mouseY >= scrollbarY + scrollbarHeight)
             return;
 
         window.startDraggingScrollbar(window.getY() + 13 + mouseY);
     }
 
     private void handleComponentMouseClick(Window window, int mouseX,
-                                           int mouseY, int mouseButton) {
-        for (int i2 = window.countChildren() - 1; i2 >= 0; i2--) {
+                                           int mouseY, int mouseButton)
+    {
+        for(int i2 = window.countChildren() - 1; i2 >= 0; i2--)
+        {
             Component c = window.getChild(i2);
 
-            if (mouseX < c.getX() || mouseY < c.getY())
+            if(mouseX < c.getX() || mouseY < c.getY())
                 continue;
-            if (mouseX >= c.getX() + c.getWidth()
+            if(mouseX >= c.getX() + c.getWidth()
                     || mouseY >= c.getY() + c.getHeight())
                 continue;
 
@@ -339,141 +370,143 @@ public final class ClickGui implements Event {
         }
     }
 
+    public void render(int mouseX, int mouseY, float partialTicks)
+    {
+        GL11.glDisable(GL11.GL_CULL_FACE);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glShadeModel(GL11.GL_SMOOTH);
+        GL11.glLineWidth(1);
 
-    public void render(int mouseX, int mouseY, float partialTicks) throws LWJGLException {
-        try {
-            Minecraft mc = Minecraft.getMinecraft();
+        Minecraft mc = Minecraft.getMinecraft();
 
-            ItemStack itemStack = new ItemStack(Items.SLIME_BALL);
-            Minecraft.getMinecraft().getRenderItem().renderItemIntoGUI(itemStack, mouseX, mouseY);
+        // scrolling
+        int dWheel = Mouse.getDWheel();
+        if(dWheel != 0)
+            for(int i = windows.size() - 1; i >= 0; i--)
+            {
+                Window window = windows.get(i);
 
-            GL11.glDisable(GL11.GL_CULL_FACE);
-            GL11.glDisable(GL11.GL_TEXTURE_2D);
-            GL11.glLineWidth(4);
-
-            // scrolling
-            int dWheel = Mouse.getDWheel();
-            if (dWheel != 0)
-                for (int i = windows.size() - 1; i >= 0; i--) {
-                    Window window = windows.get(i);
-
-                    if (!window.isScrollingEnabled() || window.isMinimized()
-                            || window.isInvisible())
-                        continue;
-
-                    if (mouseX < window.getX() || mouseY < window.getY() + 13)
-                        continue;
-                    if (mouseX >= window.getX() + window.getWidth()
-                            || mouseY >= window.getY() + window.getHeight())
-                        continue;
-
-                    int scroll = window.getScrollOffset() + dWheel / 16;
-                    scroll = Math.min(scroll, 0);
-                    scroll = Math.max(scroll,
-                            -window.getInnerHeight() + window.getHeight() - 13);
-                    window.setScrollOffset(scroll);
-                    break;
-                }
-
-            tooltip = null;
-            for (Window window : windows) {
-                if (window.isInvisible())
+                if(!window.isScrollingEnabled() || window.isMinimized()
+                        || window.isInvisible())
                     continue;
 
-                // dragging
-                if (window.isDragging())
-                    if (Mouse.isButtonDown(0))
-                        window.dragTo(mouseX, mouseY);
-                    else {
-                        window.stopDragging();
-                        saveWindows();
-                    }
+                if(mouseX < window.getX() || mouseY < window.getY() + 13)
+                    continue;
+                if(mouseX >= window.getX() + window.getWidth()
+                        || mouseY >= window.getY() + window.getHeight())
+                    continue;
 
-                // scrollbar dragging
-                if (window.isDraggingScrollbar())
-                    if (Mouse.isButtonDown(0))
-                        window.dragScrollbarTo(mouseY);
-                    else
-                        window.stopDraggingScrollbar();
-
-                renderWindow(window, mouseX, mouseY, partialTicks);
+                int scroll = window.getScrollOffset() + dWheel / 16;
+                scroll = Math.min(scroll, 0);
+                scroll = Math.max(scroll,
+                        -window.getInnerHeight() + window.getHeight() - 13);
+                window.setScrollOffset(scroll);
+                break;
             }
 
-            GL11.glDisable(GL11.GL_TEXTURE_2D);
-            for (Popup popup : popups) {
-                Component owner = popup.getOwner();
-                Window parent = owner.getParent();
+        tooltip = null;
+        for(Window window : windows)
+        {
+            if(window.isInvisible())
+                continue;
 
-                int x1 = parent.getX() + owner.getX();
-                int y1 =
-                        parent.getY() + 13 + parent.getScrollOffset() + owner.getY();
-
-                GL11.glPushMatrix();
-                GL11.glTranslated(x1, y1, 0);
-
-                int cMouseX = mouseX - x1;
-                int cMouseY = mouseY - y1;
-                popup.render(cMouseX, cMouseY);
-
-                GL11.glPopMatrix();
-            }
-
-            // tooltip
-            if (tooltip != null) {
-                String[] lines = tooltip.split("\n");
-                FontRenderer fr = WMinecraft.getFontRenderer();
-
-                int tw = 0;
-                int th = lines.length * fr.FONT_HEIGHT;
-                for (String line : lines) {
-                    int lw = fr.getStringWidth(line);
-                    if (lw > tw)
-                        tw = lw;
+            // dragging
+            if(window.isDragging())
+                if(Mouse.isButtonDown(0))
+                    window.dragTo(mouseX, mouseY);
+                else
+                {
+                    window.stopDragging();
+                    saveWindows();
                 }
-                int sw = mc.currentScreen.width;
-                int sh = mc.currentScreen.height;
 
-                int xt1 = mouseX + tw + 11 <= sw ? mouseX + 8 : mouseX - tw - 8;
-                int xt2 = xt1 + tw + 3;
-                int yt1 = mouseY + th - 2 <= sh ? mouseY - 4 : mouseY - th - 4;
-                int yt2 = yt1 + th + 2;
+            // scrollbar dragging
+            if(window.isDraggingScrollbar())
+                if(Mouse.isButtonDown(0))
+                    window.dragScrollbarTo(mouseY);
+                else
+                    window.stopDraggingScrollbar();
 
-                // background
-                GL11.glDisable(GL11.GL_TEXTURE_2D);
-                GL11.glColor4f(bgColor[0], bgColor[1], bgColor[2], 0.75F);
-                GL11.glBegin(GL11.GL_QUADS);
-                GL11.glVertex2i(xt1, yt1);
-                GL11.glVertex2i(xt1, yt2);
-                GL11.glVertex2i(xt2, yt2);
-                GL11.glVertex2i(xt2, yt1);
-                GL11.glEnd();
-
-                GL11.glDisable(GL11.GL_TEXTURE_2D);
-                GL11.glColor4f(acColor[0], acColor[1], acColor[2], 0.75f);
-                GL11.glBegin(GL11.GL_QUADS);
-                GL11.glVertex2i(xt1, yt1);
-                GL11.glVertex2i(xt1, yt2);
-                GL11.glVertex2i(xt2, yt2);
-                GL11.glVertex2i(xt2, yt1);
-                GL11.glEnd();
-
-                // text
-                GL11.glEnable(GL11.GL_TEXTURE_2D);
-                for (int i = 0; i < lines.length; i++) {
-                    fr.drawStringWithShadow(lines[i], xt1 + 2, yt1 + 2 + i * fr.FONT_HEIGHT,
-                            0xffffff);
-                }
-            }
-
-            GL11.glEnable(GL11.GL_CULL_FACE);
-            GL11.glEnable(GL11.GL_TEXTURE_2D);
-            GL11.glDisable(GL11.GL_BLEND);
-        } catch (Exception e) {
-            e.printStackTrace();
+            renderWindow(window, mouseX, mouseY, partialTicks);
         }
+
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        for(Popup popup : popups)
+        {
+            Component owner = popup.getOwner();
+            Window parent = owner.getParent();
+
+            int x1 = parent.getX() + owner.getX();
+            int y1 =
+                    parent.getY() + 13 + parent.getScrollOffset() + owner.getY();
+
+            GL11.glPushMatrix();
+            GL11.glTranslated(x1, y1, 0);
+
+            int cMouseX = mouseX - x1;
+            int cMouseY = mouseY - y1;
+            popup.render(cMouseX, cMouseY);
+
+            GL11.glPopMatrix();
+        }
+
+        // tooltip
+        if(tooltip != null)
+        {
+            String[] lines = tooltip.split("\n");
+            FontRenderer fr = WMinecraft.getFontRenderer();
+
+            int tw = 0;
+            int th = lines.length * fr.FONT_HEIGHT;
+            for(String line : lines)
+            {
+                int lw = fr.getStringWidth(line);
+                if(lw > tw)
+                    tw = lw;
+            }
+            int sw = mc.currentScreen.width;
+            int sh = mc.currentScreen.height;
+
+            int xt1 = mouseX + tw + 11 <= sw ? mouseX + 8 : mouseX - tw - 8;
+            int xt2 = xt1 + tw + 3;
+            int yt1 = mouseY + th - 2 <= sh ? mouseY - 4 : mouseY - th - 4;
+            int yt2 = yt1 + th + 2;
+
+            // background
+            GL11.glDisable(GL11.GL_TEXTURE_2D);
+            GL11.glColor4f(bgColor[0], bgColor[1], bgColor[2], 0.75F);
+            GL11.glBegin(GL11.GL_QUADS);
+            GL11.glVertex2i(xt1, yt1);
+            GL11.glVertex2i(xt1, yt2);
+            GL11.glVertex2i(xt2, yt2);
+            GL11.glVertex2i(xt2, yt1);
+            GL11.glEnd();
+
+            // outline
+            GL11.glColor4f(acColor[0], acColor[1], acColor[2], 0.5F);
+            GL11.glBegin(GL11.GL_LINE_LOOP);
+            GL11.glVertex2i(xt1, yt1);
+            GL11.glVertex2i(xt1, yt2);
+            GL11.glVertex2i(xt2, yt2);
+            GL11.glVertex2i(xt2, yt1);
+            GL11.glEnd();
+
+            // text
+            GL11.glEnable(GL11.GL_TEXTURE_2D);
+            for(int i = 0; i < lines.length; i++)
+                fr.drawString(lines[i], xt1 + 2, yt1 + 2 + i * fr.FONT_HEIGHT,
+                        0xffffff);
+        }
+
+        GL11.glEnable(GL11.GL_CULL_FACE);
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glDisable(GL11.GL_BLEND);
     }
 
-    public void renderPinnedWindows(float partialTicks) {
+    public void renderPinnedWindows(float partialTicks)
+    {
         GL11.glDisable(GL11.GL_CULL_FACE);
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_BLEND);
@@ -501,24 +534,31 @@ public final class ClickGui implements Event {
     }
 
     private void renderWindow(Window window, int mouseX, int mouseY,
-                              float partialTicks) {
+                              float partialTicks)
+    {
+        windowww = window;
         int x1 = window.getX();
         int y1 = window.getY();
         int x2 = x1 + window.getWidth();
         int y2 = y1 + window.getHeight();
         int y3 = y1 + 13;
 
-        if (mouseX >= x1 && mouseY >= y1 && mouseX < x2 && mouseY < y2)
+        if(window.isMinimized())
+            y2 = y3;
+
+        if(mouseX >= x1 && mouseY >= y1 && mouseX < x2 && mouseY < y2)
             tooltip = null;
 
         GL11.glDisable(GL11.GL_TEXTURE_2D);
 
-        if (!window.isMinimized()) {
+        if(!window.isMinimized())
+        {
             window.setMaxHeight(maxHeight);
             window.validate();
 
             // scrollbar
-            if (window.isScrollingEnabled()) {
+            if(window.isScrollingEnabled())
+            {
                 int xs1 = x2 - 3;
                 int xs2 = xs1 + 2;
                 int xs3 = x2;
@@ -533,27 +573,11 @@ public final class ClickGui implements Event {
 
                 int ys1 = y3;
                 int ys2 = y2;
-                int ys3 = ys1 + (int) scrollbarY;
-                int ys4 = ys3 + (int) scrollbarHeight;
+                int ys3 = ys1 + (int)scrollbarY;
+                int ys4 = ys3 + (int)scrollbarHeight;
 
                 // window background
                 GL11.glColor4f(bgColor[0], bgColor[1], bgColor[2], opacity);
-                GL11.glBegin(GL11.GL_QUADS);
-                GL11.glVertex2i(xs2, ys1);
-                GL11.glVertex2i(xs2, ys2);
-                GL11.glVertex2i(xs3, ys2);
-                GL11.glVertex2i(xs3, ys1);
-                GL11.glVertex2i(xs1, ys1);
-                GL11.glVertex2i(xs1, ys3);
-                GL11.glVertex2i(xs2, ys3);
-                GL11.glVertex2i(xs2, ys1);
-                GL11.glVertex2i(xs1, ys4);
-                GL11.glVertex2i(xs1, ys2);
-                GL11.glVertex2i(xs2, ys2);
-                GL11.glVertex2i(xs2, ys4);
-                GL11.glEnd();
-
-                GL11.glColor4f(acColor[0], acColor[1], acColor[2], 0.75f);
                 GL11.glBegin(GL11.GL_QUADS);
                 GL11.glVertex2i(xs2, ys1);
                 GL11.glVertex2i(xs2, ys2);
@@ -581,6 +605,15 @@ public final class ClickGui implements Event {
                 GL11.glVertex2i(xs2, ys4);
                 GL11.glVertex2i(xs2, ys3);
                 GL11.glEnd();
+
+                // outline
+                GL11.glColor4f(acColor[0], acColor[1], acColor[2], 0.5F);
+                GL11.glBegin(GL11.GL_LINE_LOOP);
+                GL11.glVertex2i(xs1, ys3);
+                GL11.glVertex2i(xs1, ys4);
+                GL11.glVertex2i(xs2, ys4);
+                GL11.glVertex2i(xs2, ys3);
+                GL11.glEnd();
             }
 
             int x3 = x1 + 2;
@@ -602,38 +635,28 @@ public final class ClickGui implements Event {
             GL11.glVertex2i(x4, y3);
             GL11.glEnd();
 
-            GL11.glColor4f(acColor[0], acColor[1], acColor[2], 0.75f);
-            GL11.glBegin(GL11.GL_QUADS);
-            GL11.glVertex2i(x1, y3);
-            GL11.glVertex2i(x1, y2);
-            GL11.glVertex2i(x3, y2);
-            GL11.glVertex2i(x3, y3);
-            GL11.glVertex2i(x5, y3);
-            GL11.glVertex2i(x5, y2);
-            GL11.glVertex2i(x4, y2);
-            GL11.glVertex2i(x4, y3);
-            GL11.glEnd();
-
-            if (window.isScrollingEnabled()) {
+            if(window.isScrollingEnabled())
+            {
                 ScaledResolution sr =
                         new ScaledResolution(Minecraft.getMinecraft());
                 int sf = sr.getScaleFactor();
                 GL11.glScissor(x1 * sf,
-                        (int) ((sr.getScaledHeight_double() - y2) * sf),
+                        (int)((sr.getScaledHeight_double() - y2) * sf),
                         window.getWidth() * sf, (y2 - y3) * sf);
                 GL11.glEnable(GL11.GL_SCISSOR_TEST);
             }
             GL11.glPushMatrix();
             GL11.glTranslated(x1, y4, 0);
 
-            GL11.glColor4f(bgColor[0], bgColor[1], bgColor[2], 1f);
-            GL11.glBegin(GL11.GL_LINES);
+            GL11.glColor4f(bgColor[0], bgColor[1], bgColor[2], opacity);
+            GL11.glBegin(GL11.GL_QUADS);
 
             // window background
             // between children
             int xc1 = 2;
             int xc2 = x5 - x1;
-            for (int i = 0; i < window.countChildren(); i++) {
+            for(int i = 0; i < window.countChildren(); i++)
+            {
                 int yc1 = window.getChild(i).getY();
                 int yc2 = yc1 - 2;
                 GL11.glVertex2i(xc1, yc2);
@@ -645,41 +668,50 @@ public final class ClickGui implements Event {
             // window background
             // bottom
             int yc1;
-            if (window.countChildren() == 0)
+            if(window.countChildren() == 0)
                 yc1 = 0;
-            else {
+            else
+            {
                 Component lastChild =
                         window.getChild(window.countChildren() - 1);
                 yc1 = lastChild.getY() + lastChild.getHeight();
             }
             int yc2 = yc1 + 2;
-            GL11.glColor4f(bgColor[0], bgColor[1], bgColor[2], opacity);
-            GL11.glBegin(GL11.GL_QUADS);
             GL11.glVertex2i(xc1, yc2);
             GL11.glVertex2i(xc1, yc1);
             GL11.glVertex2i(xc2, yc1);
             GL11.glVertex2i(xc2, yc2);
-            GL11.glEnd();
 
-            GL11.glColor4f(acColor[0], acColor[1], acColor[2], opacity);
-            GL11.glBegin(GL11.GL_QUADS);
-            GL11.glVertex2i(xc1, yc2);
-            GL11.glVertex2i(xc1, yc1);
-            GL11.glVertex2i(xc2, yc1);
-            GL11.glVertex2i(xc2, yc2);
             GL11.glEnd();
 
             // render children
             int cMouseX = mouseX - x1;
             int cMouseY = mouseY - y4;
-            for (int i = 0; i < window.countChildren(); i++)
+            for(int i = 0; i < window.countChildren(); i++)
                 window.getChild(i).render(cMouseX, cMouseY, partialTicks);
 
             GL11.glPopMatrix();
-            if (window.isScrollingEnabled())
+            if(window.isScrollingEnabled())
                 GL11.glDisable(GL11.GL_SCISSOR_TEST);
         }
 
+        // window outline
+        GL11.glColor4f(acColor[0], acColor[1], acColor[2], 0.5F);
+        GL11.glBegin(GL11.GL_LINE_LOOP);
+        GL11.glVertex2i(x1, y1);
+        GL11.glVertex2i(x1, y2);
+        GL11.glVertex2i(x2, y2);
+        GL11.glVertex2i(x2, y1);
+        GL11.glEnd();
+
+        if(!window.isMinimized())
+        {
+            // title bar outline
+            GL11.glBegin(GL11.GL_LINE_LOOP);
+            GL11.glVertex2i(x1, y3);
+            GL11.glVertex2i(x2, y3);
+            GL11.glEnd();
+        }
 
         // title bar buttons
         int x3 = x2;
@@ -687,21 +719,24 @@ public final class ClickGui implements Event {
         int y5 = y3 - 2;
         boolean hoveringY = mouseY >= y4 && mouseY < y5;
 
-        if (window.isClosable()) {
+        if(window.isClosable())
+        {
             x3 -= 11;
             int x4 = x3 + 9;
             boolean hovering = hoveringY && mouseX >= x3 && mouseX < x4;
             renderCloseButton(x3, y4, x4, y5, hovering);
         }
 
-        if (window.isPinnable()) {
+        if(window.isPinnable())
+        {
             x3 -= 11;
             int x4 = x3 + 9;
             boolean hovering = hoveringY && mouseX >= x3 && mouseX < x4;
             renderPinButton(x3, y4, x4, y5, hovering, window.isPinned());
         }
 
-        if (window.isMinimizable()) {
+        if(window.isMinimizable())
+        {
             x3 -= 11;
             int x4 = x3 + 9;
             boolean hovering = hoveringY && mouseX >= x3 && mouseX < x4;
@@ -709,18 +744,22 @@ public final class ClickGui implements Event {
                     window.isMinimized());
         }
 
+        // title bar background
+        // above & below buttons
+        GL11.glColor4f(acColor[0], acColor[1], acColor[2], opacity);
+        GL11.glBegin(GL11.GL_QUADS);
+        GL11.glVertex2i(x3, y1);
+        GL11.glVertex2i(x3, y4);
+        GL11.glVertex2i(x2, y4);
+        GL11.glVertex2i(x2, y1);
+        GL11.glVertex2i(x3, y5);
+        GL11.glVertex2i(x3, y3);
+        GL11.glVertex2i(x2, y3);
+        GL11.glVertex2i(x2, y5);
+        GL11.glEnd();
 
         // title bar background
         // behind title
-        GL11.glColor4f(acColor[0], acColor[1], acColor[2], 0.75f);
-        GL11.glBegin(GL11.GL_LINE_LOOP);
-        GL11.glVertex2i(x1, y1);
-        GL11.glVertex2i(x1, y3);
-        GL11.glVertex2i(x3, y3);
-        GL11.glVertex2i(x3, y1);
-        GL11.glEnd();
-
-        GL11.glColor4f(acColor[0], acColor[1], acColor[2], 0.75f);
         GL11.glBegin(GL11.GL_QUADS);
         GL11.glVertex2i(x1, y1);
         GL11.glVertex2i(x1, y3);
@@ -734,16 +773,17 @@ public final class ClickGui implements Event {
         FontRenderer fontRenderer = WMinecraft.getFontRenderer();
         String title =
                 fontRenderer.trimStringToWidth(window.getTitle(), x3 - x1);
-        fontRenderer.drawString(title, x1 + 2, y1 + 3, 0xffffff);
+        fontRenderer.drawString(title, x1 + 2, y1 + 3, 0xf0f0f0);
     }
 
-
     private void renderTitleBarButton(int x1, int y1, int x2, int y2,
-                                      boolean hovering) {
+                                      boolean hovering)
+    {
         int x3 = x2 + 2;
 
         // button background
-        GL11.glColor4f(acColor[0], acColor[1], acColor[2], 0.75f);
+        GL11.glColor4f(bgColor[0], bgColor[1], bgColor[2],
+                hovering ? opacity * 1.5F : opacity);
         GL11.glBegin(GL11.GL_QUADS);
         GL11.glVertex2i(x1, y1);
         GL11.glVertex2i(x1, y2);
@@ -751,18 +791,28 @@ public final class ClickGui implements Event {
         GL11.glVertex2i(x2, y1);
         GL11.glEnd();
 
-        GL11.glColor4f(acColor[0], acColor[1], acColor[2], 0.75f);
+        // background between buttons
+        GL11.glColor4f(acColor[0], acColor[1], acColor[2], opacity);
         GL11.glBegin(GL11.GL_QUADS);
+        GL11.glVertex2i(x2, y1);
+        GL11.glVertex2i(x2, y2);
+        GL11.glVertex2i(x3, y2);
+        GL11.glVertex2i(x3, y1);
+        GL11.glEnd();
+
+        // button outline
+        GL11.glColor4f(acColor[0], acColor[1], acColor[2], 0.5F);
+        GL11.glBegin(GL11.GL_LINE_LOOP);
         GL11.glVertex2i(x1, y1);
         GL11.glVertex2i(x1, y2);
         GL11.glVertex2i(x2, y2);
         GL11.glVertex2i(x2, y1);
-
         GL11.glEnd();
     }
 
     private void renderMinimizeButton(int x1, int y1, int x2, int y2,
-                                      boolean hovering, boolean minimized) {
+                                      boolean hovering, boolean minimized)
+    {
         renderTitleBarButton(x1, y1, x2, y2, hovering);
 
         double xa1 = x1 + 1;
@@ -771,12 +821,14 @@ public final class ClickGui implements Event {
         double ya1;
         double ya2;
 
-        if (minimized) {
+        if(minimized)
+        {
             ya1 = y1 + 3;
             ya2 = y2 - 2.5;
             GL11.glColor4f(0, hovering ? 1 : 0.85F, 0, 1);
 
-        } else {
+        }else
+        {
             ya1 = y2 - 3;
             ya2 = y1 + 2.5;
             GL11.glColor4f(hovering ? 1 : 0.85F, 0, 0, 1);
@@ -791,7 +843,7 @@ public final class ClickGui implements Event {
 
         // outline
         GL11.glColor4f(0.0625F, 0.0625F, 0.0625F, 0.5F);
-        GL11.glBegin(GL11.GL_QUADS);
+        GL11.glBegin(GL11.GL_LINE_LOOP);
         GL11.glVertex2d(xa1, ya1);
         GL11.glVertex2d(xa3, ya1);
         GL11.glVertex2d(xa2, ya2);
@@ -799,11 +851,13 @@ public final class ClickGui implements Event {
     }
 
     private void renderPinButton(int x1, int y1, int x2, int y2,
-                                 boolean hovering, boolean pinned) {
+                                 boolean hovering, boolean pinned)
+    {
         renderTitleBarButton(x1, y1, x2, y2, hovering);
         float h = hovering ? 1 : 0.85F;
 
-        if (pinned) {
+        if(pinned)
+        {
             double xk1 = x1 + 2;
             double xk2 = x2 - 2;
             double xk3 = x1 + 1;
@@ -841,7 +895,7 @@ public final class ClickGui implements Event {
 
             // outlines
             GL11.glColor4f(0.0625F, 0.0625F, 0.0625F, 0.5F);
-            GL11.glBegin(GL11.GL_QUADS);
+            GL11.glBegin(GL11.GL_LINE_LOOP);
             GL11.glVertex2d(xk1, yk1);
             GL11.glVertex2d(xk2, yk1);
             GL11.glVertex2d(xk2, yk2);
@@ -860,7 +914,8 @@ public final class ClickGui implements Event {
             GL11.glVertex2d(xn1, yn2);
             GL11.glEnd();
 
-        } else {
+        }else
+        {
             double xk1 = x2 - 3.5;
             double xk2 = x2 - 0.5;
             double xk3 = x2 - 3;
@@ -906,7 +961,7 @@ public final class ClickGui implements Event {
 
             // outlines
             GL11.glColor4f(0.0625F, 0.0625F, 0.0625F, 0.5F);
-            GL11.glBegin(GL11.GL_QUADS);
+            GL11.glBegin(GL11.GL_LINE_LOOP);
             GL11.glVertex2d(xk1, yk1);
             GL11.glVertex2d(xk2, yk2);
             GL11.glVertex2d(xk3, yk3);
@@ -927,7 +982,8 @@ public final class ClickGui implements Event {
     }
 
     private void renderCloseButton(int x1, int y1, int x2, int y2,
-                                   boolean hovering) {
+                                   boolean hovering)
+    {
         renderTitleBarButton(x1, y1, x2, y2, hovering);
 
         double xc1 = x1 + 2;
@@ -964,7 +1020,7 @@ public final class ClickGui implements Event {
 
         // outline
         GL11.glColor4f(0.0625F, 0.0625F, 0.0625F, 0.5F);
-        GL11.glBegin(GL11.GL_QUADS);
+        GL11.glBegin(GL11.GL_LINE_LOOP);
         GL11.glVertex2d(xc1, yc1);
         GL11.glVertex2d(xc2, yc2);
         GL11.glVertex2d(xc6, yc5);

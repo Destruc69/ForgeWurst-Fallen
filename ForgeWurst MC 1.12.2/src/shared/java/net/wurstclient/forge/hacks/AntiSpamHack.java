@@ -58,8 +58,6 @@ public final class AntiSpamHack extends Hack
 			GuiUtilRenderComponents.splitText(event.getComponent(),
 				maxTextLength, WMinecraft.getFontRenderer(), false, false);
 
-		mc.player.connection.sendPacket(new CPacketPlayer.Rotation());
-		
 		int spamCounter = 1;
 		int matchingLines = 0;
 		

@@ -55,12 +55,18 @@ import static java.lang.Math.sin;
 
 public final class Flight extends Hack {
 
+	private final CheckboxSetting hypixelsafe =
+			new CheckboxSetting("HypixelSafe", "",
+					false);
 
 	private final EnumSetting<Mode> mode =
 			new EnumSetting<>("Mode", Mode.values(), Mode.AAC);
 
 	private final SliderSetting speed =
 			new SliderSetting("Speed", "How fast we go for !specific modes!", 0.1, 0.05, 20, 0.05, SliderSetting.ValueDisplay.DECIMAL);
+
+	public static double startY;
+	public static double startSpartanY;
 
 	private enum Mode {
 		AAC("AAC", true, false, false, false, false, false, false),
@@ -99,15 +105,21 @@ public final class Flight extends Hack {
 	public Flight() {
 		super("Flight", "I believe i can fly.");
 		setCategory(Category.MOVEMENT);
+		addSetting(hypixelsafe);
 		addSetting(mode);
 		addSetting(speed);
 	}
 
 	@Override
 	protected void onEnable() {
-		MinecraftForge.EVENT_BUS.register(this);
-		if (mode.getSelected().aac) {
-			mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, 1.7976931348623157E+308, mc.player.posZ, true));
+		try {
+			MinecraftForge.EVENT_BUS.register(this);
+			startY = mc.player.posY;
+			if (mode.getSelected().aac) {
+				mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, 1.7976931348623157E+308, mc.player.posZ, true));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -145,21 +157,44 @@ public final class Flight extends Hack {
 			mc.player.motionY = 0;
 		}
 		if (mode.getSelected().hypixel) {
-			if (mc.player.ticksExisted % 2 == 0) {
-				mc.player.setPosition(mc.player.posX, mc.player.posY + 1.0E-5, mc.player.posZ);
-			} else {
-				mc.player.setVelocity(0, 0, 0);
+			if (hypixelsafe.isChecked()) {
+				mc.player.setPosition(mc.player.posX, startY, mc.player.posZ);
+				KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, false);
+				KeyBindingUtils.setPressed(mc.gameSettings.keyBindSneak, false);
 			}
+			mc.player.onGround = true;
+			mc.player.isAirBorne = false;
+			mc.player.fallDistance = 0;
 			mc.player.stepHeight = 0;
-			KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, false);
+			mc.player.motionY = 0;
+			mc.player.collidedVertically = true;
+			mc.player.collidedHorizontally = false;
+			mc.player.setVelocity(mc.player.motionX, 0, mc.player.motionZ);
 		}
 		if (mode.getSelected().aac) {
 			mc.player.motionY = 0.003;
 		}
 		if (mode.getSelected().spartan) {
-			mc.player.motionY = 0.264;
-			if (mc.player.ticksExisted % 8 == 0) {
-				mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 10, mc.player.posZ, true));
+			if (!mc.gameSettings.keyBindSneak.isKeyDown()) {
+				if (mc.player.posY == Math.round(mc.player.posY)) {
+					mc.player.jump();
+					startSpartanY = mc.player.posY;
+				}
+				if (!mc.gameSettings.keyBindJump.isKeyDown()) {
+					if (mc.player.posY <= startSpartanY) {
+						mc.player.jump();
+					}
+				} else {
+					startSpartanY = mc.player.posY;
+				}
+				mc.player.onGround = true;
+				mc.player.isAirBorne = false;
+				mc.player.fallDistance = 0;
+				mc.player.stepHeight = 0;
+				mc.player.collidedVertically = true;
+				mc.player.collidedHorizontally = false;
+			} else {
+				startSpartanY = mc.player.posY;
 			}
 		}
 		if (mode.getSelected().flagfly) {
@@ -192,12 +227,14 @@ public final class Flight extends Hack {
 						mc.player.setPosition(mc.player.posX + -sin(yaw) * dist, mc.player.posY, mc.player.posZ + cos(yaw) * dist);
 						mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY, mc.player.posZ, false));
 						mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, 1.7976931348623157E+308, mc.player.posZ, true));
+					} else if (event.getPacket() instanceof CPacketPlayer) {
+						event.setCanceled(true);
 					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			if (mode.getSelected().basic || mode.getSelected().hypixel) {
+			if (mode.getSelected().basic || mode.getSelected().hypixel || mode.getSelected().spartan) {
 				try {
 					assert event != null;
 					if (event.getPacket() instanceof CPacketPlayer) {
@@ -215,21 +252,27 @@ public final class Flight extends Hack {
 
 	@SubscribeEvent
 	public void onPacketOut(WPacketOutputEvent event) {
-		assert event != null;
-		assert event.getPacket() != null;
 		try {
-			if (mode.getSelected().aac) {
-				SPacketPlayerPosLook sPacketPlayerPosLook = (SPacketPlayerPosLook) event.getPacket();
-				assert sPacketPlayerPosLook != null;
-				if (event.getPacket() instanceof SPacketPlayerPosLook) {
-					event.setCanceled(true);
-					mc.player.connection.sendPacket(new CPacketPlayer.PositionRotation(mc.player.posX, mc.player.posY, mc.player.posZ, sPacketPlayerPosLook.getYaw(), sPacketPlayerPosLook.getPitch(), false));
-					double dist = 0.14;
-					double yaw = mc.player.rotationYaw;
-					mc.player.setPosition(mc.player.posX + -sin(yaw) * dist, mc.player.posY, mc.player.posZ + cos(yaw) * dist);
-					mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY, mc.player.posZ, false));
-					mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, 1.7976931348623157E+308, mc.player.posZ, true));
+			assert event != null;
+			assert event.getPacket() != null;
+			try {
+				if (mode.getSelected().aac) {
+					SPacketPlayerPosLook sPacketPlayerPosLook = (SPacketPlayerPosLook) event.getPacket();
+					assert sPacketPlayerPosLook != null;
+					if (event.getPacket() instanceof SPacketPlayerPosLook) {
+						event.setCanceled(true);
+						mc.player.connection.sendPacket(new CPacketPlayer.PositionRotation(mc.player.posX, mc.player.posY, mc.player.posZ, sPacketPlayerPosLook.getYaw(), sPacketPlayerPosLook.getPitch(), false));
+						double dist = 0.14;
+						double yaw = mc.player.rotationYaw;
+						mc.player.setPosition(mc.player.posX + -sin(yaw) * dist, mc.player.posY, mc.player.posZ + cos(yaw) * dist);
+						mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY, mc.player.posZ, false));
+						mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, 1.7976931348623157E+308, mc.player.posZ, true));
+					} else if (event.getPacket() instanceof CPacketPlayer) {
+						event.setCanceled(true);
+					}
 				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

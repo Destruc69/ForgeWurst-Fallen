@@ -7,36 +7,40 @@
  */
 package net.wurstclient.forge.hacks;
 
-import net.minecraft.network.play.client.CPacketPlayer;
-import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.wurstclient.fmlevents.WPacketInputEvent;
-import net.wurstclient.fmlevents.WPacketOutputEvent;
+import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
-import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.utils.RotationUtils;
+import net.wurstclient.forge.settings.EnumSetting;
+import net.wurstclient.forge.utils.KeyBindingUtils;
 
-public final class Rotations extends Hack {
-
-	public Rotations() {
-		super("Rotations", "Renders rotations.");
+public final class AntiLag extends Hack {
+	public AntiLag() {
+		super("AntiLag", "Optimizes for best performance.");
 		setCategory(Category.RENDER);
 	}
 
 	@Override
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
+
+		mc.gameSettings.chatOpacity = 0;
+		mc.gameSettings.enableVsync = true;
+		mc.gameSettings.chatColours = false;
+		mc.gameSettings.limitFramerate = 60;
+		mc.gameSettings.forceUnicodeFont = false;
+		mc.gameSettings.clouds = 0;
+		mc.gameSettings.entityShadows = false;
+		mc.gameSettings.fancyGraphics = false;
+		mc.gameSettings.particleSetting = 0;
+		mc.gameSettings.viewBobbing = false;
+		mc.player.setInvisible(true);
+		mc.player.setGlowing(false);
 	}
 
 	@Override
 	protected void onDisable() {
 		MinecraftForge.EVENT_BUS.unregister(this);
-	}
-
-	@SubscribeEvent
-	public void renderPlayerPost(RenderPlayerEvent event) {
-
 	}
 }

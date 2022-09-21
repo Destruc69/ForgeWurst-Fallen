@@ -31,6 +31,10 @@ import java.util.Objects;
 
 public final class EntityFlight extends Hack {
 
+	private final CheckboxSetting ground =
+			new CheckboxSetting("NCPFly", "Always act as if your on ground",
+					false);
+
 	private final SliderSetting upSpeed =
 			new SliderSetting("UpSpeed", 1, 0.1, 10, 0.05, SliderSetting.ValueDisplay.DECIMAL);
 
@@ -49,15 +53,21 @@ public final class EntityFlight extends Hack {
 			new CheckboxSetting("AntiStuck",
 					false);
 
+	private final CheckboxSetting bypass =
+			new CheckboxSetting("Bypass",
+					false);
+
 	public EntityFlight() {
 		super("EntityFlight", "Fly with Entitys/Ridables.\n" +
 				"Go down pressing S or your keybind to walk back");
 		setCategory(Category.MOVEMENT);
+		addSetting(ground);
 		addSetting(upSpeed);
 		addSetting(downSpeed);
 		addSetting(vel);
 		addSetting(anti);
 		addSetting(stuck);
+		addSetting(bypass);
 	}
 
 	@Override
@@ -72,36 +82,57 @@ public final class EntityFlight extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
+		if (bypass.isChecked() && !ground.isChecked()) {
+			if (mc.player.ticksExisted % 2 == 0) {
+				return;
+			}
+		}
 		try {
-			if (mc.gameSettings.keyBindJump.isKeyDown()) {
-				Objects.requireNonNull(mc.player.getRidingEntity()).motionY += upSpeed.getValueF();
+			if (ground.isChecked()) {
+				Objects.requireNonNull(mc.player.getRidingEntity()).onGround = true;
+				Objects.requireNonNull(mc.player.getRidingEntity()).isAirBorne = false;
+				Objects.requireNonNull(mc.player.getRidingEntity()).collidedVertically = true;
+				Objects.requireNonNull(mc.player.getRidingEntity()).collidedHorizontally = false;
+				Objects.requireNonNull(mc.player.getRidingEntity()).onGround = true;
+				Objects.requireNonNull(mc.player.getRidingEntity()).isAirBorne = false;
+				Objects.requireNonNull(mc.player.getRidingEntity()).fallDistance = 0;
+				Objects.requireNonNull(mc.player.getRidingEntity()).stepHeight = 0;
+				Objects.requireNonNull(mc.player.getRidingEntity()).collidedVertically = true;
+				Objects.requireNonNull(mc.player.getRidingEntity()).collidedHorizontally = false;
+				Objects.requireNonNull(mc.player.getRidingEntity()).setVelocity(mc.player.motionX, 0, mc.player.motionZ);
+				Objects.requireNonNull(mc.player.getRidingEntity()).height = 999;
 			}
-			if (mc.gameSettings.keyBindSneak.isKeyDown()) {
-				Objects.requireNonNull(mc.player.getRidingEntity()).motionY -= downSpeed.getValueF();
-			}
-			if (vel.isChecked()) {
-				if (!mc.gameSettings.keyBindSneak.isKeyDown() && !mc.gameSettings.keyBindJump.isKeyDown()) {
-					mc.player.getRidingEntity().setVelocity(mc.player.getRidingEntity().motionX, 0, mc.player.getRidingEntity().motionZ);
+			if (!ground.isChecked()) {
+				if (mc.gameSettings.keyBindJump.isKeyDown()) {
+					Objects.requireNonNull(mc.player.getRidingEntity()).motionY += upSpeed.getValueF();
 				}
-			}
-			if (anti.isChecked()) {
-				if (!mc.gameSettings.keyBindSneak.isKeyDown() && !mc.gameSettings.keyBindJump.isKeyDown()) {
-					if (mc.player.ticksExisted % 2 == 0) {
-						Objects.requireNonNull(mc.player.getRidingEntity().motionY += 0.10123 / 2);
-					} else {
-						Objects.requireNonNull(mc.player.getRidingEntity().motionY -= 0.91873 / 2);
+				if (mc.gameSettings.keyBindSneak.isKeyDown()) {
+					Objects.requireNonNull(mc.player.getRidingEntity()).motionY -= downSpeed.getValueF();
+				}
+				if (vel.isChecked()) {
+					if (!mc.gameSettings.keyBindSneak.isKeyDown() && !mc.gameSettings.keyBindJump.isKeyDown()) {
+						mc.player.getRidingEntity().setVelocity(mc.player.getRidingEntity().motionX, 0, mc.player.getRidingEntity().motionZ);
 					}
 				}
-			}
-			if (stuck.isChecked()) {
-				for (Entity entity : mc.world.loadedEntityList) {
-					if (entity instanceof EntityBoat || entity instanceof EntityHorse) {
-						if (!mc.player.isRiding() && mc.player.getDistance(entity) < 3) {
-							for (int x = 0; x < 6; x ++) {
-								RotationUtils.faceVectorPacket(new Vec3d(entity.lastTickPosX, entity.lastTickPosY, entity.lastTickPosZ));
-							}
-							mc.playerController.interactWithEntity(mc.player, entity, EnumHand.MAIN_HAND);
+				if (anti.isChecked()) {
+					if (!mc.gameSettings.keyBindSneak.isKeyDown() && !mc.gameSettings.keyBindJump.isKeyDown()) {
+						if (mc.player.ticksExisted % 2 == 0) {
+							Objects.requireNonNull(mc.player.getRidingEntity().motionY += 0.10123 / 2);
+						} else {
+							Objects.requireNonNull(mc.player.getRidingEntity().motionY -= 0.91873 / 2);
+						}
+					}
+				}
+				if (stuck.isChecked()) {
+					for (Entity entity : mc.world.loadedEntityList) {
+						if (entity instanceof EntityBoat || entity instanceof EntityHorse) {
+							if (!mc.player.isRiding() && mc.player.getDistance(entity) < 3) {
+								for (int x = 0; x < 6; x++) {
+									RotationUtils.faceVectorPacket(new Vec3d(entity.lastTickPosX, entity.lastTickPosY, entity.lastTickPosZ).add(new Vec3d(0.5, 0.5, 0.5)));
+								}
+								mc.playerController.interactWithEntity(mc.player, entity, EnumHand.MAIN_HAND);
 
+							}
 						}
 					}
 				}

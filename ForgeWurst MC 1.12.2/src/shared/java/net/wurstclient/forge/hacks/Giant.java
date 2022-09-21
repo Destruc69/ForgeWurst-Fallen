@@ -7,22 +7,27 @@
  */
 package net.wurstclient.forge.hacks;
 
-import net.minecraft.client.renderer.debug.DebugRendererCollisionBox;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EnumPlayerModelParts;
-import net.minecraft.init.SoundEvents;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.settings.EnumSetting;
+import net.wurstclient.forge.settings.SliderSetting;
+import net.wurstclient.forge.utils.KeyBindingUtils;
 
-public final class AntiCollide extends Hack {
+public final class Giant extends Hack {
+	private final SliderSetting height =
+			new SliderSetting("Height", 2, 1, 30, 1, SliderSetting.ValueDisplay.DECIMAL);
 
-	public AntiCollide() {
-		super("AntiCollide", "Prevent colliding with players");
+	private final SliderSetting width =
+			new SliderSetting("Width", 2, 1, 30, 1, SliderSetting.ValueDisplay.DECIMAL);
+
+	public Giant() {
+		super("Giant", "Makes you really big.");
 		setCategory(Category.PLAYER);
+		addSetting(height);
+		addSetting(width);
 	}
 
 	@Override
@@ -37,15 +42,7 @@ public final class AntiCollide extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		for (Entity entity : mc.world.getLoadedEntityList()) {
-			if (entity != mc.player) {
-				if (entity instanceof EntityPlayer) {
-					if (mc.player.getCollisionBox(entity) == mc.player.getCollisionBox(mc.player)) {
-						mc.player.collidedHorizontally = false;
-						mc.player.collidedVertically = false;
-					}
-				}
-			}
-		}
+		event.getPlayer().height = -height.getValueF();
+		event.getPlayer().width = width.getValueF();
 	}
 }

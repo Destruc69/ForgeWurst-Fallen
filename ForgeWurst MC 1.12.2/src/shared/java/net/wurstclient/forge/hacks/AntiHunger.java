@@ -7,12 +7,11 @@
  */
 package net.wurstclient.forge.hacks;
 
-import net.minecraft.init.SoundEvents;
 import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WPacketInputEvent;
-import net.wurstclient.fmlevents.WUpdateEvent;
+import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 
@@ -37,11 +36,25 @@ public final class AntiHunger extends Hack {
 	}
 
 	@SubscribeEvent
-	public void onPacket(WPacketInputEvent event) {
+	public void onPacketIn(WPacketInputEvent event) {
 		try {
 			if (event.getPacket() instanceof CPacketEntityAction) {
-				CPacketEntityAction action = (CPacketEntityAction) event.getPacket();
-				if (action.getAction() == CPacketEntityAction.Action.START_SPRINTING || action.getAction() == CPacketEntityAction.Action.STOP_SPRINTING) {
+				CPacketEntityAction cPacketEntityAction = (CPacketEntityAction) event.getPacket();
+				if (cPacketEntityAction.getAction().equals(CPacketEntityAction.Action.START_SPRINTING) || cPacketEntityAction.getAction().equals(CPacketEntityAction.Action.STOP_SPRINTING)) {
+					event.setCanceled(true);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@SubscribeEvent
+	public void onPacketOut(WPacketOutputEvent event) {
+		try {
+			if (event.getPacket() instanceof CPacketEntityAction) {
+				CPacketEntityAction cPacketEntityAction = (CPacketEntityAction) event.getPacket();
+				if (cPacketEntityAction.getAction().equals(CPacketEntityAction.Action.START_SPRINTING) || cPacketEntityAction.getAction().equals(CPacketEntityAction.Action.STOP_SPRINTING)) {
 					event.setCanceled(true);
 				}
 			}

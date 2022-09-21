@@ -23,7 +23,7 @@ import net.wurstclient.forge.settings.SliderSetting.ValueDisplay;
 public final class Timerr extends Hack
 {
 	private final SliderSetting speed =
-			new SliderSetting("TimerSpeed", 0.9, 0.1, 2, 0.1, ValueDisplay.DECIMAL);
+			new SliderSetting("TimerSpeed", 0.9, 0.1, 20, 0.1, ValueDisplay.DECIMAL);
 
 	public Timerr()
 	{

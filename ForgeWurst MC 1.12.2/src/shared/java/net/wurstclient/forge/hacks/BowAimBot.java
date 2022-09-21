@@ -23,6 +23,7 @@ import net.wurstclient.forge.utils.PlayerUtils;
 import net.wurstclient.forge.utils.RotationUtils;
 
 public final class BowAimBot extends Hack {
+	float[] rot;
 	public BowAimBot() {
 		super("BowAimBot", "When using a bow it will aim at entitys.");
 		setCategory(Category.COMBAT);
@@ -41,9 +42,9 @@ public final class BowAimBot extends Hack {
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
 		for (Entity entity : mc.world.loadedEntityList) {
-			if (PlayerUtils.CanSeeBlock(new BlockPos(entity.posX, entity.posY + 1, entity.posZ))) {
+			if (PlayerUtils.CanSeeBlock(new BlockPos(entity.posX, entity.posY, entity.posZ))) {
 				if (entity != mc.player) {
-					float[] rot = RotationUtils.getNeededRotations(new Vec3d(entity.lastTickPosX, entity.lastTickPosY + 1, entity.lastTickPosZ));
+					rot = RotationUtils.getNeededRotations(new Vec3d(entity.lastTickPosX, entity.lastTickPosY + 1, entity.lastTickPosZ));
 					if (mc.player.getHeldItemMainhand().getItem().equals(Items.BOW) && mc.player.isHandActive()) {
 						mc.player.rotationYaw = rot[0];
 						mc.player.rotationPitch = rot[1];

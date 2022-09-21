@@ -15,6 +15,7 @@ public final class CommandList extends WCommandList
 	public final BindsCmd bindsCmd = register(new BindsCmd());
 	public final ClearCmd clearCmd = register(new ClearCmd());
 	public final GmCmd gmCmd = register(new GmCmd());
+	public final PeekCmd peekCmd = register(new PeekCmd());
 	public final BoatTP boatTP = register(new BoatTP());
 	public final FaceCMD faceCMD = register(new FaceCMD());
 	public final CenterTP centerTP = register(new CenterTP());

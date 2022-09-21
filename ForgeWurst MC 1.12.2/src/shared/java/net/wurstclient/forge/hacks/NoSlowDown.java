@@ -9,37 +9,24 @@ package net.wurstclient.forge.hacks;
 
 import net.minecraft.item.ItemFood;
 import net.minecraft.network.play.client.CPacketEntityAction;
+import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.client.event.InputUpdateEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.settings.CheckboxSetting;
-import net.wurstclient.forge.utils.MathUtils;
 import net.wurstclient.forge.utils.PlayerUtils;
 
+import java.util.Objects;
+
 public final class NoSlowDown extends Hack {
-
-	public static double[] dir;
-
-	private final CheckboxSetting ncp =
-			new CheckboxSetting("NCP", "Bypass NCP", true);
-
-	private final CheckboxSetting ncp2 =
-			new CheckboxSetting("NCP2", "Bypass other/maybe custom NCP", false);
-
-
-	private final CheckboxSetting tobetotee =
-			new CheckboxSetting("2b2t", "Bypass 2B2T", true);
-
 	public NoSlowDown() {
 		super("NoSlowDown", "No time to slow down when eating");
 		setCategory(Category.MOVEMENT);
-		addSetting(ncp);
-		addSetting(ncp2);
-		addSetting(tobetotee);
 	}
 
 	@Override
@@ -53,48 +40,18 @@ public final class NoSlowDown extends Hack {
 	}
 
 	@SubscribeEvent
-	public void onUpdate(WUpdateEvent event) {
-		moveLogic();
-		if (ncp.isChecked()) {
-			ncpPacket();
-		}
-		if (tobetotee.isChecked()) {
-			tbttPacket();
-		}
-		if (ncp2.isChecked()) {
-			ncp2Packet();
-		}
-	}
-
-	public void moveLogic() {
+	public void onUpdate(InputUpdateEvent event) {
 		if (mc.player.isHandActive() && mc.player.getHeldItemMainhand().getItem() instanceof ItemFood) {
-			if (!mc.gameSettings.keyBindSprint.isKeyDown()) {
-				dir = MathUtils.directionSpeed(0.2);
-			}
-			if (mc.player.moveForward != 0 || mc.player.moveStrafing != 0) {
-				mc.player.motionX = dir[0];
-				mc.player.motionZ = dir[1];
-			}
-		}
-	}
-
-	public void ncpPacket() {
-		if (mc.player.isHandActive() && mc.player.getHeldItemMainhand().getItem() instanceof ItemFood) {
+			event.getMovementInput().moveForward *= 5;
+			event.getMovementInput().moveStrafe *= 5;
 			mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.ABORT_DESTROY_BLOCK, PlayerUtils.GetLocalPlayerPosFloored(), EnumFacing.DOWN));
-		}
-	}
-
-	public void ncp2Packet() {
-		if (mc.player.isHandActive() && mc.player.getHeldItemMainhand().getItem() instanceof ItemFood) {
-			mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.RELEASE_USE_ITEM, PlayerUtils.GetLocalPlayerPosFloored(), EnumFacing.DOWN));
-		}
-	}
-
-	public void tbttPacket() {
-		if (mc.player.isHandActive() && mc.player.getHeldItemMainhand().getItem() instanceof ItemFood) {
-			mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_SNEAKING));
+			if (Objects.requireNonNull(mc.player.getServer()).getName().contains("2b2t")) {
+				mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_SNEAKING));
+			}
 		} else {
-			mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
+			if (Objects.requireNonNull(mc.player.getServer()).getName().contains("2b2t")) {
+				mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
+			}
 		}
 	}
 }

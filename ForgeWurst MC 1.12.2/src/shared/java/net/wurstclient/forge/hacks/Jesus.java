@@ -32,10 +32,7 @@ import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.compatibility.WPlayer;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.EnumSetting;
-import net.wurstclient.forge.utils.BlockUtils;
-import net.wurstclient.forge.utils.KeyBindingUtils;
-import net.wurstclient.forge.utils.MathUtils;
-import net.wurstclient.forge.utils.TimerUtils;
+import net.wurstclient.forge.utils.*;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -76,8 +73,10 @@ public final class Jesus extends Hack {
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
 		if (mode.getSelected().test) {
-			if (mc.player.isInWater()) {
-				mc.player.motionY = 0.005;
+			if (!mc.player.collidedHorizontally) {
+				if (mc.player.isInWater()) {
+					mc.player.motionY = 0.005;
+				}
 			}
 		}
 		if (!mc.player.collidedHorizontally) {

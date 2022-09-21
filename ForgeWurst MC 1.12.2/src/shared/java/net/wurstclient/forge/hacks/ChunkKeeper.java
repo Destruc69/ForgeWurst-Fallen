@@ -7,21 +7,20 @@
  */
 package net.wurstclient.forge.hacks;
 
-import net.minecraft.network.play.client.CPacketPlayer;
-import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraft.network.play.server.SPacketUnloadChunk;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WPacketInputEvent;
 import net.wurstclient.fmlevents.WPacketOutputEvent;
+import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
-import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.utils.RotationUtils;
+import net.wurstclient.forge.settings.EnumSetting;
+import net.wurstclient.forge.utils.KeyBindingUtils;
 
-public final class Rotations extends Hack {
-
-	public Rotations() {
-		super("Rotations", "Renders rotations.");
+public final class ChunkKeeper extends Hack {
+	public ChunkKeeper() {
+		super("ChunkKeeper", "Keeps chunks you rendered to stay rendered.");
 		setCategory(Category.RENDER);
 	}
 
@@ -36,7 +35,24 @@ public final class Rotations extends Hack {
 	}
 
 	@SubscribeEvent
-	public void renderPlayerPost(RenderPlayerEvent event) {
+	public void onPacketOut(WPacketOutputEvent event) {
+		try {
+			if (event.getPacket() instanceof SPacketUnloadChunk) {
+				event.setCanceled(true);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
+	@SubscribeEvent
+	public void onPacketIn(WPacketInputEvent event) {
+		try {
+			if (event.getPacket() instanceof SPacketUnloadChunk) {
+				event.setCanceled(true);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

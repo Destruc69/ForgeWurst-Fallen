@@ -20,6 +20,7 @@ import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.client.event.InputUpdateEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -181,6 +182,7 @@ public final class FreeCam extends Hack {
 			camera.rotationPitch = mc.player.rotationPitch;
 
 			camera.move(MoverType.SELF, camera.motionX, camera.motionY, camera.motionZ);
+			e.getEntity().move(MoverType.SELF, camera.motionX, camera.motionY, camera.motionZ);
 		}
 	}
 
@@ -221,6 +223,14 @@ public final class FreeCam extends Hack {
 				}
 			}
 		}
+	}
+
+	@SubscribeEvent
+	public void onKeyEvent(InputUpdateEvent event) {
+		event.getMovementInput().moveForward = 0;
+		event.getMovementInput().moveStrafe = 0;
+		event.getMovementInput().jump = false;
+		event.getMovementInput().sneak = false;
 	}
 
 	@SubscribeEvent

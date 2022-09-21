@@ -18,6 +18,7 @@ import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 
 import java.sql.Wrapper;
+import java.util.Objects;
 
 public final class Discord extends Hack {
 
@@ -58,7 +59,7 @@ public final class Discord extends Hack {
 		rpc.Discord_UpdatePresence(presence);
 
 		try {
-		presence.details = mc.getCurrentServerData().serverIP + " " + "|" + " " + mc.getCurrentServerData().version;
+		presence.details = Objects.requireNonNull(mc.getCurrentServerData()).serverIP + " " + "|" + " " + mc.getCurrentServerData().version;
 		presence.state = mc.player.getName() + " " + "|" + " " + mc.player.getHeldItemMainhand();
 		} catch (Exception e) {
 			e.printStackTrace();

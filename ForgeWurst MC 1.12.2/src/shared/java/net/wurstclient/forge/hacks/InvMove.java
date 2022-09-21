@@ -8,41 +8,22 @@
 package net.wurstclient.forge.hacks;
 
 import net.minecraft.client.gui.GuiChat;
-import net.minecraft.client.gui.GuiRepair;
-import net.minecraft.client.gui.GuiScreenBook;
+import net.minecraft.client.gui.GuiIngameMenu;
+import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.gui.inventory.GuiEditSign;
 import net.minecraft.client.gui.inventory.GuiInventory;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.network.play.client.CPacketClientStatus;
-import net.minecraft.network.play.client.CPacketEntityAction;
+import net.minecraftforge.client.event.InputUpdateEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerWakeUpEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.wurstclient.fmlevents.WPacketInputEvent;
-import net.wurstclient.fmlevents.WPacketOutputEvent;
-import net.wurstclient.fmlevents.WPlayerMoveEvent;
-import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.settings.CheckboxSetting;
-import net.wurstclient.forge.utils.ChatUtils;
-import net.wurstclient.forge.utils.KeyBindingUtils;
-import net.wurstclient.forge.utils.MathUtils;
 import org.lwjgl.input.Keyboard;
 
 public final class InvMove extends Hack {
 
-	public static double[] dir;
-
-	private final CheckboxSetting spoof =
-			new CheckboxSetting("Spoof", "Server never knows you opened your inv",
-					false);
-
 	public InvMove() {
-		super("InvMove", "Allows you to move with your inventory (tank u cookie client my beloved).");
+		super("InvMove", "Allows you to move with your inventory.");
 		setCategory(Category.MOVEMENT);
-		addSetting(spoof);
 	}
 
 	@Override
@@ -56,59 +37,32 @@ public final class InvMove extends Hack {
 	}
 
 	@SubscribeEvent
-	public void onUpdate(WUpdateEvent event) {
+	public void onInput(InputUpdateEvent event) {
 		assert event != null;
 		try {
-			if (mc.currentScreen instanceof GuiContainer || mc.currentScreen instanceof GuiInventory) {
-				dir = MathUtils.directionSpeed(0.19);
-				mc.player.setSprinting(true);
-				if (Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_D) ||Keyboard.isKeyDown(Keyboard.KEY_S) ||Keyboard.isKeyDown(Keyboard.KEY_A)) {
-					mc.player.motionX = dir[0];
-					mc.player.motionZ = dir[1];
-				}
-				if (Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
-					if (mc.player.onGround) {
-						mc.player.motionY = 0.405;
-					}
-				}
-				if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
-					mc.player.setSneaking(true);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	@SubscribeEvent
-	public void onPacket(WPacketInputEvent event) {
-		assert event != null;
-		try {
-			if (!spoof.isChecked())
+			if (mc.currentScreen instanceof GuiChat)
 				return;
-
-			if (event.getPacket() instanceof CPacketEntityAction) {
-				CPacketEntityAction cPacketEntityAction = (CPacketEntityAction) event.getPacket();
-				if (cPacketEntityAction.getAction().equals(CPacketEntityAction.Action.OPEN_INVENTORY)) {
-					event.setCanceled(true);
-				}
+			if (Keyboard.isKeyDown(Keyboard.KEY_W) || mc.gameSettings.keyBindForward.isKeyDown()) {
+				event.getMovementInput().moveForward++;
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	@SubscribeEvent
-	public void onPacketOut(WPacketOutputEvent event) {
-		assert event != null;
-		try {
-			if (!spoof.isChecked())
-				return;
-
-			if (event.getPacket() instanceof CPacketEntityAction) {
-				CPacketEntityAction cPacketEntityAction = (CPacketEntityAction) event.getPacket();
-				if (cPacketEntityAction.getAction().equals(CPacketEntityAction.Action.OPEN_INVENTORY)) {
-					event.setCanceled(true);
-				}
+			if (Keyboard.isKeyDown(Keyboard.KEY_S) || mc.gameSettings.keyBindBack.isKeyDown()) {
+				event.getMovementInput().moveForward--;
+			}
+			if (Keyboard.isKeyDown(Keyboard.KEY_D) || mc.gameSettings.keyBindRight.isKeyDown()) {
+				event.getMovementInput().moveStrafe--;
+			}
+			if (Keyboard.isKeyDown(Keyboard.KEY_A) || mc.gameSettings.keyBindLeft.isKeyDown()) {
+				event.getMovementInput().moveStrafe++;
+			}
+			if (Keyboard.isKeyDown(Keyboard.KEY_SPACE) || mc.gameSettings.keyBindJump.isKeyDown()) {
+				event.getMovementInput().jump = true;
+			} else {
+				event.getMovementInput().jump = false;
+			}
+			if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || mc.gameSettings.keyBindSneak.isKeyDown()) {
+				event.getMovementInput().sneak = true;
+			} else {
+				event.getMovementInput().sneak = false;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

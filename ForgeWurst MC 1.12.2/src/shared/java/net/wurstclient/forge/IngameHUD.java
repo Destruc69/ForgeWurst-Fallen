@@ -8,32 +8,20 @@
 package net.wurstclient.forge;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.*;
-import net.minecraft.client.gui.advancements.GuiAdvancement;
-import net.minecraft.client.gui.advancements.GuiAdvancementTab;
-import net.minecraft.client.gui.advancements.GuiScreenAdvancements;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.renderer.EntityRenderer;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderGlobal;
-import net.minecraft.client.renderer.texture.TextureUtil;
-import net.minecraft.client.resources.ResourcePackRepository;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.forge.clickgui.ClickGui;
 import net.wurstclient.forge.clickgui.ClickGuiScreen;
 import net.wurstclient.forge.compatibility.WMinecraft;
+import net.wurstclient.forge.hacks.ClickGuiHack;
 import net.wurstclient.forge.utils.TextUtil;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Objects;
 
 public final class IngameHUD {
 	private final Minecraft mc = Minecraft.getMinecraft();
@@ -41,6 +29,9 @@ public final class IngameHUD {
 	private final ClickGui clickGui;
 
 	public static double theColor;
+
+	public static double xx = 145 * 4 + 45;
+	public static double yy = 4 * 55 * 2;
 
 	float textColor;
 
@@ -78,6 +69,22 @@ public final class IngameHUD {
 
 
 		if (!ForgeWurst.getForgeWurst().getHax().clickGuiHack.nogui().isChecked()) {
+
+			if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
+				xx = xx + 1;
+			}
+			if (Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
+				xx = xx - 1;
+			}
+
+			if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
+				yy = yy - 1;
+			}
+
+			if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
+				yy = yy + 1;
+			}
+
 			ArrayList<Hack> hacks = new ArrayList<>();
 			// title
 			GL11.glPushMatrix();
@@ -98,6 +105,12 @@ public final class IngameHUD {
 			GL11.glPushMatrix();
 			GL11.glScaled(1.55555555, 1.55555555, 0.88888888);
 			WMinecraft.getFontRenderer().drawStringWithShadow(" _____", 4, 4, (int) textColor);
+			GL11.glPopMatrix();
+
+			//coords
+			GL11.glPushMatrix();
+			GL11.glScaled(1.55555555, 1.55555555, 0.88888888);
+			WMinecraft.getFontRenderer().drawStringWithShadow(Math.round(mc.player.posX) + " " + Math.round(mc.player.posY) + " " + Math.round(mc.player.posZ), (float) xx, (float) yy, (int) textColor);
 			GL11.glPopMatrix();
 
 			GL11.glShadeModel(GL11.GL_SMOOTH);

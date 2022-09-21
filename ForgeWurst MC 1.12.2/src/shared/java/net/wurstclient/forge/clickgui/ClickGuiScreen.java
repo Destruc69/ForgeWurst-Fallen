@@ -20,7 +20,7 @@ public final class ClickGuiScreen extends GuiScreen
 	{
 		this.gui = gui;
 	}
-	
+
 	@Override
 	public boolean doesGuiPauseGame()
 	{
@@ -39,10 +39,6 @@ public final class ClickGuiScreen extends GuiScreen
 	public void drawScreen(int mouseX, int mouseY, float partialTicks)
 	{
 		super.drawScreen(mouseX, mouseY, partialTicks);
-		try {
-			gui.render(mouseX, mouseY, partialTicks);
-		} catch (LWJGLException e) {
-			e.printStackTrace();
-		}
+		gui.render(mouseX, mouseY, partialTicks);
 	}
 }

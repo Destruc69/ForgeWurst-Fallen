@@ -46,6 +46,8 @@ public final class ClickGuiHack extends Hack
     private final SliderSetting acBlue = new SliderSetting("AC blue",
             "Accent blue", 16, 0, 255, 0.01, ValueDisplay.INTEGER);
 
+    private static final SliderSetting scaleGUI = new SliderSetting("GUIScale", 3, 1, 10, 1, ValueDisplay.INTEGER);
+
     private final CheckboxSetting nogui =
             new CheckboxSetting("NoGUI",
                     "Hide the UI",
@@ -100,6 +102,10 @@ public final class ClickGuiHack extends Hack
     public void setMaxHeight(int maxHeight)
     {
         this.maxHeight.setValue(maxHeight);
+    }
+
+    public static float getScale() {
+        return scaleGUI.getValueF();
     }
 
     public float[] getBgColor()

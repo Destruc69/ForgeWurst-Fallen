@@ -7,27 +7,41 @@
  */
 package net.wurstclient.forge.hacks;
 
-import net.minecraft.client.renderer.debug.DebugRendererCollisionBox;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EnumPlayerModelParts;
-import net.minecraft.init.SoundEvents;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.settings.CheckboxSetting;
+import net.wurstclient.forge.settings.EnumSetting;
+import net.wurstclient.forge.utils.KeyBindingUtils;
 
-public final class AntiCollide extends Hack {
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.Clip;
+import java.io.File;
 
-	public AntiCollide() {
-		super("AntiCollide", "Prevent colliding with players");
+public final class MusicBox extends Hack {
+
+	Clip clip;
+	AudioInputStream audioInputStream;
+	File file;
+
+	private final CheckboxSetting dupeGriefer =
+			new CheckboxSetting("DupeGriefer", "",
+					false);
+
+	public MusicBox() {
+		super("2b2tMusicBox", "Plays 2b2t classics.");
 		setCategory(Category.PLAYER);
+		addSetting(dupeGriefer);
 	}
 
 	@Override
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
+		if (dupeGriefer.isChecked()) {
+
+		}
 	}
 
 	@Override
@@ -37,15 +51,6 @@ public final class AntiCollide extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		for (Entity entity : mc.world.getLoadedEntityList()) {
-			if (entity != mc.player) {
-				if (entity instanceof EntityPlayer) {
-					if (mc.player.getCollisionBox(entity) == mc.player.getCollisionBox(mc.player)) {
-						mc.player.collidedHorizontally = false;
-						mc.player.collidedVertically = false;
-					}
-				}
-			}
-		}
+
 	}
 }

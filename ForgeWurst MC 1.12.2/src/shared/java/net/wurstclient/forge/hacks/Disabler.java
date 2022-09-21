@@ -37,7 +37,6 @@ public final class Disabler extends Hack {
 			new CheckboxSetting("CPacketClientStatus/CPacketClientSettings cancel", "Cancels this packet, the server knows less about clients status",
 					false);
 
-
 	private final CheckboxSetting ghostly =
 			new CheckboxSetting("Ghostly", "Dont send some packets so the AntiCheat has less info on you",
 					false);
@@ -130,8 +129,13 @@ public final class Disabler extends Hack {
 				}
 			}
 			if (ghostly.isChecked()) {
-				if (event.getPacket() instanceof CPacketKeepAlive || event.getPacket() instanceof CPacketConfirmTransaction || event.getPacket() instanceof CPacketEntityAction || event.getPacket() instanceof CPacketCustomPayload) {
+				if (event.getPacket() instanceof CPacketConfirmTransaction || event.getPacket() instanceof CPacketEntityAction || event.getPacket() instanceof CPacketCustomPayload) {
 					event.setCanceled(true);
+				}
+				if (!pingSpoof.isChecked()) {
+					if (event.getPacket() instanceof CPacketKeepAlive) {
+						event.setCanceled(true);
+					}
 				}
 			}
 			if (ping.isChecked()) {

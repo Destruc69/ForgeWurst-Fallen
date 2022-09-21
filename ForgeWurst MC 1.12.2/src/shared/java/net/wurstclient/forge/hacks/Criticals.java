@@ -7,23 +7,17 @@
  */
 package net.wurstclient.forge.hacks;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.network.play.client.CPacketPlayer;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.Rotations;
+import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.wurstclient.fmlevents.WUpdateEvent;
+import net.wurstclient.fmlevents.WPacketInputEvent;
+import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.settings.CheckboxSetting;
-import net.wurstclient.forge.settings.SliderSetting;
-import net.wurstclient.forge.utils.RotationUtils;
 
 public final class Criticals extends Hack {
-	private final SliderSetting critstrength =
-			new SliderSetting("Crits-Strength", "How strong are the crits?", 2, 1, 10, 1, SliderSetting.ValueDisplay.DECIMAL);
-
 	public Criticals() {
 		super("Criticals", "Get critical hits.");
 		setCategory(Category.COMBAT);
@@ -40,13 +34,36 @@ public final class Criticals extends Hack {
 	}
 
 	@SubscribeEvent
-	public void onUpdate(WUpdateEvent event) {
-		for (Entity entity : mc.world.loadedEntityList) {
-			if (entity.hitByEntity(mc.player)) {
-				for (int x = 0; x < critstrength.getValueF(); x ++) {
-					doCrits();
+	public void onPacket(WPacketInputEvent event) {
+		try {
+			if (event.getPacket() instanceof CPacketUseEntity) {
+				CPacketUseEntity cPacketUseEntity = (CPacketUseEntity) event.getPacket();
+
+				if (cPacketUseEntity.getAction().equals(CPacketUseEntity.Action.ATTACK)) {
+					if (cPacketUseEntity.getEntityFromWorld(mc.world) instanceof EntityLivingBase && mc.player.onGround && !mc.gameSettings.keyBindJump.isKeyDown()) {
+						doCrits();
+					}
 				}
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@SubscribeEvent
+	public void onPacketOut(WPacketOutputEvent event) {
+		try {
+			if (event.getPacket() instanceof CPacketUseEntity) {
+				CPacketUseEntity cPacketUseEntity = (CPacketUseEntity) event.getPacket();
+
+				if (cPacketUseEntity.getAction().equals(CPacketUseEntity.Action.ATTACK)) {
+					if (cPacketUseEntity.getEntityFromWorld(mc.world) instanceof EntityLivingBase && mc.player.onGround && !mc.gameSettings.keyBindJump.isKeyDown()) {
+						doCrits();
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 

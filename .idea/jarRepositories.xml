@@ -31,5 +31,35 @@
       <option name="name" value="forge" />
       <option name="url" value="https://maven.minecraftforge.net" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="spongepowered-repo" />
+      <option name="name" value="spongepowered-repo" />
+      <option name="url" value="https://repo.spongepowered.org/repository/maven-public/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="swt-repo" />
+      <option name="name" value="swt-repo" />
+      <option name="url" value="http://maven-eclipse.github.io/maven" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="jitpack.io" />
+      <option name="name" value="jitpack.io" />
+      <option name="url" value="https://jitpack.io" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven" />
+      <option name="name" value="maven" />
+      <option name="url" value="https://www.cursemaven.com" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="lukflug" />
+      <option name="name" value="lukflug" />
+      <option name="url" value="https://lukflug.github.io/maven/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="IzzelAliz Maven" />
+      <option name="name" value="IzzelAliz Maven" />
+      <option name="url" value="https://maven.izzel.io/releases/" />
+    </remote-repository>
   </component>
 </project>

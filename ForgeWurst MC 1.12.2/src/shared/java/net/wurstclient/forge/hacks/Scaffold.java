@@ -17,25 +17,25 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.wurstclient.fmlevents.WPacketInputEvent;
+import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.compatibility.WMinecraft;
+import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.*;
 
 import java.lang.reflect.Field;
 
 public final class Scaffold extends Hack {
-	Vec3d vec3d;
-
-	private final SliderSetting rotStrength =
-			new SliderSetting("RotationStrength", "How strong are the rotations?", 2, 1, 30, 1, SliderSetting.ValueDisplay.DECIMAL);
+	public static float yawForRot;
+	public static float pitchForRot;
 
 	public Scaffold() {
 		super("Scaffold", "thank you phobos my beloved");
 		setCategory(Category.WORLD);
-		addSetting(rotStrength);
 	}
 
 	@Override
@@ -46,17 +46,14 @@ public final class Scaffold extends Hack {
 	@Override
 	protected void onDisable() {
 		MinecraftForge.EVENT_BUS.unregister(this);
-		setTickLength(50);
 	}
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
 		try {
 			if (mc.player.isSwingInProgress) {
-				setTickLength(50 / 0.8f);
-				mc.player.setVelocity(mc.player.motionX / 1.2, mc.player.motionY, mc.player.motionZ / 1.2);
-			} else {
-				setTickLength(50);
+				mc.player.motionX = mc.player.motionX / 2;
+				mc.player.motionZ = mc.player.motionZ / 2;
 			}
 			BlockPos playerBlock;
 			if (BlockUtils.isScaffoldPos((playerBlock = PlayerUtils.EntityPosToFloorBlockPos(mc.player)).add(0, -1, 0))) {
@@ -140,11 +137,9 @@ public final class Scaffold extends Hack {
 				}
 			}
 			float[] angle = MathUtils.calcAngle(Scaffold.mc.player.getPositionEyes(mc.getRenderPartialTicks()), new Vec3d((double) ((float) pos.getX() + 0.5f), (double) ((float) pos.getY() - 0.5f), (double) ((float) pos.getZ() + 0.5f)));
-			float yawForRot = angle[0];
-			float pitchForRot = (float) MathHelper.normalizeAngle((int) ((int) angle[1]), (int) 360);
-			for (int x = 0; x < rotStrength.getValueF(); x++) {
-				mc.player.connection.sendPacket(new CPacketPlayer.Rotation(yawForRot, pitchForRot, mc.player.onGround));
-			}
+			yawForRot = angle[0];
+			pitchForRot = (float) MathHelper.normalizeAngle((int) ((int) angle[1]), (int) 360);
+
 			Scaffold.mc.playerController.processRightClickBlock(Scaffold.mc.player, Scaffold.mc.world, pos, face, new Vec3d(0.5, 0.5, 0.5), EnumHand.MAIN_HAND);
 			Scaffold.mc.player.swingArm(EnumHand.MAIN_HAND);
 			Scaffold.mc.player.connection.sendPacket((Packet) new CPacketHeldItemChange(oldSlot));
@@ -154,32 +149,21 @@ public final class Scaffold extends Hack {
 			e.printStackTrace();
 		}
 	}
-	private void setTickLength(float tickLength)
-	{
-		try
-		{
-			Field fTimer = mc.getClass().getDeclaredField(
-					wurst.isObfuscated() ? "field_71428_T" : "timer");
-			fTimer.setAccessible(true);
 
-			if(WMinecraft.VERSION.equals("1.10.2"))
-			{
-				Field fTimerSpeed = Timer.class.getDeclaredField(
-						wurst.isObfuscated() ? "field_74278_d" : "timerSpeed");
-				fTimerSpeed.setAccessible(true);
-				fTimerSpeed.setFloat(fTimer.get(mc), 50 / tickLength);
-
-			}else
-			{
-				Field fTickLength = Timer.class.getDeclaredField(
-						wurst.isObfuscated() ? "field_194149_e" : "tickLength");
-				fTickLength.setAccessible(true);
-				fTickLength.setFloat(fTimer.get(mc), tickLength);
+	@SubscribeEvent
+	public void onPacketIn(WPacketInputEvent event) {
+		assert event != null;
+		try {
+			if (event.getPacket() instanceof CPacketPlayer.Rotation) {
+				event.setCanceled(true);
+				mc.player.connection.sendPacket(new CPacketPlayer.Rotation(yawForRot, pitchForRot, mc.player.onGround));
 			}
-
-		}catch(ReflectiveOperationException e)
-		{
-			throw new RuntimeException(e);
+			if (event.getPacket() instanceof CPacketPlayer.PositionRotation) {
+				event.setCanceled(true);
+				mc.player.connection.sendPacket(new CPacketPlayer.PositionRotation(mc.player.posX, mc.player.posY, mc.player.posZ, yawForRot, pitchForRot, mc.player.onGround));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 }

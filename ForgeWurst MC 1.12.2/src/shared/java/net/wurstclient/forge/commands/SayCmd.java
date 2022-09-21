@@ -9,22 +9,20 @@ package net.wurstclient.forge.commands;
 
 import net.minecraft.network.play.client.CPacketChatMessage;
 import net.wurstclient.forge.Command;
+import net.wurstclient.forge.utils.TTS;
 
 public final class SayCmd extends Command
 {
 	public SayCmd()
 	{
-		super("say", "Sends the given chat message.", "Syntax: .say <message>");
+		super("say", "Says the message.", "Syntax: .say <message>");
 	}
 	
 	@Override
 	public void call(String[] args) throws CmdException
 	{
-		if(args.length < 1)
-			throw new CmdSyntaxError();
-		
 		String message = String.join(" ", args);
-		CPacketChatMessage packet = new CPacketChatMessage(message);
-		mc.getConnection().sendPacket(packet);
+
+		TTS.say(message);
 	}
 }
