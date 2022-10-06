@@ -46,6 +46,7 @@ public final class AutoSneak extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
+		//9ughrsvdvcd
 		if (mode.getSelected().ncp) {
 			mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_SNEAKING));
 			mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
