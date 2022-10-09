@@ -26,9 +26,8 @@ public interface PlayerInventory {
 	 * Selects the slot containing the given item
 	 *
 	 * @param item the item to select
-	 * @return true, if the item was selected
 	 */
-	boolean selectItem(ItemWrapper item);
+	void selectItem(ItemWrapper item);
 
 
 	/**

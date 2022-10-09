@@ -37,7 +37,7 @@ public class ActionMineStraight extends Action {
 
 
 
-	private StateMachine<State, Transition> stateMachine = new StateMachine<>();
+	private final StateMachine<State, Transition> stateMachine = new StateMachine<>();
 
 	private final Modification[] modifications;
 
@@ -232,7 +232,7 @@ public class ActionMineStraight extends Action {
 
 			// check top block to break
 			final BaseBlockPos posTop = to.copyAsFastBlockPos().add(Direction.UP);
-			if (!ActionUtils.canSafelyBreak(posTop)) {
+			if (ActionUtils.canSafelyBreak(posTop)) {
 				return Result.invalid();
 			}
 			if (!BlockUtils.canWalkThrough(posTop)) {
@@ -246,17 +246,16 @@ public class ActionMineStraight extends Action {
 			}
 
 			// check bottom block to break
-			final BaseBlockPos posBottom = to;
-			if (!ActionUtils.canSafelyBreak(posBottom)) {
+			if (ActionUtils.canSafelyBreak(to)) {
 				return Result.invalid();
 			}
-			if (!BlockUtils.canWalkThrough(posBottom)) {
-				final BreakBlockCheckResult resultBottom = ActionUtils.checkBlockToBreak(posBottom);
+			if (!BlockUtils.canWalkThrough(to)) {
+				final BreakBlockCheckResult resultBottom = ActionUtils.checkBlockToBreak(to);
 				if (!resultBottom.breakable) {
 					return Result.invalid();
 				} else {
 					totalTicksTopBreak += resultBottom.ticksToBreak;
-					modificationList.add(Modification.breakBlock(posBottom, (ItemToolWrapper) resultBottom.bestTool));
+					modificationList.add(Modification.breakBlock(to, (ItemToolWrapper) resultBottom.bestTool));
 				}
 			}
 

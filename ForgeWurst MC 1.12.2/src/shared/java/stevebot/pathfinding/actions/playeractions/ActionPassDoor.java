@@ -58,11 +58,11 @@ public class ActionPassDoor extends Action {
 
 		if (firstTick) {
 			// check, which door-blocks the player has to open
-			hasToOpenDoorBottom = !BlockUtils.canPassDoor(positionDoorBottom, direction);
+			hasToOpenDoorBottom = BlockUtils.canPassDoor(positionDoorBottom, direction);
 			if (BlockUtils.isDoor(positionDoorBottom)) {
 				hasToOpenDoorTop = true;
 			} else {
-				hasToOpenDoorTop = !BlockUtils.canPassDoor(positionDoorTop, direction);
+				hasToOpenDoorTop = BlockUtils.canPassDoor(positionDoorTop, direction);
 			}
 		}
 

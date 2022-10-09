@@ -32,7 +32,7 @@ public class ActionDigDown extends Action {
 
 
 
-	private StateMachine<State, Transition> stateMachine = new StateMachine<>();
+	private final StateMachine<State, Transition> stateMachine = new StateMachine<>();
 
 	private final Modification[] modifications;
 
@@ -219,7 +219,7 @@ public class ActionDigDown extends Action {
 			if (!resultBreak.breakable) {
 				return Result.invalid();
 			}
-			if (!ActionUtils.canSafelyBreak(posBreakBlock)) {
+			if (ActionUtils.canSafelyBreak(posBreakBlock)) {
 				return Result.invalid();
 			}
 

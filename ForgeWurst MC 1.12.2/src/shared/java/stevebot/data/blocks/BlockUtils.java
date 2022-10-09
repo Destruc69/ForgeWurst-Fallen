@@ -335,7 +335,7 @@ public class BlockUtils {
 	 * @return whether the block at the given position can affect a jump
 	 */
 	public static boolean affectsJump(BaseBlockPos position) {
-		return affectsJump(blockProvider.getBlockAt(position));
+		return !affectsJump(blockProvider.getBlockAt(position));
 	}
 
 
@@ -352,8 +352,7 @@ public class BlockUtils {
 		if (id == BIRCH_DOOR) return true;
 		if (id == JUNGLE_DOOR) return true;
 		if (id == ACACIA_DOOR) return true;
-		if (id == DARK_OAK_DOOR) return true;
-		return false;
+		return id == DARK_OAK_DOOR;
 	}
 
 
@@ -381,8 +380,7 @@ public class BlockUtils {
 		if (id == BIRCH_FENCE_GATE) return true;
 		if (id == JUNGLE_FENCE_GATE) return true;
 		if (id == DARK_OAK_FENCE_GATE) return true;
-		if (id == ACACIA_FENCE_GATE) return true;
-		return false;
+		return id == ACACIA_FENCE_GATE;
 	}
 
 
@@ -429,7 +427,7 @@ public class BlockUtils {
 	public static boolean canPassDoor(BaseBlockPos position, Direction direction) {
 
 		if (!BlockUtils.isDoorLike(position)) {
-			return false;
+			return true;
 		}
 
 		final IBlockState blockState = MinecraftAdapter.get().getWorld().getBlockState(position.copyAsMCBlockPos());
@@ -448,9 +446,9 @@ public class BlockUtils {
 		}
 
 		if (isFenceGate(position)) {
-			return facingDoor && blockState.getValue(BlockDoor.OPEN);
+			return !facingDoor || !blockState.getValue(BlockDoor.OPEN);
 		} else {
-			return !facingDoor;
+			return facingDoor;
 		}
 
 	}

@@ -13,6 +13,8 @@ import stevebot.pathfinding.nodes.Node;
 import stevebot.pathfinding.nodes.NodeCache;
 import stevebot.player.PlayerUtils;
 
+import java.util.Objects;
+
 public class ActionPillarUpMine extends Action {
 
 
@@ -34,7 +36,7 @@ public class ActionPillarUpMine extends Action {
 
 
 
-	private StateMachine<State, Transition> stateMachine = new StateMachine<>();
+	private final StateMachine<State, Transition> stateMachine = new StateMachine<>();
 	private final Modification[] modifications;
 
 
@@ -140,11 +142,11 @@ public class ActionPillarUpMine extends Action {
 	 */
 	private ProcState tickJump() {
 		PlayerUtils.getMovement().moveTowards(getTo().getPos(), true);
-		if (PlayerUtils.getPlayerBlockPos().equals(getFrom().getPos())) {
+		if (Objects.equals(PlayerUtils.getPlayerBlockPos(), getFrom().getPos())) {
 			PlayerUtils.getInput().setJump();
 		}
 		if (PlayerUtils.getPlayerBlockPos().equals(getTo().getPos())) {
-			if (!PlayerUtils.getInventory().selectThrowawayBlock(true)) {
+			if (PlayerUtils.getInventory().selectThrowawayBlock(true)) {
 				return ProcState.FAILED;
 			}
 			ActionUtils.placeBlockAgainst(getFrom().getPosCopy().add(Direction.DOWN), Direction.UP);
@@ -160,7 +162,7 @@ public class ActionPillarUpMine extends Action {
 	 * Land on the new block.
 	 */
 	private ProcState tickLand() {
-		if (PlayerUtils.getPlayer().onGround && PlayerUtils.getPlayerBlockPos().equals(getTo().getPos())) {
+		if (PlayerUtils.getPlayer().onGround && Objects.equals(PlayerUtils.getPlayerBlockPos(), getTo().getPos())) {
 			PlayerUtils.getCamera().disableForceCamera(true);
 			return ProcState.DONE;
 		} else {
@@ -235,7 +237,7 @@ public class ActionPillarUpMine extends Action {
 
 			// check block to break
 			final BaseBlockPos posAbove = node.getPosCopy().add(0, 2, 0);
-			if (!ActionUtils.canSafelyBreak(posAbove)) {
+			if (ActionUtils.canSafelyBreak(posAbove)) {
 				return Result.invalid();
 			}
 			float ticksToBreak = 0;

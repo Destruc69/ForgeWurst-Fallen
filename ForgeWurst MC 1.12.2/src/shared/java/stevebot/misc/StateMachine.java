@@ -7,9 +7,9 @@ public class StateMachine<S extends Enum, T extends Enum> {
 
 	private S errorState = null;
 	private S current;
-	private List<TransitionDefinition> definitions = new ArrayList<>();
-	private List<TransitionListener<S, T>> transitionListenersAll = new ArrayList<>();
-	private Map<T, List<TransitionListener<S, T>>> transitionListenerMap = new HashMap<>();
+	private final List<TransitionDefinition> definitions = new ArrayList<>();
+	private final List<TransitionListener<S, T>> transitionListenersAll = new ArrayList<>();
+	private final Map<T, List<TransitionListener<S, T>>> transitionListenerMap = new HashMap<>();
 
 
 

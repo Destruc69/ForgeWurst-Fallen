@@ -14,7 +14,7 @@ public class BlockCache {
 	private final BlockLibrary library;
 	private final BlockProvider blockProvider;
 
-	private final EventListener listenerBreakBlock = new EventListener<BlockEvent.BreakEvent>() {
+	private final EventListener<BlockEvent.BreakEvent> listenerBreakBlock = new EventListener<BlockEvent.BreakEvent>() {
 		@Override
 		public Class<BlockEvent.BreakEvent> getEventClass() {
 			return BlockEvent.BreakEvent.class;
@@ -29,7 +29,7 @@ public class BlockCache {
 		}
 	};
 
-	private final EventListener listenerPlaceBlock = new EventListener<BlockEvent.PlaceEvent>() {
+	private final EventListener<BlockEvent.PlaceEvent> listenerPlaceBlock = new EventListener<BlockEvent.PlaceEvent>() {
 		@Override
 		public Class<BlockEvent.PlaceEvent> getEventClass() {
 			return BlockEvent.PlaceEvent.class;

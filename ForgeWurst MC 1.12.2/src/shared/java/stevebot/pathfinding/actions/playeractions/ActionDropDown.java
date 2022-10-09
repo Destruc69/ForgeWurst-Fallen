@@ -14,6 +14,8 @@ import stevebot.pathfinding.nodes.Node;
 import stevebot.pathfinding.nodes.NodeCache;
 import stevebot.player.PlayerUtils;
 
+import java.util.Objects;
+
 public class ActionDropDown extends Action {
 
 
@@ -35,7 +37,7 @@ public class ActionDropDown extends Action {
 
 
 
-	private StateMachine<State, Transition> stateMachine = new StateMachine<>();
+	private final StateMachine<State, Transition> stateMachine = new StateMachine<>();
 
 
 	private final ActionFall fall;
@@ -125,7 +127,7 @@ public class ActionDropDown extends Action {
 	 * Walk towards the edge but do not fall off.
 	 */
 	private ProcState tickWalkTowardsEdge() {
-		final double distToEdge = BlockUtils.distToEdge(PlayerUtils.getPlayerPosition(), direction);
+		final double distToEdge = BlockUtils.distToEdge(Objects.requireNonNull(PlayerUtils.getPlayerPosition()), direction);
 		if (distToEdge <= 0.4) {
 			stateMachine.fireTransition(Transition.IS_AT_POSITION);
 		} else {

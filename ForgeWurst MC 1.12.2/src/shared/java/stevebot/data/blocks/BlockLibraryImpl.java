@@ -18,7 +18,7 @@ public class BlockLibraryImpl implements BlockLibrary {
 
 	private BlockWrapper[] blocks;
 
-	private final EventListener listener = new EventListener<PostInitEvent>() {
+	private final EventListener<PostInitEvent> listener = new EventListener<PostInitEvent>() {
 
 		@Override
 		public Class<PostInitEvent> getEventClass() {
@@ -128,8 +128,7 @@ public class BlockLibraryImpl implements BlockLibrary {
 	 * @return the id of the block with the given name or {@link BlockLibrary#ID_INVALID_BLOCK}.
 	 */
 	private int getIdFromName(String name) {
-		for (int i = 0, n = blocks.length; i < n; i++) {
-			final BlockWrapper entry = blocks[i];
+		for (final BlockWrapper entry : blocks) {
 			if (entry.getName().equalsIgnoreCase(name)) {
 				return entry.getId();
 			}

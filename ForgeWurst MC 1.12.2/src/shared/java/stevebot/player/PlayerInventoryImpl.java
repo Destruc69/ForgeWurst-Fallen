@@ -20,20 +20,20 @@ public class PlayerInventoryImpl implements PlayerInventory {
 			if (!stack.isEmpty() && stack.getItem() instanceof ItemBlock) {
 				if (allowGravityBlock) {
 					inventory.currentItem = i;
-					return true;
+					return false;
 				} else {
 					final ItemWrapper itemWrapper = ItemUtils.getItemLibrary().getItemByMCItem(stack.getItem());
 					if (itemWrapper instanceof ItemBlockWrapper) {
 						final BlockWrapper block = ((ItemBlockWrapper) itemWrapper).getBlockWrapper();
 						if (block != null && !BlockUtils.hasGravity(block)) {
 							inventory.currentItem = i;
-							return true;
+							return false;
 						}
 					}
 				}
 			}
 		}
-		return false;
+		return true;
 	}
 
 
@@ -57,14 +57,11 @@ public class PlayerInventoryImpl implements PlayerInventory {
 
 
 	@Override
-	public boolean selectItem(ItemWrapper item) {
+	public void selectItem(ItemWrapper item) {
 		final InventoryPlayer inventory = PlayerUtils.getPlayer().inventory;
 		final int slot = findItem(item);
 		if (slot != -1) {
 			inventory.currentItem = slot;
-			return true;
-		} else {
-			return false;
 		}
 	}
 

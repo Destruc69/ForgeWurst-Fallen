@@ -10,9 +10,9 @@ import java.util.Set;
 public class ImpossibleActionHandler {
 
 
-	private HashMap<Class<? extends Action>, Set<Class<? extends Action>>> mapping = new HashMap<>();
+	private final HashMap<Class<? extends Action>, Set<Class<? extends Action>>> mapping = new HashMap<>();
 
-	private HashMap<String, boolean[]> invalidActions = new HashMap<>();
+	private final HashMap<String, boolean[]> invalidActions = new HashMap<>();
 
 
 
@@ -24,7 +24,8 @@ public class ImpossibleActionHandler {
 	 * @param valid      the class of the valid action
 	 * @param impossible the classes of the impossible actions
 	 */
-	public void makesImpossible(Class<? extends Action> valid, Class<? extends Action>... impossible) {
+	@SafeVarargs
+	public final void makesImpossible(Class<? extends Action> valid, Class<? extends Action>... impossible) {
 		for (Class<? extends Action> imp : impossible) {
 			makesImpossible(valid, imp);
 		}

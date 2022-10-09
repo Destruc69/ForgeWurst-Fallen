@@ -74,8 +74,7 @@ public class RendererImpl implements Renderer {
 			setup(playerPos);
 
 			// draw
-			for (int i = 0, n = renderables.size(); i < n; i++) {
-				Renderable renderable = renderables.get(i);
+			for (Renderable renderable : renderables) {
 				if (renderable instanceof ChunkCache.ChunkCacheRenderable && !Config.isShowChunkCache()) {
 					continue;
 				}

@@ -8,6 +8,7 @@ import stevebot.rendering.Color;
 import stevebot.rendering.Renderable;
 import stevebot.rendering.Renderer;
 
+import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,12 +16,7 @@ import java.util.Map;
 public class ChunkCache {
 
 
-	/**
-	 * The maximum number of chunks cached
-	 */
-	private final int MAX_CAPACITY = 9999;
-
-	private Map<ChunkPos, CachedChunk> chunks = new HashMap<>();
+	private final Map<ChunkPos, CachedChunk> chunks = new HashMap<>();
 
 
 
@@ -74,6 +70,7 @@ public class ChunkCache {
 	 * @return the {@link CachedChunk} that was saved
 	 */
 	private CachedChunk addChunk(ChunkPos chunkPos) {
+		int MAX_CAPACITY = 9999;
 		if (chunks.size() >= MAX_CAPACITY) {
 			removeFurthestChunk(chunkPos);
 		}
@@ -234,13 +231,9 @@ public class ChunkCache {
 		CachedChunk(ChunkPos pos) {
 			this.pos = pos;
 			this.blockIds = new int[16][16][16];
-			for (int x = 0; x < blockIds.length; x++) {
-				int[][] blocksIdsYZ = blockIds[x];
-				for (int y = 0; y < blockIds[x].length; y++) {
-					int[] blocksIdsZ = blocksIdsYZ[y];
-					for (int z = 0; z < blockIds[x][y].length; z++) {
-						blocksIdsZ[z] = BlockLibrary.ID_INVALID_BLOCK;
-					}
+			for (int[][] blocksIdsYZ : blockIds) {
+				for (int[] blocksIdsZ : blocksIdsYZ) {
+					Arrays.fill(blocksIdsZ, BlockLibrary.ID_INVALID_BLOCK);
 				}
 			}
 		}
@@ -350,7 +343,7 @@ public class ChunkCache {
 	public static class ChunkCacheRenderable implements Renderable {
 
 
-		private Map<ChunkPos, CachedChunk> chunks;
+		private final Map<ChunkPos, CachedChunk> chunks;
 
 
 

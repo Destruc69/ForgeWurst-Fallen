@@ -15,14 +15,9 @@ import stevebot.player.PlayerUtils;
 public class ActionSwim extends Action {
 
 
-	private final boolean sprint;
-
-
-
-
 	private ActionSwim(Node from, Node to, double cost) {
 		super(from, to, cost);
-		this.sprint = true;
+		boolean sprint = true;
 	}
 
 

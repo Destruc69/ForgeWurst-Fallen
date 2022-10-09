@@ -14,6 +14,8 @@ import stevebot.pathfinding.nodes.Node;
 import stevebot.pathfinding.nodes.NodeCache;
 import stevebot.player.PlayerUtils;
 
+import java.util.Objects;
+
 public class ActionPillarUp extends Action {
 
 
@@ -35,7 +37,7 @@ public class ActionPillarUp extends Action {
 
 
 
-	private StateMachine<State, Transition> stateMachine = new StateMachine<>();
+	private final StateMachine<State, Transition> stateMachine = new StateMachine<>();
 	private final Modification[] modifications;
 
 
@@ -110,11 +112,11 @@ public class ActionPillarUp extends Action {
 	 */
 	private ProcState tickJump() {
 		PlayerUtils.getMovement().moveTowards(getTo().getPos(), true);
-		if (PlayerUtils.getPlayerBlockPos().equals(getFrom().getPos())) {
+		if (Objects.equals(PlayerUtils.getPlayerBlockPos(), getFrom().getPos())) {
 			PlayerUtils.getInput().setJump();
 		}
 		if (PlayerUtils.getPlayerBlockPos().equals(getTo().getPos())) {
-			if (!PlayerUtils.getInventory().selectThrowawayBlock(true)) {
+			if (PlayerUtils.getInventory().selectThrowawayBlock(true)) {
 				return ProcState.FAILED;
 			}
 			ActionUtils.placeBlockAgainst(getFrom().getPosCopy().add(Direction.DOWN), Direction.UP);

@@ -21,7 +21,7 @@ public class ItemLibraryImpl implements ItemLibrary {
 
 	private ItemWrapper[] items;
 
-	private final EventListener listener = new EventListener<PostInitEvent>() {
+	private final EventListener<PostInitEvent> listener = new EventListener<PostInitEvent>() {
 
 		@Override
 		public Class<PostInitEvent> getEventClass() {
@@ -162,8 +162,7 @@ public class ItemLibraryImpl implements ItemLibrary {
 	 * @return the id of the item with the given name or {@link ItemLibrary#ID_INVALID_ITEM}.
 	 */
 	private int getIdFromName(String name) {
-		for (int i = 0, n = items.length; i < n; i++) {
-			final ItemWrapper entry = items[i];
+		for (final ItemWrapper entry : items) {
 			if (entry.getName().equalsIgnoreCase(name)) {
 				return entry.getId();
 			}

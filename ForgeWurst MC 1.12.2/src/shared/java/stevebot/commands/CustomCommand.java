@@ -13,7 +13,7 @@ public class CustomCommand extends CommandBase {
 
 
 	private final String name;
-	private List<CommandTemplate> templates = new ArrayList<>();
+	private final List<CommandTemplate> templates = new ArrayList<>();
 
 
 
@@ -77,7 +77,7 @@ public class CustomCommand extends CommandBase {
 		}
 
 		if (!foundCommand) {
-			throw new WrongUsageException(getUsage(sender), new Object[0]);
+			throw new WrongUsageException(getUsage(sender));
 		}
 
 	}
@@ -98,7 +98,7 @@ public class CustomCommand extends CommandBase {
 			return false;
 		}
 
-		if (template.tokens.length == 1 && cmdArgs.length == 0) {
+		if (template.tokens.length == 1) {
 			return true;
 		}
 

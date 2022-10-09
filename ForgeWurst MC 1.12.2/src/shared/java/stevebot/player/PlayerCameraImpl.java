@@ -21,9 +21,9 @@ public class PlayerCameraImpl implements PlayerCamera {
 	private CameraState state = CameraState.DEFAULT;
 	private boolean isFreelook = false;
 	private CameraState preForcedState = state;
-	private Vector2f lastFreeView = new Vector2f();
+	private final Vector2f lastFreeView = new Vector2f();
 
-	private final EventListener listener = new EventListener<TickEvent.RenderTickEvent>() {
+	private final EventListener<TickEvent.RenderTickEvent> listener = new EventListener<TickEvent.RenderTickEvent>() {
 		@Override
 		public Class<TickEvent.RenderTickEvent> getEventClass() {
 			return TickEvent.RenderTickEvent.class;

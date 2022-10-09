@@ -37,12 +37,9 @@ public class ActionFall extends Action {
 
 
 
-	private StateMachine<State, Transition> stateMachine = new StateMachine<>();
+	private final StateMachine<State, Transition> stateMachine = new StateMachine<>();
 
 	private final Modification[] modifications = new Modification[1];
-	private boolean landInWater;
-
-
 
 
 	private ActionFall(Node from, Node to, double cost) {
@@ -50,7 +47,7 @@ public class ActionFall extends Action {
 		stateMachine.defineTransition(State.FALLING, Transition.LANDED, State.FINISHING);
 
 		final FastBlockPos fallOn = to.getPosCopy().add(Direction.DOWN);
-		this.landInWater = BlockUtils.isWater(fallOn);
+		boolean landInWater = BlockUtils.isWater(fallOn);
 
 		if (!landInWater) {
 			final int fallDamage = ActionUtils.calculateFallDamage(from.getPos().getY() - to.getPos().getY());

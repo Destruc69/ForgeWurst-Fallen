@@ -15,6 +15,7 @@ import stevebot.player.PlayerUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ActionMineUp extends Action {
 
@@ -37,7 +38,7 @@ public class ActionMineUp extends Action {
 
 
 
-	private StateMachine<State, Transition> stateMachine = new StateMachine<>();
+	private final StateMachine<State, Transition> stateMachine = new StateMachine<>();
 
 	private final Modification[] modifications;
 
@@ -191,7 +192,7 @@ public class ActionMineUp extends Action {
 	 * Move to the target position.
 	 */
 	private ProcState tickMove() {
-		if (PlayerUtils.getPlayerBlockPos().equals(getFrom().getPos())) {
+		if (Objects.equals(PlayerUtils.getPlayerBlockPos(), getFrom().getPos())) {
 			PlayerUtils.getInput().setJump();
 		}
 		if (PlayerUtils.getMovement().moveTowards(getTo().getPos(), true)) {
@@ -267,7 +268,7 @@ public class ActionMineUp extends Action {
 
 			// check block above to break
 			final BaseBlockPos posAbove = node.getPosCopy().add(0, 2, 0);
-			if (!ActionUtils.canSafelyBreak(posAbove)) {
+			if (ActionUtils.canSafelyBreak(posAbove)) {
 				return Result.invalid();
 			}
 			if (!BlockUtils.canWalkThrough(posAbove)) {
@@ -282,7 +283,7 @@ public class ActionMineUp extends Action {
 
 			// check top block to break
 			final BaseBlockPos posTop = to.copyAsFastBlockPos().add(Direction.UP);
-			if (!ActionUtils.canSafelyBreak(posTop)) {
+			if (ActionUtils.canSafelyBreak(posTop)) {
 				return Result.invalid();
 			}
 			if (!BlockUtils.canWalkThrough(posTop)) {
@@ -296,17 +297,16 @@ public class ActionMineUp extends Action {
 			}
 
 			// check bottom block to break
-			final BaseBlockPos posBottom = to;
-			if (!ActionUtils.canSafelyBreak(posBottom)) {
+			if (ActionUtils.canSafelyBreak(to)) {
 				return Result.invalid();
 			}
-			if (!BlockUtils.canWalkThrough(posBottom)) {
-				final BreakBlockCheckResult resultBottom = ActionUtils.checkBlockToBreak(posBottom);
+			if (!BlockUtils.canWalkThrough(to)) {
+				final BreakBlockCheckResult resultBottom = ActionUtils.checkBlockToBreak(to);
 				if (!resultBottom.breakable) {
 					return Result.invalid();
 				} else {
 					totalTicksTopBreak += resultBottom.ticksToBreak;
-					modificationList.add(Modification.breakBlock(posBottom, (ItemToolWrapper) resultBottom.bestTool));
+					modificationList.add(Modification.breakBlock(to, (ItemToolWrapper) resultBottom.bestTool));
 				}
 			}
 

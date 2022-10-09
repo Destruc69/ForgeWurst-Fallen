@@ -8,7 +8,7 @@ import java.util.Map;
 public class CommandSystem {
 
 
-	private static Map<String, CustomCommand> commands = new HashMap<>();
+	private static final Map<String, CustomCommand> commands = new HashMap<>();
 
 
 

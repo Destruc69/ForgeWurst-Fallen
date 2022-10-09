@@ -13,6 +13,8 @@ import stevebot.pathfinding.nodes.Node;
 import stevebot.pathfinding.nodes.NodeCache;
 import stevebot.player.PlayerUtils;
 
+import java.util.Objects;
+
 public class ActionSprintJump extends Action {
 
 
@@ -34,7 +36,7 @@ public class ActionSprintJump extends Action {
 
 
 
-	private StateMachine<State, Transition> stateMachine = new StateMachine<>();
+	private final StateMachine<State, Transition> stateMachine = new StateMachine<>();
 
 
 
@@ -105,11 +107,11 @@ public class ActionSprintJump extends Action {
 	private ProcState tickJump() {
 		PlayerUtils.getMovement().moveTowards(getTo().getPos(), true);
 		PlayerUtils.getInput().setSprint();
-		final double distToCenter = BlockUtils.distToCenter(getFrom().getPos(), PlayerUtils.getPlayerPosition());
+		final double distToCenter = BlockUtils.distToCenter(getFrom().getPos(), Objects.requireNonNull(PlayerUtils.getPlayerPosition()));
 		if (distToCenter > 0.4) {
 			PlayerUtils.getInput().setJump();
 		}
-		if (PlayerUtils.getPlayer().onGround && PlayerUtils.getPlayerBlockPos().equals(getTo().getPos())) {
+		if (PlayerUtils.getPlayer().onGround && Objects.equals(PlayerUtils.getPlayerBlockPos(), getTo().getPos())) {
 			stateMachine.fireTransition(Transition.TOUCHED_GROUND);
 		}
 		return ProcState.EXECUTING;
@@ -161,12 +163,12 @@ public class ActionSprintJump extends Action {
 			if (!BlockUtils.isLoaded(to)) {
 				return Result.unloaded();
 			}
-			if (!ActionUtils.canJumpAt(to)) {
+			if (ActionUtils.canJumpAt(to)) {
 				return Result.invalid();
 			}
 
 			// check from-position
-			if (!ActionUtils.canJumpAt(node.getPos())) {
+			if (ActionUtils.canJumpAt(node.getPos())) {
 				return Result.invalid();
 			}
 
@@ -181,7 +183,7 @@ public class ActionSprintJump extends Action {
 						return Result.invalid();
 					}
 				} else {
-					if (!ActionUtils.canJumpThrough(gap)) {
+					if (ActionUtils.canJumpThrough(gap)) {
 						return Result.invalid();
 					}
 				}

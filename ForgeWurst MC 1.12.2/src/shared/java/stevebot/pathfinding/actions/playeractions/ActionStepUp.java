@@ -14,6 +14,8 @@ import stevebot.pathfinding.nodes.Node;
 import stevebot.pathfinding.nodes.NodeCache;
 import stevebot.player.PlayerUtils;
 
+import java.util.Objects;
+
 public class ActionStepUp extends Action {
 
 
@@ -35,7 +37,7 @@ public class ActionStepUp extends Action {
 
 
 
-	private StateMachine<State, Transition> stateMachine = new StateMachine<>();
+	private final StateMachine<State, Transition> stateMachine = new StateMachine<>();
 
 
 
@@ -111,7 +113,7 @@ public class ActionStepUp extends Action {
 	 * Jump up to the target block.
 	 */
 	private ProcState tickJump() {
-		if (PlayerUtils.getPlayerBlockPos().equals(getFrom().getPos())) {
+		if (Objects.equals(PlayerUtils.getPlayerBlockPos(), getFrom().getPos())) {
 			PlayerUtils.getInput().setJump();
 		}
 		if (PlayerUtils.getMovement().moveTowards(getTo().getPos(), true)) {

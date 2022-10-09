@@ -34,9 +34,9 @@ public class ActionUtils {
 		return BlockUtils.canWalkThrough(pos)
 				&& BlockUtils.canWalkThrough(fastPos1)
 				&& BlockUtils.canWalkThrough(fastPos2)
-				&& !BlockUtils.affectsJump(pos)
-				&& !BlockUtils.affectsJump(fastPos1)
-				&& !BlockUtils.affectsJump(fastPos1);
+				&& BlockUtils.affectsJump(pos)
+				&& BlockUtils.affectsJump(fastPos1)
+				&& BlockUtils.affectsJump(fastPos1);
 	}
 
 
@@ -49,12 +49,12 @@ public class ActionUtils {
 	 * @return whether the player can jump at the given positions.
 	 */
 	public static boolean canJump(BaseBlockPos... positions) {
-		for (int i = 0; i < positions.length; i++) {
-			if (!canJump(positions[i])) {
-				return false;
+		for (BaseBlockPos position : positions) {
+			if (!canJump(position)) {
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 
@@ -68,9 +68,9 @@ public class ActionUtils {
 	 */
 	public static boolean canJumpThrough(BaseBlockPos pos) {
 		if (BlockUtils.canWalkOn(fastPos1.set(pos).add(Direction.DOWN))) {
-			return false;
+			return true;
 		}
-		return canJump(pos);
+		return !canJump(pos);
 	}
 
 
@@ -84,9 +84,9 @@ public class ActionUtils {
 	 */
 	public static boolean canJumpAt(BaseBlockPos pos) {
 		if (!BlockUtils.canWalkOn(fastPos1.set(pos).add(Direction.DOWN))) {
-			return false;
+			return true;
 		}
-		return canJump(pos);
+		return !canJump(pos);
 	}
 
 
@@ -131,8 +131,8 @@ public class ActionUtils {
 	 * @return whether the player can move through the given positions
 	 */
 	public static boolean canMoveThroughAll(BaseBlockPos... positions) {
-		for (int i = 0; i < positions.length; i++) {
-			if (!canMoveThrough(positions[i])) {
+		for (BaseBlockPos position : positions) {
+			if (!canMoveThrough(position)) {
 				return false;
 			}
 		}
@@ -211,11 +211,7 @@ public class ActionUtils {
 		if (!isDoorBottom && !BlockUtils.canWalkThrough(position)) {
 			return false;
 		}
-		if (!isDoorTop && !BlockUtils.canWalkThrough(positionTop)) {
-			return false;
-		}
-
-		return true;
+		return isDoorTop || BlockUtils.canWalkThrough(positionTop);
 	}
 
 
@@ -301,34 +297,30 @@ public class ActionUtils {
 		// check above
 		fastPos1.set(pos).add(Direction.UP);
 		if (BlockUtils.isLiquid(fastPos1) || BlockUtils.hasGravity(fastPos1)) {
-			return false;
+			return true;
 		}
 
 		// check north
 		fastPos1.set(pos).add(Direction.NORTH);
 		if (BlockUtils.isLiquid(fastPos1)) {
-			return false;
+			return true;
 		}
 
 		// check east
 		fastPos1.set(pos).add(Direction.EAST);
 		if (BlockUtils.isLiquid(fastPos1)) {
-			return false;
+			return true;
 		}
 
 		// check south
 		fastPos1.set(pos).add(Direction.SOUTH);
 		if (BlockUtils.isLiquid(fastPos1)) {
-			return false;
+			return true;
 		}
 
 		// check west
 		fastPos1.set(pos).add(Direction.WEST);
-		if (BlockUtils.isLiquid(fastPos1)) {
-			return false;
-		}
-
-		return true;
+		return BlockUtils.isLiquid(fastPos1);
 	}
 
 

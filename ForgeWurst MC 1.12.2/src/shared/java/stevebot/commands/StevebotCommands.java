@@ -44,6 +44,7 @@ public class StevebotCommands {
 					if (PlayerUtils.getPlayer() != null) {
 						final BaseBlockPos from = PlayerUtils.getPlayerBlockPos();
 						final BaseBlockPos to = CommandListener.getAsBaseBlockPos("xs", "ys", "zs", parameters);
+						assert from != null;
 						pathHandler.createPath(new BaseBlockPos(from), new ExactGoal(new BaseBlockPos(to)), true, false);
 					}
 				});
@@ -57,6 +58,7 @@ public class StevebotCommands {
 					if (PlayerUtils.getPlayer() != null) {
 						final BaseBlockPos from = PlayerUtils.getPlayerBlockPos();
 						final BaseBlockPos to = CommandListener.getAsBaseBlockPos("xs", "ys", "zs", parameters);
+						assert from != null;
 						pathHandler.createPath(new BaseBlockPos(from), new ExactGoal(new BaseBlockPos(to)), true, true);
 					}
 				});
@@ -70,6 +72,7 @@ public class StevebotCommands {
 					if (PlayerUtils.getPlayer() != null) {
 						final BaseBlockPos from = PlayerUtils.getPlayerBlockPos();
 						final Vector3d dir = PlayerUtils.getCamera().getLookDir().setLength(CommandListener.getAsInt("dist", parameters));
+						assert from != null;
 						Goal goal = new XZGoal(from.getX() + dir.getIntX(), from.getZ() + dir.getIntZ());
 						pathHandler.createPath(new BaseBlockPos(from), goal, true, false);
 					}
@@ -84,6 +87,7 @@ public class StevebotCommands {
 					if (PlayerUtils.getPlayer() != null) {
 						final BaseBlockPos from = PlayerUtils.getPlayerBlockPos();
 						final Vector3d dir = PlayerUtils.getCamera().getLookDir().setLength(CommandListener.getAsInt("dist", parameters));
+						assert from != null;
 						Goal goal = new XZGoal(from.getX() + dir.getIntX(), from.getZ() + dir.getIntZ());
 						pathHandler.createPath(new BaseBlockPos(from), goal, true, true);
 					}
@@ -99,6 +103,7 @@ public class StevebotCommands {
 						final BaseBlockPos from = PlayerUtils.getPlayerBlockPos();
 						final int level = CommandListener.getAsInt("level", parameters);
 						Goal goal = new YGoal(level);
+						assert from != null;
 						pathHandler.createPath(new BaseBlockPos(from), goal, true, false);
 					}
 				});
@@ -113,6 +118,7 @@ public class StevebotCommands {
 						final BaseBlockPos from = PlayerUtils.getPlayerBlockPos();
 						final int level = CommandListener.getAsInt("level", parameters);
 						Goal goal = new YGoal(level);
+						assert from != null;
 						pathHandler.createPath(new BaseBlockPos(from), goal, true, true);
 					}
 				});
@@ -129,6 +135,7 @@ public class StevebotCommands {
 						final BaseBlockPos posBlock = BlockUtils.findNearest(BlockUtils.getBlockLibrary().getBlockByName(blockName), from, 219, 219);
 						if (posBlock != null) {
 							Goal goal = new ExactGoal(posBlock);
+							assert from != null;
 							pathHandler.createPath(new BaseBlockPos(from), goal, true, false);
 						} else {
 							Stevebot.log("No block of the given type found.");
@@ -148,6 +155,7 @@ public class StevebotCommands {
 						final BaseBlockPos posBlock = BlockUtils.findNearest(BlockUtils.getBlockLibrary().getBlockByName(blockName), from, 219, 219);
 						if (posBlock != null) {
 							Goal goal = new ExactGoal(posBlock);
+							assert from != null;
 							pathHandler.createPath(new BaseBlockPos(from), goal, true, true);
 						} else {
 							Stevebot.log("No block of the given type found.");

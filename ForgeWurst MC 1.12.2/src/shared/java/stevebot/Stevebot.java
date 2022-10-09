@@ -27,7 +27,7 @@ import stevebot.rendering.RendererImpl;
 public class Stevebot {
 
 
-	private static Logger logger = LogManager.getLogger(Config.MODID);
+	private static final Logger logger = LogManager.getLogger(Config.MODID);
 
 	private static EventManager eventManager;
 	private static ModEventProducer eventProducer;

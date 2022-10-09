@@ -14,6 +14,8 @@ import stevebot.pathfinding.nodes.Node;
 import stevebot.pathfinding.nodes.NodeCache;
 import stevebot.player.PlayerUtils;
 
+import java.util.Objects;
+
 public class ActionBridgeFree extends Action {
 
 
@@ -35,7 +37,7 @@ public class ActionBridgeFree extends Action {
 
 
 
-	private StateMachine<State, Transition> stateMachine = new StateMachine<>();
+	private final StateMachine<State, Transition> stateMachine = new StateMachine<>();
 	private final Direction direction;
 	private final Modification[] modifications;
 
@@ -86,7 +88,7 @@ public class ActionBridgeFree extends Action {
 	private ProcState tickPrepare() {
 		PlayerUtils.getInput().holdSneak();
 		PlayerUtils.getMovement().moveTowards(getTo().getPos(), true);
-		if (getTo().getPos().equals(PlayerUtils.getPlayerBlockPos()) && BlockUtils.distToEdge(PlayerUtils.getPlayerPosition(), direction.opposite()) > 0.2) {
+		if (getTo().getPos().equals(PlayerUtils.getPlayerBlockPos()) && BlockUtils.distToEdge(Objects.requireNonNull(PlayerUtils.getPlayerPosition()), direction.opposite()) > 0.2) {
 			stateMachine.fireTransition(Transition.PREPARED);
 		}
 		return ProcState.EXECUTING;
@@ -99,7 +101,7 @@ public class ActionBridgeFree extends Action {
 	 * Place the block after the required position was reached.
 	 */
 	private ProcState tickPlaceBridge() {
-		if (!PlayerUtils.getInventory().selectThrowawayBlock(false)) {
+		if (PlayerUtils.getInventory().selectThrowawayBlock(false)) {
 			return ProcState.FAILED;
 		}
 		PlayerUtils.getCamera().enableForceCamera();

@@ -9,9 +9,9 @@ import stevebot.pathfinding.nodes.Node;
 public abstract class Action {
 
 
-	private Node from;
-	private Node to;
-	private double cost;
+	private final Node from;
+	private final Node to;
+	private final double cost;
 
 
 

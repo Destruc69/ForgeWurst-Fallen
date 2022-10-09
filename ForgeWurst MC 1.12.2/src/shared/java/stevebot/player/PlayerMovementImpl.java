@@ -5,6 +5,8 @@ import com.ruegnerlukas.simplemath.vectors.vec3.Vector3d;
 import stevebot.data.blockpos.BaseBlockPos;
 import stevebot.data.blocks.BlockUtils;
 
+import java.util.Objects;
+
 public class PlayerMovementImpl implements PlayerMovement {
 
 
@@ -37,7 +39,7 @@ public class PlayerMovementImpl implements PlayerMovement {
 	@Override
 	public boolean moveTowards(double x, double y, double z) {
 		if (!PlayerUtils.isAtLocation(x, y, z)) {
-			camera.setLookAt(BlockUtils.toBaseBlockPos(x, PlayerUtils.getPlayerPosition().y, z), true);
+			camera.setLookAt(BlockUtils.toBaseBlockPos(x, Objects.requireNonNull(PlayerUtils.getPlayerPosition()).y, z), true);
 			input.setMoveForward();
 			return false;
 		} else {
@@ -53,7 +55,7 @@ public class PlayerMovementImpl implements PlayerMovement {
 		if (PlayerUtils.isAtLocation(x, z)) {
 			return true;
 		} else {
-			camera.setLookAt(BlockUtils.toBaseBlockPos(new Vector3d(x, PlayerUtils.getPlayerPosition().y, z)), true);
+			camera.setLookAt(BlockUtils.toBaseBlockPos(new Vector3d(x, Objects.requireNonNull(PlayerUtils.getPlayerPosition()).y, z)), true);
 			input.setMoveForward();
 			return false;
 		}
@@ -65,9 +67,9 @@ public class PlayerMovementImpl implements PlayerMovement {
 	@Override
 	public boolean moveTowardsSpeed(double x, double y, double z, double maxHorSpeed) {
 		if (!PlayerUtils.isAtLocation(x, y, z)) {
-			final double currentSpeedSquared = PlayerUtils.getMotionVector().mul(1, 0, 1).length2();
+			final double currentSpeedSquared = Objects.requireNonNull(PlayerUtils.getMotionVector()).mul(1, 0, 1).length2();
 			if (currentSpeedSquared < maxHorSpeed * maxHorSpeed) {
-				camera.setLookAt(BlockUtils.toBaseBlockPos(new Vector3d(x, PlayerUtils.getPlayerPosition().y, z)), true);
+				camera.setLookAt(BlockUtils.toBaseBlockPos(new Vector3d(x, Objects.requireNonNull(PlayerUtils.getPlayerPosition()).y, z)), true);
 				input.setMoveForward();
 			}
 			return false;
@@ -81,7 +83,7 @@ public class PlayerMovementImpl implements PlayerMovement {
 
 	@Override
 	public boolean moveTowardsSpeed(double x, double z, double maxHorSpeed) {
-		final double currentSpeedSquared = PlayerUtils.getMotionVector().mul(1, 0, 1).length2();
+		final double currentSpeedSquared = Objects.requireNonNull(PlayerUtils.getMotionVector()).mul(1, 0, 1).length2();
 		if (currentSpeedSquared > maxHorSpeed * maxHorSpeed) {
 			return false;
 		} else {
@@ -94,7 +96,7 @@ public class PlayerMovementImpl implements PlayerMovement {
 
 	@Override
 	public boolean slowDown(double prefSpeed) {
-		Vector3d motion = PlayerUtils.getMotionVector().mul(1, 0, 1);
+		Vector3d motion = Objects.requireNonNull(PlayerUtils.getMotionVector()).mul(1, 0, 1);
 		final double speed = motion.length();
 
 		if (speed > prefSpeed) {

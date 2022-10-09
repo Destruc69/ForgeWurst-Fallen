@@ -182,6 +182,7 @@ public class PlayerUtils {
 		EntityPlayerSP player = getPlayer();
 		if (player != null) {
 			final Vector3d playerPos = getPlayerPosition();
+			assert playerPos != null;
 			playerPos.x = playerPos.x - Math.floor(playerPos.x);
 			playerPos.y = playerPos.y - Math.floor(playerPos.y);
 			playerPos.z = playerPos.z - Math.floor(playerPos.z);
@@ -301,6 +302,7 @@ public class PlayerUtils {
 	 */
 	public static boolean isAtLocationThreshold(double x, double z, double threshold) {
 		final Vector3d current = getPlayerPosition();
+		assert current != null;
 		if (current.dist2(x, current.y, z) > threshold) {
 			return false;
 		} else {
@@ -319,11 +321,7 @@ public class PlayerUtils {
 	 */
 	public static boolean isAtLocation(double x, double y, double z) {
 		final Vector3d current = getPlayerPosition();
-		if (current.dist2(x, y, z) > AT_LOC_DIST_ERROR) {
-			return false;
-		} else {
-			return true;
-		}
+		return !(current.dist2(x, y, z) > AT_LOC_DIST_ERROR);
 	}
 
 

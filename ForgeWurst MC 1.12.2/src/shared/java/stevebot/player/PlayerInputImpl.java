@@ -13,7 +13,7 @@ public class PlayerInputImpl implements PlayerInput {
 	private boolean isHoldingJump = false;
 	private boolean isHoldingSneak = false;
 
-	private final EventListener listenerPlayerTick = new EventListener<TickEvent.PlayerTickEvent>() {
+	private final EventListener<TickEvent.PlayerTickEvent> listenerPlayerTick = new EventListener<TickEvent.PlayerTickEvent>() {
 		@Override
 		public Class<TickEvent.PlayerTickEvent> getEventClass() {
 			return TickEvent.PlayerTickEvent.class;
@@ -32,7 +32,7 @@ public class PlayerInputImpl implements PlayerInput {
 		}
 	};
 
-	private final EventListener listenerConfigChanged = new EventListener<ConfigChangedEvent.PostConfigChangedEvent>() {
+	private final EventListener<ConfigChangedEvent.PostConfigChangedEvent> listenerConfigChanged = new EventListener<ConfigChangedEvent.PostConfigChangedEvent>() {
 		@Override
 		public Class<ConfigChangedEvent.PostConfigChangedEvent> getEventClass() {
 			return ConfigChangedEvent.PostConfigChangedEvent.class;
@@ -202,7 +202,7 @@ public class PlayerInputImpl implements PlayerInput {
 
 	@Override
 	public boolean isHoldingJump() {
-		return isHoldingJump;
+		return !isHoldingJump;
 	}
 
 
@@ -329,11 +329,11 @@ public class PlayerInputImpl implements PlayerInput {
 		setMoveBackward(false);
 		setMoveLeft(false);
 		setMoveRight(false);
-		if (!isHoldingJump()) {
+		if (isHoldingJump()) {
 			setJump(false, true);
 		}
 		setSprint(false);
-		if (!isHoldingJump()) {
+		if (isHoldingJump()) {
 			setSneak(false);
 		}
 		setPlaceBlock(false);

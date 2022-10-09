@@ -14,6 +14,8 @@ import stevebot.pathfinding.nodes.Node;
 import stevebot.pathfinding.nodes.NodeCache;
 import stevebot.player.PlayerUtils;
 
+import java.util.Objects;
+
 public class ActionJump extends Action {
 
 
@@ -35,7 +37,7 @@ public class ActionJump extends Action {
 
 
 
-	private StateMachine<State, Transition> stateMachine = new StateMachine<>();
+	private final StateMachine<State, Transition> stateMachine = new StateMachine<>();
 
 
 
@@ -113,7 +115,7 @@ public class ActionJump extends Action {
 	 */
 	private ProcState tickJump() {
 		PlayerUtils.getMovement().moveTowards(getTo().getPos(), true);
-		final double distToCenter = BlockUtils.distToCenter(getFrom().getPos(), PlayerUtils.getPlayerPosition());
+		final double distToCenter = BlockUtils.distToCenter(getFrom().getPos(), Objects.requireNonNull(PlayerUtils.getPlayerPosition()));
 		if (distToCenter > 0.4) {
 			PlayerUtils.getInput().setJump();
 		}
@@ -177,17 +179,17 @@ public class ActionJump extends Action {
 			if (!BlockUtils.isLoaded(to)) {
 				return Result.unloaded();
 			}
-			if (!ActionUtils.canJumpAt(to)) {
+			if (ActionUtils.canJumpAt(to)) {
 				return Result.invalid();
 			}
 
 			// check from-position
-			if (!ActionUtils.canJumpAt(node.getPos())) {
+			if (ActionUtils.canJumpAt(node.getPos())) {
 				return Result.invalid();
 			}
 
 			// check gap
-			if (!ActionUtils.canJumpThrough(node.getPosCopy().add(direction.dx, 0, direction.dy))) {
+			if (ActionUtils.canJumpThrough(node.getPosCopy().add(direction.dx, 0, direction.dy))) {
 				return Result.invalid();
 			}
 
@@ -204,18 +206,18 @@ public class ActionJump extends Action {
 			if (!BlockUtils.isLoaded(to)) {
 				return Result.unloaded();
 			}
-			if (!ActionUtils.canJumpAt(to)) {
+			if (ActionUtils.canJumpAt(to)) {
 				return Result.invalid();
 			}
 
 			// check from-position
-			if (!ActionUtils.canJumpAt(node.getPos())) {
+			if (ActionUtils.canJumpAt(node.getPos())) {
 				return Result.invalid();
 			}
 
 			// check gap
 			final FastBlockPos from = node.getPosCopy();
-			if (!ActionUtils.canJumpThrough(from.add(direction))) {
+			if (ActionUtils.canJumpThrough(from.add(direction))) {
 				return Result.invalid();
 			}
 
@@ -223,7 +225,7 @@ public class ActionJump extends Action {
 			Direction[] splitDirection1 = direction.split();
 			final FastBlockPos p0 = node.getPosCopy().add(splitDirection1[0]);
 			final FastBlockPos p1 = node.getPosCopy().add(splitDirection1[1]);
-			if (!ActionUtils.canJump(p0, p1)) {
+			if (ActionUtils.canJump(p0, p1)) {
 				return Result.invalid();
 			}
 
@@ -231,7 +233,7 @@ public class ActionJump extends Action {
 			Direction[] splitDirection2 = direction.split();
 			final FastBlockPos p2 = node.getPosCopy().add(direction).add(splitDirection2[0]);
 			final FastBlockPos p3 = node.getPosCopy().add(direction).add(splitDirection2[1]);
-			if (!ActionUtils.canJump(p2, p3)) {
+			if (ActionUtils.canJump(p2, p3)) {
 				return Result.invalid();
 			}
 
