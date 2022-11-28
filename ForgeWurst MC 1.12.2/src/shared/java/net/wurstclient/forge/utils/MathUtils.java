@@ -85,16 +85,16 @@ public final class MathUtils {
 
 	public static double[] directionSpeed(double speed) {
 		final Minecraft mc = Minecraft.getMinecraft();
-		if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
+		if (mc.gameSettings.keyBindForward.isKeyDown()) {
 			forward = 1;
-		} else if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
+		} else if (mc.gameSettings.keyBindBack.isKeyDown()) {
 			forward = -1;
 		} else {
 			forward = 0;
 		}
-		if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
+		if (mc.gameSettings.keyBindLeft.isKeyDown()) {
 			side = 1;
-		} else if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
+		} else if (mc.gameSettings.keyBindRight.isKeyDown()) {
 			side = -1;
 		} else {
 			side = 0;

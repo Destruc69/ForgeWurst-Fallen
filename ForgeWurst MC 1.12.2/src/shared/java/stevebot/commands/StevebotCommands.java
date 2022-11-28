@@ -19,9 +19,11 @@ import stevebot.player.PlayerUtils;
 
 public class StevebotCommands {
 
+	public static PathHandler thePathHandler;
+
 
 	public static void initialize(PathHandler pathHandler) {
-
+		thePathHandler = pathHandler;
 		// path <from> <to>
 		CommandSystem.addCommand(
 				"pathFromTo",

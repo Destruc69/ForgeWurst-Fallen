@@ -10,14 +10,13 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.wurstclient.fmlevents.WPacketInputEvent;
 import net.wurstclient.fmlevents.WPostMotionEvent;
 import net.wurstclient.fmlevents.WPreMotionEvent;
 import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.compatibility.WVec3d;
 
-import static net.wurstclient.forge.hacks.FreeCam.normalizeAngle;
+import static net.wurstclient.forge.hacks.render.FreeCam.normalizeAngle;
 
 @Mod.EventBusSubscriber
 public final class RotationUtils {

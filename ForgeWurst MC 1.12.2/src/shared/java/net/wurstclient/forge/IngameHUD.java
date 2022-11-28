@@ -15,6 +15,7 @@ import net.wurstclient.forge.clickgui.ClickGui;
 import net.wurstclient.forge.clickgui.ClickGuiScreen;
 import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.hacks.ClickGuiHack;
+import net.wurstclient.forge.hudmodules.HudModules;
 import net.wurstclient.forge.utils.TextUtil;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -22,6 +23,7 @@ import org.lwjgl.opengl.GL11;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Objects;
 
 public final class IngameHUD {
 	private final Minecraft mc = Minecraft.getMinecraft();
@@ -30,10 +32,7 @@ public final class IngameHUD {
 
 	public static double theColor;
 
-	public static double xx = 145 * 4 + 45;
-	public static double yy = 4 * 55 * 2;
-
-	float textColor;
+	public static float textColor;
 
 	String color;
 
@@ -70,22 +69,21 @@ public final class IngameHUD {
 
 		if (!ForgeWurst.getForgeWurst().getHax().clickGuiHack.nogui().isChecked()) {
 
-			if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
-				xx = xx + 1;
-			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
-				xx = xx - 1;
+			if (ForgeWurst.getForgeWurst().getHax().hudModules.isEnabled()) {
+				if (ForgeWurst.getForgeWurst().getHax().hudModules.speed.isChecked()) {
+					GL11.glPushMatrix();
+					GL11.glScaled(1.55555555, 1.55555555, 0.88888888);
+					WMinecraft.getFontRenderer().drawStringWithShadow(String.format("%.3f", mc.player.motionX) + " " + String.format("%.3f", mc.player.motionY) + " " + String.format("%.3f", mc.player.motionZ), (int) HudModules.speedX, (int) HudModules.speedY, (int) IngameHUD.textColor);
+					GL11.glPopMatrix();
+				}
+				if (ForgeWurst.getForgeWurst().getHax().hudModules.coords.isChecked()) {
+					GL11.glPushMatrix();
+					GL11.glScaled(1.55555555, 1.55555555, 0.88888888);
+					WMinecraft.getFontRenderer().drawStringWithShadow(Math.round(mc.player.posX) + " " + Math.round(mc.player.posY) + " " + Math.round(mc.player.posZ), (int) HudModules.coordX, (int) HudModules.coordY, (int) IngameHUD.theColor);
+					GL11.glPopMatrix();
+				}
 			}
 
-			if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
-				yy = yy - 1;
-			}
-
-			if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
-				yy = yy + 1;
-			}
-
-			ArrayList<Hack> hacks = new ArrayList<>();
 			// title
 			GL11.glPushMatrix();
 			GL11.glScaled(1.55555555, 1.55555555, 0.88888888);
@@ -107,17 +105,11 @@ public final class IngameHUD {
 			WMinecraft.getFontRenderer().drawStringWithShadow(" _____", 4, 4, (int) textColor);
 			GL11.glPopMatrix();
 
-			//coords
-			GL11.glPushMatrix();
-			GL11.glScaled(1.55555555, 1.55555555, 0.88888888);
-			WMinecraft.getFontRenderer().drawStringWithShadow(Math.round(mc.player.posX) + " " + Math.round(mc.player.posY) + " " + Math.round(mc.player.posZ), (float) xx, (float) yy, (int) textColor);
-			GL11.glPopMatrix();
-
 			GL11.glShadeModel(GL11.GL_SMOOTH);
 
 			// hack list
 			int y = 23;
-			hacks.addAll(hackList.getValues());
+			ArrayList<Hack> hacks = new ArrayList<>(hackList.getValues());
 			hacks.sort(Comparator.comparing(Hack::getName));
 
 			gui.updateColors();
@@ -125,6 +117,9 @@ public final class IngameHUD {
 			for (Hack hack : hacks) {
 				if (!hack.isEnabled())
 					continue;
+
+				if (hack.getName().equals(""))
+					return;
 
 				if (hack.getCategory().getName().contains("Combat")) {
 					color = TextUtil.coloredString(hack.getName(), TextUtil.Color.RED);

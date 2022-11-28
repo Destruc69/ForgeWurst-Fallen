@@ -9,10 +9,8 @@ package net.wurstclient.forge.commands;
 
 import net.minecraft.util.math.BlockPos;
 import net.wurstclient.forge.Command;
-import net.wurstclient.forge.hacks.Pointer;
+import net.wurstclient.forge.hacks.render.Pointer;
 import net.wurstclient.forge.utils.ChatUtils;
-
-import java.util.Objects;
 
 public final class AddPoint extends Command {
     public AddPoint() {

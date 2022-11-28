@@ -18,7 +18,7 @@ import net.minecraft.entity.passive.EntityWaterMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.compatibility.WMinecraft;
-import net.wurstclient.forge.hacks.RadarHack;
+import net.wurstclient.forge.hacks.render.RadarHack;
 
 public final class Radar extends Component
 {
