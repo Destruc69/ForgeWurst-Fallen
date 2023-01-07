@@ -5,25 +5,29 @@
  * License, version 3. If a copy of the GPL was not distributed with this
  * file, You can obtain one at: https://www.gnu.org/licenses/gpl-3.0.txt
  */
-package net.wurstclient.forge.hacks.movement;
+package net.wurstclient.forge.hacks.player;
 
+import net.minecraft.network.play.client.CPacketConfirmTeleport;
+import net.minecraft.network.play.client.CPacketPlayer;
+import net.minecraft.network.play.server.SPacketEntityTeleport;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.wurstclient.fmlevents.WPacketInputEvent;
+import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.utils.KeyBindingUtils;
-import net.wurstclient.forge.utils.NotiUtils;
 
-public final class AutoSprintHack extends Hack {
+public final class GodMode extends Hack {
 
 	private final EnumSetting<Mode> mode =
-			new EnumSetting<>("Mode", Mode.values(), Mode.RAGE);
+			new EnumSetting<>("Mode", Mode.values(), Mode.AAC);
 
-	public AutoSprintHack() {
-		super("AutoSprint", "Makes you sprint automatically.");
-		setCategory(Category.MOVEMENT);
+	public GodMode() {
+		super("GodMode", "Prevents damage.");
+		setCategory(Category.PLAYER);
 		addSetting(mode);
 	}
 
@@ -44,28 +48,28 @@ public final class AutoSprintHack extends Hack {
 	}
 
 	@SubscribeEvent
-	public void onUpdate(WUpdateEvent event) {
-		if (mode.getSelected().rage) {
-			if (mc.player.moveForward != 0 || mc.player.moveStrafing != 0) {
-				mc.player.setSprinting(true);
+	public void onUpdate(WPacketInputEvent event) {
+		if (mode.getSelected().aac) {
+			mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY - 0.1, mc.player.posZ, true));
+		} else if (mode.getSelected().portal) {
+			if (event.getPacket() instanceof CPacketConfirmTeleport) {
+				event.setCanceled(true);
 			}
-		} else {
-			KeyBindingUtils.setPressed(mc.gameSettings.keyBindSprint, true);
 		}
 	}
 
 	private enum Mode {
-		NORMAL("Normal", true, false),
-		RAGE("Rage", false, true);
+		PORTAL("Portal", true, false),
+		AAC("AAC", false, true);
 
 		private final String name;
-		private final boolean normal;
-		private final boolean rage;
+		private final boolean portal;
+		private final boolean aac;
 
-		private Mode(String name, boolean normal, boolean rage) {
+		private Mode(String name, boolean portal, boolean aac) {
 			this.name = name;
-			this.normal = normal;
-			this.rage = rage;
+			this.portal = portal;
+			this.aac = aac;
 		}
 
 		public String toString() {

@@ -19,6 +19,7 @@ import net.wurstclient.forge.hudmodules.HudModules;
 import net.wurstclient.forge.utils.TextUtil;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
+import org.w3c.dom.css.RGBColor;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -122,29 +123,29 @@ public final class IngameHUD {
 					return;
 
 				if (hack.getCategory().getName().contains("Combat")) {
-					color = TextUtil.coloredString(hack.getName(), TextUtil.Color.RED);
+					color = TextUtil.coloredString(hack.getRenderName(), TextUtil.Color.RED);
 					theColor = Color.RED.getRGB();
 				} else if (hack.getCategory().getName().contains("Movement")) {
-					color = TextUtil.coloredString(hack.getName(), TextUtil.Color.BLUE);
+					color = TextUtil.coloredString(hack.getRenderName(), TextUtil.Color.BLUE);
 					theColor = Color.BLUE.getRGB();
 				} else if (hack.getCategory().getName().contains("World")) {
-					color = TextUtil.coloredString(hack.getName(), TextUtil.Color.GREEN);
+					color = TextUtil.coloredString(hack.getRenderName(), TextUtil.Color.GREEN);
 					theColor = Color.GREEN.getRGB();
 				} else if (hack.getCategory().getName().contains("Player")) {
-					color = TextUtil.coloredString(hack.getName(), TextUtil.Color.GOLD);
+					color = TextUtil.coloredString(hack.getRenderName(), TextUtil.Color.GOLD);
 					theColor = Color.ORANGE.getRGB();
 				} else if (hack.getCategory().getName().contains("Render")) {
-					color = TextUtil.coloredString(hack.getName(), TextUtil.Color.AQUA);
+					color = TextUtil.coloredString(hack.getRenderName(), TextUtil.Color.AQUA);
 					theColor = Color.CYAN.getRGB();
 				} else if (hack.getCategory().getName().contains("Pathing")) {
-					color = TextUtil.coloredString(hack.getName(), TextUtil.Color.YELLOW);
+					color = TextUtil.coloredString(hack.getRenderName(), TextUtil.Color.YELLOW);
 					theColor = Color.YELLOW.getRGB();
 				} else if (hack.getCategory().getName().contains("Games")) {
-					color = TextUtil.coloredString(hack.getName(), TextUtil.Color.GOLD);
+					color = TextUtil.coloredString(hack.getRenderName(), TextUtil.Color.GOLD);
 					theColor = Color.YELLOW.getRGB();
 				}
 
-				WMinecraft.getFontRenderer().drawString(color, 4, y, (int) textColor, true);
+				WMinecraft.getFontRenderer().drawString(color, 4, y, (int) textColor, false);
 
 				y += 9;
 				// pinned windows

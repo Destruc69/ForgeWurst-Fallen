@@ -39,7 +39,7 @@ public final class Cheststealer extends Hack {
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
 		if (mc.currentScreen instanceof GuiChest) {
-			if (mc.player.ticksExisted % 2 == 0) {
+			if (mc.player.ticksExisted % 10 == 0) {
 				if (slot + 1 < 27) {
 					slot = slot + 1;
 				}

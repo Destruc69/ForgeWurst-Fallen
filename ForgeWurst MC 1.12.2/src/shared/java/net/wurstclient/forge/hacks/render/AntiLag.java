@@ -12,8 +12,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.settings.EnumSetting;
-import net.wurstclient.forge.utils.KeyBindingUtils;
 
 public final class AntiLag extends Hack {
 	public AntiLag() {
@@ -42,5 +40,12 @@ public final class AntiLag extends Hack {
 	@Override
 	protected void onDisable() {
 		MinecraftForge.EVENT_BUS.unregister(this);
+	}
+
+	@SubscribeEvent
+	public void onUpdate(WUpdateEvent event) {
+		if (Runtime.getRuntime ().totalMemory () - Runtime.getRuntime ().freeMemory () > Runtime.getRuntime().maxMemory() / 3) {
+			Runtime.getRuntime().gc();
+		}
 	}
 }

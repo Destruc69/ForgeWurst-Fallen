@@ -180,4 +180,7 @@ public final class RotationUtils {
 
 		return MathHelper.wrapDegrees(current + change);
 	}
+	public static void cameraFaceTowards(double x, double y, double z) {
+
+	}
 }

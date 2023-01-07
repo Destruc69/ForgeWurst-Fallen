@@ -78,23 +78,31 @@ public final class NoFall extends Hack {
 				mc.player.setPosition(lastOnGroundX, lastOnGroundY, lastOnGroundZ);
 			}
 		}
+		if (mode.getSelected().damage) {
+			if (mc.player.fallDistance > 4) {
+				mc.player.onGround = true;
+			}
+		}
 	}
 
 	private enum Mode {
-		PACKET("Packet", true, false, false),
-		ANTI("Anti", false, true, false),
-		AAC("AAC", false, false, true);
+		PACKET("Packet", true, false, false, false),
+		ANTI("Anti", false, true, false, false),
+		DAMAGE("Damage", false, false, false, true),
+		AAC("AAC", false, false, true, false);
 
 		private final String name;
 		private final boolean packet;
 		private final boolean anti;
 		private final boolean aac;
+		private final boolean damage;
 
-		private Mode(String name, boolean packet, boolean anti, boolean aac) {
+		private Mode(String name, boolean packet, boolean anti, boolean aac, boolean damage) {
 			this.name = name;
 			this.anti = anti;
 			this.packet = packet;
 			this.aac = aac;
+			this.damage = damage;
 		}
 
 		public String toString() {

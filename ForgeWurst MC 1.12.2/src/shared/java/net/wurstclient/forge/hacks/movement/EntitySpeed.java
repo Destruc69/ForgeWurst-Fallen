@@ -7,20 +7,22 @@
  */
 package net.wurstclient.forge.hacks.movement;
 
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityBoat;
+import net.minecraft.network.play.client.CPacketSteerBoat;
+import net.minecraft.network.play.client.CPacketVehicleMove;
+import net.minecraft.network.play.server.SPacketMoveVehicle;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.world.GetCollisionBoxesEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.wurstclient.fmlevents.WPacketInputEvent;
+import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.MathUtils;
-import org.lwjgl.input.Keyboard;
 
-import java.lang.reflect.Field;
 import java.util.Objects;
 
 public final class EntitySpeed extends Hack {
@@ -29,11 +31,7 @@ public final class EntitySpeed extends Hack {
 			new SliderSetting("Speed", 2, 0.5, 5, 0.05, SliderSetting.ValueDisplay.DECIMAL);
 
 	private final CheckboxSetting bypass =
-			new CheckboxSetting("Bypass",
-					false);
-
-	private final CheckboxSetting horse =
-			new CheckboxSetting("PerfectHorse", "Perfect hose jump, ect",
+			new CheckboxSetting("Bypass", "Bypass some anti cheats.",
 					false);
 
 	public EntitySpeed() {
@@ -41,7 +39,6 @@ public final class EntitySpeed extends Hack {
 		setCategory(Category.MOVEMENT);
 		addSetting(speed);
 		addSetting(bypass);
-		addSetting(horse);
 	}
 
 	@Override
@@ -57,22 +54,25 @@ public final class EntitySpeed extends Hack {
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
 		try {
-			if (horse.isChecked()) {
-				if (Objects.requireNonNull(mc.player.getRidingEntity()).onGround && Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
-					mc.player.getRidingEntity().motionY = 0.405;
-				}
-				mc.player.getRidingEntity().handleWaterMovement();
-			}
-			if (bypass.isChecked()) {
-				if (mc.player.ticksExisted % 2 == 0) {
-					Objects.requireNonNull(mc.player.getRidingEntity()).setVelocity(0, 0, 0);
-					return;
+			if (Objects.requireNonNull(mc.player.getRidingEntity()).isEntityAlive()) {
+				if (!bypass.isChecked()) {
+					double[] dir = MathUtils.directionSpeed(speed.getValueF());
+					assert mc.player.getRidingEntity() != null;
+					Objects.requireNonNull(mc.player.getRidingEntity()).motionX = dir[0];
+					Objects.requireNonNull(mc.player.getRidingEntity().motionZ = dir[1]);
+				} else {
+					if (mc.player.ticksExisted % 5 == 0) {
+						double[] dir = MathUtils.directionSpeed(speed.getValueF());
+						assert mc.player.getRidingEntity() != null;
+						Objects.requireNonNull(mc.player.getRidingEntity()).motionX = dir[0];
+						Objects.requireNonNull(mc.player.getRidingEntity().motionZ = dir[1]);
+					} else {
+						mc.player.setVelocity(0, 0, 0);
+					}
 				}
 			}
 			Objects.requireNonNull(mc.player.getRidingEntity()).rotationYaw = mc.player.rotationYaw;
-			double[] dir = MathUtils.directionSpeed(speed.getValueF());
-			Objects.requireNonNull(mc.player.getRidingEntity().motionX = dir[0]);
-			Objects.requireNonNull(mc.player.getRidingEntity().motionZ = dir[1]);
+			Objects.requireNonNull(mc.player.getRidingEntity()).rotationPitch = mc.player.rotationPitch;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

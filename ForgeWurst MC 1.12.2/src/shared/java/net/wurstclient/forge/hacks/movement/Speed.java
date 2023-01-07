@@ -13,6 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.wurstclient.fmlevents.WPacketInputEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
@@ -38,6 +39,10 @@ public final class Speed extends Hack {
 
 	private final CheckboxSetting nbntstability =
 			new CheckboxSetting("9b9t-Hop-Stability", "Makes 9b9t Hop slower but eaier to manage",
+					false);
+
+	private final CheckboxSetting nCPStrict =
+			new CheckboxSetting("NCP-Strict", "Strict mode for NCP Speed",
 					false);
 
 	private enum Mode {
@@ -80,6 +85,7 @@ public final class Speed extends Hack {
 		addSetting(mode);
 		addSetting(speed);
 		addSetting(nbntstability);
+		addSetting(nCPStrict);
 	}
 
 	@Override
@@ -100,17 +106,17 @@ public final class Speed extends Hack {
 				MathUtils.speed(speed.getValueF());
 			}
 			if (mode.getSelected().ncp) {
-				KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, false);
 				if (mc.player.onGround) {
 					mc.player.jump();
-					setTickLength(50 / 1.2f);
-				} else {
-					double[] dir = MathUtils.directionSpeed(0.19);
-					mc.player.setSprinting(true);
-					mc.player.motionX = dir[0];
-					mc.player.motionZ = dir[1];
-					setTickLength(50);
 				}
+				double[] dir;
+				if (!nCPStrict.isChecked()) {
+					dir = MathUtils.directionSpeed(0.26);
+				} else {
+					dir = MathUtils.directionSpeed(0.26 - Math.random() * 0.2);
+				}
+				mc.player.motionX = dir[0];
+				mc.player.motionZ = dir[1];
 			}
 			if (mode.getSelected().mineplex) {
 
@@ -177,6 +183,7 @@ public final class Speed extends Hack {
 			}
 		}
 	}
+
 	private void setTickLength(float tickLength)
 	{
 		try

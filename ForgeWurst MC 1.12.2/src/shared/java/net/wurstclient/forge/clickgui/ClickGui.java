@@ -13,7 +13,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -27,6 +35,7 @@ import net.wurstclient.forge.settings.Setting;
 import net.wurstclient.forge.utils.JsonUtils;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Vector3f;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -36,6 +45,8 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public final class ClickGui
 {
@@ -372,14 +383,20 @@ public final class ClickGui
 
     public void render(int mouseX, int mouseY, float partialTicks)
     {
+
         GL11.glDisable(GL11.GL_CULL_FACE);
         GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glEnable(GL_BLEND);
+        GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         GL11.glShadeModel(GL11.GL_SMOOTH);
         GL11.glLineWidth(1);
 
+
+        //PLans: Add logo to bottom left.
         Minecraft mc = Minecraft.getMinecraft();
+        assert mc.currentScreen != null;
+        drawRect(0, 0, mc.currentScreen.width, mc.currentScreen.height, -1072689136);
+
 
         // scrolling
         int dWheel = Mouse.getDWheel();
@@ -466,6 +483,7 @@ public final class ClickGui
                 if(lw > tw)
                     tw = lw;
             }
+            assert mc.currentScreen != null;
             int sw = mc.currentScreen.width;
             int sh = mc.currentScreen.height;
 
@@ -502,15 +520,53 @@ public final class ClickGui
 
         GL11.glEnable(GL11.GL_CULL_FACE);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
-        GL11.glDisable(GL11.GL_BLEND);
+        GL11.glDisable(GL_BLEND);
+    }
+
+    public static void drawRect(float left, float top, float right, float bottom, int color) {
+
+        float var5;
+
+        if (left < right) {
+            var5 = left;
+            left = right;
+            right = var5;
+        }
+
+        if (top < bottom) {
+            var5 = top;
+            top = bottom;
+            bottom = var5;
+        }
+
+        GL11.glEnable(GL_BLEND);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glEnable(GL11.GL_LINE_SMOOTH);
+        GL11.glPushMatrix();
+        glColor(color);
+        GL11.glBegin(GL11.GL_QUADS);
+        GL11.glVertex2d(left, bottom);
+        GL11.glVertex2d(right, bottom);
+        GL11.glVertex2d(right, top);
+        GL11.glVertex2d(left, top);
+        GL11.glEnd();
+        GL11.glPopMatrix();
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glDisable(GL11.GL_LINE_SMOOTH);
+    }
+
+    public static void glColor(int color) {
+
+        GlStateManager.color((float) (color >> 16 & 255) / 255F, (float) (color >> 8 & 255) / 255F, (float) (color & 255) / 255F, (float) (color >> 24 & 255) / 255F);
     }
 
     public void renderPinnedWindows(float partialTicks)
     {
         GL11.glDisable(GL11.GL_CULL_FACE);
         GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glEnable(GL_BLEND);
+        GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         GL11.glShadeModel(GL11.GL_SMOOTH);
         GL11.glLineWidth(1);
 

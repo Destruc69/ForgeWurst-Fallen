@@ -32,6 +32,8 @@ import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.EntityFakePlayer;
 import net.wurstclient.forge.utils.KeyBindingUtils;
 
+import java.util.Objects;
+
 public final class FreeCam extends Hack {
 	public static EntityOtherPlayerMP camera;
 
@@ -240,7 +242,7 @@ public final class FreeCam extends Hack {
 				if (event.getPacket() instanceof CPacketUseEntity) {
 					CPacketUseEntity packet = (CPacketUseEntity) event.getPacket();
 
-					if (packet.getEntityFromWorld(mc.world).equals(mc.player)) {
+					if (Objects.equals(packet.getEntityFromWorld(mc.world), mc.player)) {
 						event.setCanceled(true);
 					}
 				}

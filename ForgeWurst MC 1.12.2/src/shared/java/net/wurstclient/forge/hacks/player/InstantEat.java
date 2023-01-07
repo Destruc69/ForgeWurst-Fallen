@@ -7,6 +7,8 @@
  */
 package net.wurstclient.forge.hacks.player;
 
+import net.minecraft.network.play.client.CPacketEnchantItem;
+import net.minecraft.server.management.DemoPlayerInteractionManager;
 import net.minecraft.util.Timer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -16,6 +18,7 @@ import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.utils.KeyBindingUtils;
+import stevebot.player.PlayerUtils;
 
 import java.lang.reflect.Field;
 

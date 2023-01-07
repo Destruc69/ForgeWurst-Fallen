@@ -14,7 +14,7 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 @Cancelable
 public final class WPacketInputEvent extends Event
 {
-	private final Packet<?> packet;
+	private Packet<?> packet;
 	
 	public WPacketInputEvent(Packet<?> packet)
 	{
@@ -24,5 +24,9 @@ public final class WPacketInputEvent extends Event
 	public Packet<?> getPacket()
 	{
 		return packet;
+	}
+
+	public void setPacket(Packet<?> packet) {
+		this.packet = packet;
 	}
 }

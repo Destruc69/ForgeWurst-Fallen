@@ -21,6 +21,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
+import net.minecraft.network.play.client.CPacketPlayerTryUseItem;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.util.EnumFacing;
@@ -55,6 +56,10 @@ import static java.lang.Math.sin;
 
 public final class Flight extends Hack {
 
+	public static double startXForH2 = 0;
+	public static double startYForH2 = 0;
+	public static double startZForH2 = 0;
+
 	private final CheckboxSetting hypixelsafe =
 			new CheckboxSetting("HypixelSafe", "",
 					false);
@@ -69,13 +74,14 @@ public final class Flight extends Hack {
 	public static double startSpartanY;
 
 	private enum Mode {
-		AAC("AAC", true, false, false, false, false, false, false),
-		SPARTAN("Spartan", false, true, false, false, false, false, false),
-		FLAGFLY("FlagFly", false, false, true, false, false, false, false),
-		NCPJUMP("NCP-Jump", false, false, false, true, false, false, false),
-		BASIC("Basic", false, false, false, false, true, false, false),
-		HYPIXEL("Hypixel", false, false, false, false, false, true, false),
-		MOTIONY("MotionY = 0", false, false, false, false, false, false, true);
+		AAC("AAC", true, false, false, false, false, false, false, false),
+		SPARTAN("Spartan", false, true, false, false, false, false, false, false),
+		FLAGFLY("FlagFly", false, false, true, false, false, false, false, false),
+		NCPJUMP("NCP-Jump", false, false, false, true, false, false, false, false),
+		BASIC("Basic", false, false, false, false, true, false, false, false),
+		HYPIXEL("Hypixel1", false, false, false, false, false, true, false, false),
+		HYPIXEL2("Hypixel2", false, false, false, false, false, false, false, false),
+		MOTIONY("MotionY = 0", false, false, false, false, false, false, true, false);
 		private final String name;
 		private final boolean aac;
 		private final boolean spartan;
@@ -84,8 +90,9 @@ public final class Flight extends Hack {
 		private final boolean basic;
 		private final boolean hypixel;
 		private final boolean motiony0;
+		private final boolean hypixel2;
 
-		private Mode(String name, boolean aac, boolean spartan, boolean flagfly, boolean ncpjump, boolean basic, boolean hypixel, boolean motiony0) {
+		private Mode(String name, boolean aac, boolean spartan, boolean flagfly, boolean ncpjump, boolean basic, boolean hypixel, boolean motiony0, boolean hypixel2) {
 			this.name = name;
 			this.aac = aac;
 			this.spartan = spartan;
@@ -94,6 +101,7 @@ public final class Flight extends Hack {
 			this.basic = basic;
 			this.hypixel = hypixel;
 			this.motiony0 = motiony0;
+			this.hypixel2 = hypixel2;
 		}
 
 		public String toString() {
@@ -118,6 +126,9 @@ public final class Flight extends Hack {
 			if (mode.getSelected().aac) {
 				mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, 1.7976931348623157E+308, mc.player.posZ, true));
 			}
+			startXForH2 = mc.player.posX;
+			startYForH2 = mc.player.posY;
+			startZForH2 = mc.player.posZ;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -126,6 +137,9 @@ public final class Flight extends Hack {
 	@Override
 	protected void onDisable() {
 		MinecraftForge.EVENT_BUS.unregister(this);
+		startXForH2 = 0;
+		startYForH2 = 0;
+		startZForH2 = 0;
 	}
 
 	@SubscribeEvent
@@ -154,6 +168,9 @@ public final class Flight extends Hack {
 			}
 		}
 		if (mode.getSelected().motiony0) {
+			mc.player.motionY = 0;
+		}
+		if (mode.getSelected().hypixel2) {
 			mc.player.motionY = 0;
 		}
 		if (mode.getSelected().hypixel) {
@@ -213,6 +230,14 @@ public final class Flight extends Hack {
 	@SubscribeEvent
 	public void onPacketIn(WPacketInputEvent event) {
 		try {
+
+			if (mode.getSelected().hypixel2) {
+				if (event.getPacket() instanceof CPacketPlayer.PositionRotation) {
+					mc.player.connection.sendPacket(new CPacketPlayer.PositionRotation(startXForH2, startYForH2, startZForH2, 180, 0, true));
+					event.setCanceled(true);
+				}
+			}
+
 			assert event != null;
 			assert event.getPacket() != null;
 			try {

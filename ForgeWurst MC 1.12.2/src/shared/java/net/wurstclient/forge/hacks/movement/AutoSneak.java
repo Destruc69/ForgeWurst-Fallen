@@ -9,6 +9,7 @@ package net.wurstclient.forge.hacks.movement;
 
 import net.minecraft.init.SoundEvents;
 import net.minecraft.network.play.client.CPacketEntityAction;
+import net.minecraft.server.gui.MinecraftServerGui;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
@@ -46,7 +47,6 @@ public final class AutoSneak extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		//9ughrsvdvcd
 		if (mode.getSelected().ncp) {
 			mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_SNEAKING));
 			mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));

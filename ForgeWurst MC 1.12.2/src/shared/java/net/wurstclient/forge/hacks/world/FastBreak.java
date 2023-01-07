@@ -55,6 +55,8 @@ public final class FastBreak extends Hack {
 				setEnabled(false);
 				throw new RuntimeException(e);
 			}
+			BlockPos blockPos = mc.objectMouseOver.getBlockPos();
+			mc.world.getBlockState(blockPos).getBlock().setHardness(mc.world.getBlockState(blockPos).getBlockHardness(mc.world, blockPos));
 		} else {
 			if (mc.playerController.getIsHittingBlock()) {
 				BlockPos blockPos = mc.objectMouseOver.getBlockPos();

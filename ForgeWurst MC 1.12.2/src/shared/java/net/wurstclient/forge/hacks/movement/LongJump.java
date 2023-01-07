@@ -29,6 +29,7 @@ import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.InventoryUtil;
 import net.wurstclient.forge.utils.KeyBindingUtils;
 import net.wurstclient.forge.utils.MathUtils;
+import net.wurstclient.forge.utils.NotiUtils;
 
 import java.lang.reflect.Field;
 
@@ -93,10 +94,17 @@ public final class LongJump extends Hack {
 		y = mc.player.posY;
 		z = mc.player.posZ;
 		teleported = false;
+		if (mode.getSelected().ncp) {
+			KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
+		}
 	}
+
 	@Override
 	protected void onDisable() {
 		MinecraftForge.EVENT_BUS.unregister(this);
+		if (mode.getSelected().ncp) {
+			KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, false);
+		}
 	}
 
 	@SubscribeEvent
@@ -120,10 +128,25 @@ public final class LongJump extends Hack {
 			}
 		}
 		if (mode.getSelected().ncp) {
-			if (mc.player.hurtTime > 0) {
-				mc.player.jump();
+			if (mc.player.onGround) {
+				if (mc.player.hurtTime > 0) {
+					double[] dir = MathUtils.directionSpeed(mc.player.motionY * 4);
+					mc.player.jump();
+					mc.player.motionX = dir[0];
+					mc.player.motionZ = dir[1];
+				} else {
+					NotiUtils.render("WAIT!", "Until were hurt, we cant move.", true);
+					if (mc.player.ticksExisted % 20 == 0) {
+						for (int a = 0; a < 65 * 1.5; a++) {
+							mc.player.connection.sendPacket(new CPacketPlayer.Position(x, y + 0.049, z, false));
+							mc.player.connection.sendPacket(new CPacketPlayer.Position(x, y, z, false));
+						}
+						mc.player.connection.sendPacket(new CPacketPlayer.Position(x, y, z, true));
+					}
+					mc.player.setPosition(mc.player.prevPosX, mc.player.prevPosY, mc.player.prevPosZ);
+				}
 			} else {
-
+				setEnabled(false);
 			}
 		}
 		if (mode.getSelected().aac3) {

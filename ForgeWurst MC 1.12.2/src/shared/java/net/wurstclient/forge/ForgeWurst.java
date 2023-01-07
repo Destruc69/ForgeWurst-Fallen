@@ -6,6 +6,7 @@
  * file, You can obtain one at: https://www.gnu.org/licenses/gpl-3.0.txt
  */
 package net.wurstclient.forge;
+
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -16,7 +17,6 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
-import net.wurstclient.forge.*;
 import net.wurstclient.forge.clickgui.ClickGui;
 import net.wurstclient.forge.update.WurstUpdater;
 import org.apache.logging.log4j.LogManager;
@@ -136,11 +136,7 @@ public final class ForgeWurst {
 		eventProducer.onPreInit();
 	}
 
-
-
-
 	private void setup() {
-
 		// minecraft
 		MinecraftAdapter.initialize(new MinecraftAdapterImpl());
 

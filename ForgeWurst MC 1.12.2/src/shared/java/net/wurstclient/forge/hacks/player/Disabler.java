@@ -7,59 +7,48 @@
  */
 package net.wurstclient.forge.hacks.player;
 
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.*;
-import net.minecraft.network.play.server.SPacketPlayerPosLook;
-import net.minecraft.network.status.client.CPacketPing;
+import net.minecraft.entity.player.PlayerCapabilities;
+import net.minecraft.network.play.client.CPacketConfirmTransaction;
+import net.minecraft.network.play.client.CPacketInput;
+import net.minecraft.network.play.client.CPacketKeepAlive;
+import net.minecraft.network.play.client.CPacketPlayerAbilities;
+import net.minecraft.network.play.server.SPacketConfirmTransaction;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WPacketInputEvent;
 import net.wurstclient.fmlevents.WPacketOutputEvent;
-import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.settings.CheckboxSetting;
-import net.wurstclient.forge.settings.SliderSetting;
-import net.wurstclient.forge.utils.ChatUtils;
-
-import java.util.ArrayList;
+import net.wurstclient.forge.settings.EnumSetting;
 
 public final class Disabler extends Hack {
-	private final CheckboxSetting ping =
-			new CheckboxSetting("CPacketPing cancel", "Cancels this packet, the server doesnt know the client time",
-					false);
 
-	private final CheckboxSetting confirmTP =
-			new CheckboxSetting("ConfirmTeleport", "Sends a packet confirm pos",
-					false);
+	private final EnumSetting<Mode> mode =
+			new EnumSetting<>("Mode", Mode.values(), Mode.BASIC);
 
-	private final CheckboxSetting stat =
-			new CheckboxSetting("CPacketClientStatus/CPacketClientSettings cancel", "Cancels this packet, the server knows less about clients status",
-					false);
+	private enum Mode {
+		BASIC("Basic", true, false),
+		BASICV2("BASIC V2", false, true);
 
-	private final CheckboxSetting ghostly =
-			new CheckboxSetting("Ghostly", "Dont send some packets so the AntiCheat has less info on you",
-					false);
+		private final String name;
+		private final boolean basicv2;
+		private final boolean basic;
 
-	private final CheckboxSetting pingSpoof =
-			new CheckboxSetting("PingSpoof", "Higher ping means the anti cheat will be less harsh on you",
-					false);
+		private Mode(String name, boolean basic, boolean basicv2) {
+			this.name = name;
+			this.basic = basic;
+			this.basicv2 = basicv2;
+		}
 
-	private final SliderSetting pingDelay =
-			new SliderSetting("PingSpoofDelay [MS]", "Every time we reach this time we send the packet to ping spoof", 40, 0, 1000, 5, SliderSetting.ValueDisplay.DECIMAL);
-
-
-	ArrayList<Packet> packets = new ArrayList<>();
+		public String toString() {
+			return name;
+		}
+	}
 
 	public Disabler() {
 		super("Disabler", "Bypass anti cheats.");
 		setCategory(Category.PLAYER);
-		addSetting(ping);
-		addSetting(confirmTP);
-		addSetting(stat);
-		addSetting(ghostly);
-		addSetting(pingSpoof);
-		addSetting(pingDelay);
+		addSetting(mode);
 	}
 
 	@Override
@@ -73,78 +62,40 @@ public final class Disabler extends Hack {
 	}
 
 	@SubscribeEvent
-	public void onUpdate(WUpdateEvent event) {
-
-	}
-	@SubscribeEvent
-	public void pingSpoof(WPacketInputEvent event) {
-		try {
-			if (!pingSpoof.isChecked())
-				return;
-
-			if (event.getPacket() instanceof CPacketPlayer || event.getPacket() instanceof CPacketPlayer.PositionRotation || event.getPacket() instanceof CPacketPlayer.Position || event.getPacket() instanceof CPacketPlayer.Rotation) {
-				packets.add(event.getPacket());
+	public void inPacketEvent(WPacketInputEvent event) {
+		if (mode.getSelected().basic) {
+			if (event.getPacket() instanceof CPacketKeepAlive) {
+				mc.player.connection.sendPacket(new CPacketKeepAlive((long) (Integer.MIN_VALUE + Math.random() * Integer.MIN_VALUE)));
 				event.setCanceled(true);
 			}
-
-			if (mc.player.ticksExisted % pingDelay.getValueF() != 0) {
-				for (Packet packet : packets) {
-					assert packet != null;
-					mc.player.connection.sendPacket(packet);
-					packets.clear();
-				}
+			if (event.getPacket() instanceof CPacketConfirmTransaction) {
+				CPacketConfirmTransaction cPacketConfirmTransaction = (CPacketConfirmTransaction) event.getPacket();
+				mc.player.connection.sendPacket(new CPacketConfirmTransaction(Integer.MAX_VALUE, cPacketConfirmTransaction.getUid(), false));
+				event.setCanceled(true);
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		} else {
+			try {
+				PlayerCapabilities playerCapabilities = new PlayerCapabilities();
+				playerCapabilities.isFlying = true;
+				playerCapabilities.isCreativeMode = true;
+				playerCapabilities.allowFlying = true;
+				playerCapabilities.allowEdit = true;
+				playerCapabilities.disableDamage = true;
+				mc.player.connection.sendPacket(new CPacketPlayerAbilities(playerCapabilities));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
-
-
 	@SubscribeEvent
-	public void onPacketOut(WPacketOutputEvent event) {
-		try {
-			if (confirmTP.isChecked()) {
-				if (event.getPacket() instanceof SPacketPlayerPosLook) {
-					SPacketPlayerPosLook sPacketPlayerPosLook = (SPacketPlayerPosLook) event.getPacket();
-					mc.player.connection.sendPacket(new CPacketConfirmTeleport(sPacketPlayerPosLook.getTeleportId()));
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	@SubscribeEvent
-	public void onPacket(WPacketInputEvent event) {
-		try {
-			if (confirmTP.isChecked()) {
-				if (event.getPacket() instanceof SPacketPlayerPosLook) {
-					SPacketPlayerPosLook sPacketPlayerPosLook = (SPacketPlayerPosLook) event.getPacket();
-					mc.player.connection.sendPacket(new CPacketConfirmTeleport(sPacketPlayerPosLook.getTeleportId()));
-				}
-			}
-			if (stat.isChecked()) {
-				if (event.getPacket() instanceof CPacketClientSettings || event.getPacket() instanceof CPacketClientStatus) {
+	public void outPacketEvent(WPacketOutputEvent event) {
+		if (mode.getSelected().basic) {
+			if (event.getPacket() instanceof SPacketConfirmTransaction) {
+				SPacketConfirmTransaction sPacketConfirmTransaction = (SPacketConfirmTransaction) event.getPacket();
+				if (sPacketConfirmTransaction.getActionNumber() <= 0) {
 					event.setCanceled(true);
 				}
 			}
-			if (ghostly.isChecked()) {
-				if (event.getPacket() instanceof CPacketConfirmTransaction || event.getPacket() instanceof CPacketEntityAction || event.getPacket() instanceof CPacketCustomPayload) {
-					event.setCanceled(true);
-				}
-				if (!pingSpoof.isChecked()) {
-					if (event.getPacket() instanceof CPacketKeepAlive) {
-						event.setCanceled(true);
-					}
-				}
-			}
-			if (ping.isChecked()) {
-				if (event.getPacket() instanceof CPacketPing) {
-					event.setCanceled(true);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 }

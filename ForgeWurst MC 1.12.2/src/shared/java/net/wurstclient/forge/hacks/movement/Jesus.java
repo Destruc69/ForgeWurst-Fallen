@@ -7,9 +7,11 @@
  */
 package net.wurstclient.forge.hacks.movement;
 
+import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.settings.GameSettings;
+import net.minecraft.enchantment.EnchantmentFrostWalker;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -122,6 +124,13 @@ public final class Jesus extends Hack {
 
 			// update timer
 			tickTimer++;
+		}
+		if (mc.player.isInWater()) {
+			if (mode.getSelected().vannilaplus) {
+				if (mc.player.isOverWater()) {
+					mc.player.motionY = 0;
+				}
+			}
 		}
 	}
 
@@ -247,20 +256,23 @@ public final class Jesus extends Hack {
 
 
 	private enum Mode {
-		NCP("NCP", false, true, false),
-		NORMAL("Normal", true, false, false),
-		TEST("Test", false, false, true);
+		NCP("NCP", false, true, false, false),
+		NORMAL("Normal", true, false, false, false),
+		TEST("Test", false, false, true, false),
+		VannilaPlus("Vanilla", false, false, false, true);
 
 		private final String name;
 		private final boolean normal;
 		private final boolean ncp;
 		private final boolean test;
+		private final boolean vannilaplus;
 
-		private Mode(String name, boolean normal, boolean ncp, boolean test) {
+		private Mode(String name, boolean normal, boolean ncp, boolean test, boolean vannilaplus) {
 			this.name = name;
 			this.normal = normal;
 			this.ncp = ncp;
 			this.test = test;
+			this.vannilaplus = vannilaplus;
 		}
 
 		public String toString() {

@@ -12,18 +12,30 @@ import net.minecraft.client.gui.GuiIngameMenu;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.gui.inventory.GuiInventory;
+import net.minecraft.network.play.client.CPacketClickWindow;
+import net.minecraft.network.play.client.CPacketEntityAction;
+import net.minecraft.pathfinding.PathFinder;
+import net.minecraft.pathfinding.WalkNodeProcessor;
 import net.minecraftforge.client.event.InputUpdateEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.wurstclient.fmlevents.WPacketInputEvent;
+import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.settings.CheckboxSetting;
 import org.lwjgl.input.Keyboard;
 
 public final class InvMove extends Hack {
 
+	private final CheckboxSetting bypass =
+			new CheckboxSetting("Bypass", "Bypass anticheats.",
+					false);
+
 	public InvMove() {
 		super("InvMove", "Allows you to move with your inventory.");
 		setCategory(Category.MOVEMENT);
+		addSetting(bypass);
 	}
 
 	@Override
@@ -54,15 +66,38 @@ public final class InvMove extends Hack {
 			if (Keyboard.isKeyDown(Keyboard.KEY_A) || mc.gameSettings.keyBindLeft.isKeyDown()) {
 				event.getMovementInput().moveStrafe++;
 			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_SPACE) || mc.gameSettings.keyBindJump.isKeyDown()) {
-				event.getMovementInput().jump = true;
-			} else {
-				event.getMovementInput().jump = false;
+			event.getMovementInput().jump = Keyboard.isKeyDown(Keyboard.KEY_SPACE) || mc.gameSettings.keyBindJump.isKeyDown();
+			event.getMovementInput().sneak = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || mc.gameSettings.keyBindSneak.isKeyDown();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@SubscribeEvent
+	public void onPacketIn(WPacketInputEvent event) {
+		try {
+			if (bypass.isChecked()) {
+				if (event.getPacket() instanceof CPacketEntityAction) {
+					CPacketEntityAction cPacketEntityAction = (CPacketEntityAction) event.getPacket();
+					if (cPacketEntityAction.getAction().equals(CPacketEntityAction.Action.OPEN_INVENTORY)) {
+						event.setCanceled(true);
+					}
+				}
 			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || mc.gameSettings.keyBindSneak.isKeyDown()) {
-				event.getMovementInput().sneak = true;
-			} else {
-				event.getMovementInput().sneak = false;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	@SubscribeEvent
+	public void onPacketOut(WPacketOutputEvent event) {
+		try {
+			if (bypass.isChecked()) {
+				if (event.getPacket() instanceof CPacketEntityAction) {
+					CPacketEntityAction cPacketEntityAction = (CPacketEntityAction) event.getPacket();
+					if (cPacketEntityAction.getAction().equals(CPacketEntityAction.Action.OPEN_INVENTORY)) {
+						event.setCanceled(true);
+					}
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

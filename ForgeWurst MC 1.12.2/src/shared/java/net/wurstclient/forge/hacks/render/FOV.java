@@ -5,19 +5,26 @@
  * License, version 3. If a copy of the GPL was not distributed with this
  * file, You can obtain one at: https://www.gnu.org/licenses/gpl-3.0.txt
  */
-package net.wurstclient.forge.hacks.combat;
+package net.wurstclient.forge.hacks.render;
 
+import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.wurstclient.fmlevents.WUpdateEvent;
+import net.wurstclient.fmlevents.WPacketInputEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.settings.SliderSetting;
 
-public final class ReachPlus extends Hack {
+public final class FOV extends Hack {
 
-	public ReachPlus() {
-		super("ReachPlus", "Creative gamemode reach.");
-		setCategory(Category.COMBAT);
+	private final SliderSetting fov =
+			new SliderSetting("FOV", "", 70, 0, 500, 1, SliderSetting.ValueDisplay.DECIMAL);
+
+
+	public FOV() {
+		super("FOV", "Overide fov values.");
+		setCategory(Category.RENDER);
+		addSetting(fov);
 	}
 
 	@Override
@@ -31,7 +38,7 @@ public final class ReachPlus extends Hack {
 	}
 
 	@SubscribeEvent
-	public void update(WUpdateEvent event) {
-		mc.playerController.extendedReach();
+	public void setUpCamera(EntityViewRenderEvent.FOVModifier fovModifier) {
+		fovModifier.setFOV(fov.getValueF());
 	}
 }

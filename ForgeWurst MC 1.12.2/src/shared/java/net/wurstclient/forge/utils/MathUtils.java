@@ -8,10 +8,16 @@
 package net.wurstclient.forge.utils;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.input.Keyboard;
+
+import java.awt.*;
+import java.util.Map;
+
+import static java.lang.Math.*;
 
 public final class MathUtils {
 	public static float forward;
@@ -184,4 +190,5 @@ public final class MathUtils {
 		final double posZ = (forward * sin - side * cos);
 		return posZ;
 	}
+
 }

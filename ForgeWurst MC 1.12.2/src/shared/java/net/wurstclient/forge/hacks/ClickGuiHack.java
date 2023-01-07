@@ -9,7 +9,6 @@
 package net.wurstclient.forge.hacks;
 
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.init.SoundEvents;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WGuiInventoryButtonEvent;
@@ -53,7 +52,7 @@ public final class ClickGuiHack extends Hack
                     "Hide the UI",
                     false);
 
-    private final CheckboxSetting inventoryButton =
+    public static final CheckboxSetting inventoryButton =
             new CheckboxSetting("Inventory Button",
                     "A button that lets you open the\n"
                             + "ClickGUI from the inventory screen.\n"
