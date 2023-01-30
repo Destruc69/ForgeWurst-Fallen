@@ -136,6 +136,7 @@ public final class HackList extends WHackList
 	public final YawLock yawLock = register(new YawLock());
 	public final AntiSwing antiSwing = register(new AntiSwing());
 	public final Follow follow = register(new Follow());
+	public final Surround surround = register(new Surround());
 	public final GodMode godMode = register(new GodMode());
 	public final AutoItemFrameDupe autoItemFrameDupe = register(new AutoItemFrameDupe());
 	
