@@ -11,7 +11,6 @@ import net.wurstclient.forge.hacks.games.BedWars;
 import net.wurstclient.forge.hacks.games.SkywarsCamper;
 import net.wurstclient.forge.hacks.movement.*;
 import net.wurstclient.forge.hacks.pathing.AutoPilot;
-import net.wurstclient.forge.hacks.pathing.PathingBase;
 import net.wurstclient.forge.hacks.pathing.Tunneler;
 import net.wurstclient.forge.hacks.player.*;
 import net.wurstclient.forge.hacks.render.*;
@@ -42,7 +41,6 @@ public final class HackList extends WHackList
 	public final HudModules hudModules = register(new HudModules());
 	public final ChunkKeeper chunkKeeper = register(new ChunkKeeper());
 	public final NoCom noCom = register(new NoCom());
-	public final PathingBase pathingBase = register(new PathingBase());
 	public final SoundEventLogger soundEventLogger = register(new SoundEventLogger());
 	public final ShulkerViewer shulkerViewer = register(new ShulkerViewer());
 	public final AutoTotem autoTotem = register(new AutoTotem());

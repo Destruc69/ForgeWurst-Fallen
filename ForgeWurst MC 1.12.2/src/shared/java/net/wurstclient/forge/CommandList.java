@@ -8,7 +8,6 @@
 package net.wurstclient.forge;
 
 import net.wurstclient.forge.commands.*;
-import net.wurstclient.forge.commands.stevebot.SBCmd;
 import net.wurstclient.forge.compatibility.WCommandList;
 
 public final class CommandList extends WCommandList
@@ -16,7 +15,6 @@ public final class CommandList extends WCommandList
 	public final BindsCmd bindsCmd = register(new BindsCmd());
 	public final ClearCmd clearCmd = register(new ClearCmd());
 	public final GmCmd gmCmd = register(new GmCmd());
-	public final SBCmd sbCmd = register(new SBCmd());
 	public final PearlTPCmd pearlTPCmd = register(new PearlTPCmd());
 	public final SmartTPCmd smartTPCmd = register(new SmartTPCmd());
 	public final PeekCmd peekCmd = register(new PeekCmd());

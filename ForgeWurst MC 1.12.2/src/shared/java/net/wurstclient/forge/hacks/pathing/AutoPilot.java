@@ -7,41 +7,52 @@
  */
 package net.wurstclient.forge.hacks.pathing;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.utils.ChatUtils;
-import net.wurstclient.forge.utils.FallenRenderUtils;
-
-import javax.swing.*;
-import java.util.ArrayList;
+import net.wurstclient.forge.settings.EnumSetting;
 
 public final class AutoPilot extends Hack {
 
-	public static ArrayList<BlockPos> allBlocks = new ArrayList<>();
-	public static ArrayList<BlockPos> goodBlocks = new ArrayList<>();
-	public static ArrayList<BlockPos> distancesFromBlocks = new ArrayList<>();
+	private final EnumSetting<Mode> mode =
+			new EnumSetting<>("Mode", Mode.values(), Mode.NORMAL);
+
+	private enum Mode {
+		NORMAL("Basic", true, false),
+		ADVANCED("Advanced", false, true);
+
+		private final String name;
+		private final boolean basic;
+		private final boolean advanced;
+
+		private Mode(String name, boolean basic, boolean advanced) {
+			this.name = name;
+			this.basic = basic;
+			this.advanced = advanced;
+		}
+
+		public String toString() {
+			return name;
+		}
+	}
 
 	public AutoPilot() {
-		super("AutoPilot", "Simple navigation highways..");
+		super("AutoPilot", "Simple automation for navigation.");
 		setCategory(Category.PATHING);
+		addSetting(mode);
 	}
 
 	@Override
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
-		try {
-			setEnabled(false);
-			ChatUtils.message("Module not done yet.");
-		} catch (Exception e) {
-			e.printStackTrace();
+		if (mode.getSelected().advanced) {
+			engageStartUpForAdvanced();
+		} else if (mode.getSelected().basic) {
+			engageStartUpForBasic();
 		}
+		setEnabled(false);
 	}
 
 	@Override
@@ -51,29 +62,23 @@ public final class AutoPilot extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		for (int x = -5; x < 5; x ++) {
-			for (int y = -5; y < 5; y ++) {
-				for (int z = -5; z < 5; z ++) {
-					if (!allBlocks.contains(new BlockPos(mc.player.posX + x, mc.player.posY + y, mc.player.posZ + z))) {
-						allBlocks.add(new BlockPos(mc.player.posX + x, mc.player.posY + y, mc.player.posZ + z));
-					}
-				}
-			}
-		}
-		for (BlockPos blockPos : allBlocks) {
-			boolean check1 = !mc.world.getBlockState(blockPos).getBlock().equals(Blocks.AIR) && mc.world.getBlockState(blockPos.add(0, 1, 0)).getBlock().equals(Blocks.AIR) && mc.world.getBlockState(blockPos.add(0, 2, 0)).getBlock().equals(Blocks.AIR);
-			if (check1) {
-				goodBlocks.add(blockPos);
-			}
-		}
-		allBlocks.removeIf(blockPos -> mc.player.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) > 5);
-		goodBlocks.removeIf(blockPos -> mc.player.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) > 5);
+
 	}
 
-	@SubscribeEvent
-	public void onRender(RenderWorldLastEvent event) {
-		for (BlockPos blockPos : goodBlocks) {
-			FallenRenderUtils.renderPosOutline(blockPos, event.getPartialTicks(), 0, 0, 1, 0.5f);
+	public static void engageStartUpForBasic() {
+		double yaw = mc.player.rotationYaw;
+		if (yaw >= 0 && yaw < 90) {
+			mc.player.rotationYaw = 0;
+		} else if (yaw >= 90 && yaw < 180) {
+			mc.player.rotationYaw = 90;
+		} else if (yaw >= 180 && yaw < 360) {
+			mc.player.rotationYaw = 180;
+		} else {
+			mc.player.rotationYaw = 360;
 		}
+	}
+
+	public static void engageStartUpForAdvanced() {
+
 	}
 }
