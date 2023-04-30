@@ -15,7 +15,7 @@ import net.wurstclient.forge.hacks.pathing.Tunneler;
 import net.wurstclient.forge.hacks.player.*;
 import net.wurstclient.forge.hacks.render.*;
 import net.wurstclient.forge.hacks.world.*;
-import net.wurstclient.forge.hudmodules.HudModules;
+import net.wurstclient.forge.hacks.render.HudModules;
 import net.wurstclient.forge.settings.Setting;
 import net.wurstclient.forge.utils.JsonUtils;
 
@@ -59,12 +59,12 @@ public final class HackList extends WHackList
 	public final AutoCrystal autoCrystal = register(new AutoCrystal());
 	public final Nuker nuker = register(new Nuker());
 	public final Test test = register(new Test());
+	public final AntiLag antiLag = register(new AntiLag());
 	public final StashFinder stashFinder = register(new StashFinder());
 	public final Cheststealer cheststealer = register(new Cheststealer());
 	public final InvMove invMove = register(new InvMove());
 	public final Phase phase = register(new Phase());
 	public final Aimbot aimbot = register(new Aimbot());
-	public final AntiLag antiLag = register(new AntiLag());
 	public final AntiCooldown antiCooldown = register(new AntiCooldown());
 	public final AntiBot antiBot = register(new AntiBot());
 	public final Pointer pointer = register(new Pointer());

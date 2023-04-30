@@ -7,24 +7,38 @@
  */
 package net.wurstclient.forge.hacks.player;
 
+import net.minecraft.entity.passive.EntityDonkey;
+import net.minecraft.entity.passive.EntityHorse;
+import net.minecraft.entity.passive.EntityPig;
+import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.hacks.movement.AutoSprintHack;
+import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.settings.SliderSetting;
+
+import java.util.Objects;
 
 public final class NoFall extends Hack {
 
 	private final SliderSetting fallDistance =
 			new SliderSetting("FallDistance [ANTIFALL]", "If we exeed this value we will prevent you from falling [FOR ANTI-FALL]", 4, 1, 50, 1, SliderSetting.ValueDisplay.DECIMAL);
 
-
 	public static double lastOnGroundX;
 	public static double lastOnGroundY;
 	public static double lastOnGroundZ;
+
+	public static double lastOnGroundXR;
+	public static double lastOnGroundYR;
+	public static double lastOnGroundZR;
+
+	private final EnumSetting<ModeRideable> modeRideable =
+			new EnumSetting<>("Rideables", ModeRideable.values(), ModeRideable.DAMAGE);
 
 	private final EnumSetting<Mode> mode =
 			new EnumSetting<>("Mode", Mode.values(), Mode.PACKET);
@@ -34,6 +48,7 @@ public final class NoFall extends Hack {
 		setCategory(Category.PLAYER);
 		addSetting(mode);
 		addSetting(fallDistance);
+		addSetting(modeRideable);
 	}
 
 	@Override
@@ -70,9 +85,9 @@ public final class NoFall extends Hack {
 
 		if (mode.getSelected().anti) {
 			if (mc.player.onGround) {
-				lastOnGroundX = mc.player.posX;
-				lastOnGroundY = mc.player.posY;
-				lastOnGroundZ = mc.player.posZ;
+				lastOnGroundX = mc.player.lastTickPosX;
+				lastOnGroundY = mc.player.lastTickPosY;
+				lastOnGroundZ = mc.player.lastTickPosZ;
 			}
 			if (mc.player.fallDistance > fallDistance.getValueF()) {
 				mc.player.setPosition(lastOnGroundX, lastOnGroundY, lastOnGroundZ);
@@ -82,6 +97,24 @@ public final class NoFall extends Hack {
 			if (mc.player.fallDistance > 4) {
 				mc.player.onGround = true;
 			}
+		}
+
+		try {
+			if (modeRideable.getSelected().damage) {
+				if (Objects.requireNonNull(mc.player.getRidingEntity()).fallDistance > 4) {
+					Objects.requireNonNull(mc.player.getRidingEntity()).onGround = true;
+				}
+			} else if (modeRideable.getSelected().anti) {
+				if (Objects.requireNonNull(mc.player.getRidingEntity()).onGround) {
+					lastOnGroundXR = mc.player.getRidingEntity().lastTickPosX;
+					lastOnGroundYR = mc.player.getRidingEntity().lastTickPosY;
+					lastOnGroundZR = mc.player.getRidingEntity().lastTickPosZ;
+				}
+				if (mc.player.getRidingEntity().fallDistance > fallDistance.getValueF()) {
+					mc.player.getRidingEntity().setPosition(lastOnGroundXR, lastOnGroundYR, lastOnGroundZR);
+				}
+			}
+		} catch (Exception ignored) {
 		}
 	}
 
@@ -103,6 +136,28 @@ public final class NoFall extends Hack {
 			this.packet = packet;
 			this.aac = aac;
 			this.damage = damage;
+		}
+
+		public String toString() {
+			return name;
+		}
+	}
+
+	private enum ModeRideable {
+		DAMAGE("Damage", true, false, false),
+		ANTI("Anti", false, true, false),
+		OFF("Off", false, false, true);
+
+		private final String name;
+		private final boolean damage;
+		private final boolean anti;
+		private final boolean off;
+
+		private ModeRideable(String name, boolean damage, boolean anti, boolean off) {
+			this.name = name;
+			this.anti = anti;
+			this.damage = damage;
+			this.off = off;
 		}
 
 		public String toString() {

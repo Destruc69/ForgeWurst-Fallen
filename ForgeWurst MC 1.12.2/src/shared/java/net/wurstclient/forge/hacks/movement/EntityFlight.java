@@ -51,16 +51,9 @@ public final class EntityFlight extends Hack {
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
 		try {
-			if (Objects.requireNonNull(mc.player.getRidingEntity()).isEntityAlive()) {
-				if (!bypass.isChecked()) {
-					assert mc.player.getRidingEntity() != null;
-					if (mc.gameSettings.keyBindJump.isKeyDown()) {
-						Objects.requireNonNull(mc.player.getRidingEntity()).motionY += upSpeed.getValueF();
-					} else if (mc.gameSettings.keyBindSneak.isKeyDown()) {
-						Objects.requireNonNull(mc.player.getRidingEntity()).motionY -= downSpeed.getValueF();
-					}
-				} else {
-					if (mc.player.ticksExisted % 5 == 0) {
+			if (mc.player.getRidingEntity() != null) {
+				if (Objects.requireNonNull(mc.player.getRidingEntity()).isEntityAlive()) {
+					if (!bypass.isChecked()) {
 						assert mc.player.getRidingEntity() != null;
 						if (mc.gameSettings.keyBindJump.isKeyDown()) {
 							Objects.requireNonNull(mc.player.getRidingEntity()).motionY += upSpeed.getValueF();
@@ -68,7 +61,16 @@ public final class EntityFlight extends Hack {
 							Objects.requireNonNull(mc.player.getRidingEntity()).motionY -= downSpeed.getValueF();
 						}
 					} else {
-						mc.player.setVelocity(0, 0, 0);
+						if (mc.player.ticksExisted % 5 == 0) {
+							assert mc.player.getRidingEntity() != null;
+							if (mc.gameSettings.keyBindJump.isKeyDown()) {
+								Objects.requireNonNull(mc.player.getRidingEntity()).motionY += upSpeed.getValueF();
+							} else if (mc.gameSettings.keyBindSneak.isKeyDown()) {
+								Objects.requireNonNull(mc.player.getRidingEntity()).motionY -= downSpeed.getValueF();
+							}
+						} else {
+							mc.player.setVelocity(0, 0, 0);
+						}
 					}
 				}
 			}
@@ -76,5 +78,4 @@ public final class EntityFlight extends Hack {
 			e.printStackTrace();
 		}
 	}
-
 }

@@ -19,6 +19,7 @@ public final class CommandList extends WCommandList
 	public final SmartTPCmd smartTPCmd = register(new SmartTPCmd());
 	public final PeekCmd peekCmd = register(new PeekCmd());
 	public final BoatTP boatTP = register(new BoatTP());
+	public final SetAP setAP = register(new SetAP());
 	public final FaceCMD faceCMD = register(new FaceCMD());
 	public final CenterTP centerTP = register(new CenterTP());
 	public final AddPoint addPoint = register(new AddPoint());

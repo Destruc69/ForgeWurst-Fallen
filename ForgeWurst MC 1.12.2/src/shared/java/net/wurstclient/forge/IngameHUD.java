@@ -14,17 +14,13 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.forge.clickgui.ClickGui;
 import net.wurstclient.forge.clickgui.ClickGuiScreen;
 import net.wurstclient.forge.compatibility.WMinecraft;
-import net.wurstclient.forge.hacks.ClickGuiHack;
-import net.wurstclient.forge.hudmodules.HudModules;
+import net.wurstclient.forge.hacks.render.HudModules;
 import net.wurstclient.forge.utils.TextUtil;
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
-import org.w3c.dom.css.RGBColor;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Objects;
 
 public final class IngameHUD {
 	private final Minecraft mc = Minecraft.getMinecraft();

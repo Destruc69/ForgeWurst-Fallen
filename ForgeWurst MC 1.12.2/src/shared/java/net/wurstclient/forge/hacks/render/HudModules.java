@@ -1,4 +1,4 @@
-package net.wurstclient.forge.hudmodules;
+package net.wurstclient.forge.hacks.render;
 
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;

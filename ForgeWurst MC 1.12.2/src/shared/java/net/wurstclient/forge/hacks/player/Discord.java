@@ -51,7 +51,6 @@ public final class Discord extends Hack {
 		DiscordEventHandlers handlers = new DiscordEventHandlers();
 		rpc.Discord_Initialize("891902442999017482", handlers, true, "");
 		presence.startTimestamp = System.currentTimeMillis() / 1000L;
-		presence.details = presence.state = "Idle";
 		presence.largeImageKey = "fallen";
 		rpc.Discord_UpdatePresence(presence);
 
@@ -59,8 +58,8 @@ public final class Discord extends Hack {
 		rpc.Discord_UpdatePresence(presence);
 
 		try {
-		presence.details = Objects.requireNonNull(mc.getCurrentServerData()).serverIP + " " + "|" + " " + mc.getCurrentServerData().version;
-		presence.state = mc.player.getName() + " " + "|" + " " + mc.player.getHeldItemMainhand();
+			presence.details = mc.player.getName() + " | " + Objects.requireNonNull(mc.getCurrentServerData()).serverIP;
+			presence.state = mc.player.getHealth() + " / " + mc.player.getMaxHealth();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

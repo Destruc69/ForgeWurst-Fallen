@@ -11,31 +11,18 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.event.GuiScreenEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraft.init.SoundEvents;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.HackList;
 import net.wurstclient.forge.compatibility.WMinecraft;
+import net.wurstclient.forge.hacks.ClickGuiHack;
 import net.wurstclient.forge.settings.Setting;
 import net.wurstclient.forge.utils.JsonUtils;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Vector3f;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -45,28 +32,25 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Random;
 
-import static org.lwjgl.opengl.GL11.*;
+import static java.lang.Math.abs;
+import static net.minecraft.client.gui.Gui.drawRect;
 
 public final class ClickGui
 {
-    Window windowww;
     private final ArrayList<Window> windows = new ArrayList<>();
     private final ArrayList<Popup> popups = new ArrayList<>();
     private final Path windowsFile;
+
+    private static final Random random = new Random();
+    public static final List<Particle> particles = new ArrayList<>();
 
     private float[] bgColor = new float[3];
     private float[] acColor = new float[3];
     private float opacity;
     private int maxHeight;
-
-    public static double xxx;
-    public static double yyy;
-
-    public static double ballX;
-    public static double ballY;
-    public static double ballVelocityY;
-    public static double ballVelocityX;
 
     private String tooltip;
 
@@ -191,20 +175,21 @@ public final class ClickGui
         }
     }
 
-    public void handleMouseClick(int mouseX, int mouseY, int mouseButton)
-    {
+    public void handleMouseClick(int mouseX, int mouseY, int mouseButton) {
         boolean popupClicked =
                 handlePopupMouseClick(mouseX, mouseY, mouseButton);
 
-        if(!popupClicked)
+        if (!popupClicked)
             handleWindowMouseClick(mouseX, mouseY, mouseButton);
 
-        for(Popup popup : popups)
-            if(popup.getOwner().getParent().isClosing())
+        for (Popup popup : popups)
+            if (popup.getOwner().getParent().isClosing())
                 popup.close();
 
         windows.removeIf(w -> w.isClosing());
         popups.removeIf(p -> p.isClosing());
+
+        Minecraft.getMinecraft().player.playSound(SoundEvents.UI_BUTTON_CLICK, 1, 1);
     }
 
     private boolean handlePopupMouseClick(int mouseX, int mouseY,
@@ -383,20 +368,48 @@ public final class ClickGui
 
     public void render(int mouseX, int mouseY, float partialTicks)
     {
+        Minecraft mc = Minecraft.getMinecraft();
 
         GL11.glDisable(GL11.GL_CULL_FACE);
         GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glEnable(GL_BLEND);
-        GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glShadeModel(GL11.GL_SMOOTH);
-        GL11.glLineWidth(1);
+        GL11.glLineWidth(ClickGuiHack.clickLineSize.getValueF());
 
-
-        //PLans: Add logo to bottom left.
-        Minecraft mc = Minecraft.getMinecraft();
         assert mc.currentScreen != null;
-        drawRect(0, 0, mc.currentScreen.width, mc.currentScreen.height, -1072689136);
+        drawRect(0, 0, mc.currentScreen.width, mc.currentScreen.height, ClickGuiHack.backgroundColor.getValueI());
 
+        FontRenderer fr = Minecraft.getMinecraft().fontRenderer;
+
+        if (ClickGuiHack.resetBackColor.isChecked()) {
+            ClickGuiHack.backgroundColor.setValue(-1072689136);
+            ClickGuiHack.resetBackColor.setChecked(false);
+        }
+
+        while (particles.size() < ClickGuiHack.maxParticles.getValue()) {
+            if (random.nextFloat() <= ClickGuiHack.particleSpawnRate.getValue()) {
+                particles.add(new Particle(
+                        random.nextInt(mc.displayWidth),
+                        random.nextInt(mc.displayHeight),
+                        random.nextInt(3) + 1,
+                        random.nextInt(3) + 1
+                ));
+            } else {
+                break;
+            }
+        }
+
+        for (int x = 0; x < particles.size() - 1; x ++) {
+            Particle fromP = particles.get(x);
+            Particle toP = particles.get(x + 1);
+            renderMatrix(fromP, toP);
+        }
+
+        for (Particle particle : particles) {
+            particle.update();
+            particle.render();
+        }
 
         // scrolling
         int dWheel = Mouse.getDWheel();
@@ -436,7 +449,7 @@ public final class ClickGui
                 else
                 {
                     window.stopDragging();
-                    saveWindows();
+                   saveWindows();
                 }
 
             // scrollbar dragging
@@ -473,7 +486,6 @@ public final class ClickGui
         if(tooltip != null)
         {
             String[] lines = tooltip.split("\n");
-            FontRenderer fr = WMinecraft.getFontRenderer();
 
             int tw = 0;
             int th = lines.length * fr.FONT_HEIGHT;
@@ -483,7 +495,6 @@ public final class ClickGui
                 if(lw > tw)
                     tw = lw;
             }
-            assert mc.currentScreen != null;
             int sw = mc.currentScreen.width;
             int sh = mc.currentScreen.height;
 
@@ -520,53 +531,27 @@ public final class ClickGui
 
         GL11.glEnable(GL11.GL_CULL_FACE);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
-        GL11.glDisable(GL_BLEND);
+        GL11.glDisable(GL11.GL_BLEND);
     }
 
-    public static void drawRect(float left, float top, float right, float bottom, int color) {
-
-        float var5;
-
-        if (left < right) {
-            var5 = left;
-            left = right;
-            right = var5;
+    public static void renderMatrix(Particle from, Particle to) {
+        if (ClickGuiHack.matrix.isChecked()) {
+            GL11.glLineWidth(ClickGuiHack.matSize.getValueF());
+            GL11.glBegin(GL11.GL_LINES);
+            GL11.glColor4f(ClickGuiHack.matRed.getValueF(), ClickGuiHack.matGreen.getValueF(), ClickGuiHack.matBlue.getValueF(), ClickGuiHack.matAlpha.getValueF()); // set line color to white
+            GL11.glVertex3d(from.x, from.y, 0); // start point of the line
+            GL11.glVertex3d(to.x, to.y, 0); // end point of the line
+            GL11.glEnd();
+            GL11.glLineWidth(1.0f); // reset line width to default
         }
-
-        if (top < bottom) {
-            var5 = top;
-            top = bottom;
-            bottom = var5;
-        }
-
-        GL11.glEnable(GL_BLEND);
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        GL11.glEnable(GL11.GL_LINE_SMOOTH);
-        GL11.glPushMatrix();
-        glColor(color);
-        GL11.glBegin(GL11.GL_QUADS);
-        GL11.glVertex2d(left, bottom);
-        GL11.glVertex2d(right, bottom);
-        GL11.glVertex2d(right, top);
-        GL11.glVertex2d(left, top);
-        GL11.glEnd();
-        GL11.glPopMatrix();
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
-        GL11.glDisable(GL11.GL_LINE_SMOOTH);
-    }
-
-    public static void glColor(int color) {
-
-        GlStateManager.color((float) (color >> 16 & 255) / 255F, (float) (color >> 8 & 255) / 255F, (float) (color & 255) / 255F, (float) (color >> 24 & 255) / 255F);
     }
 
     public void renderPinnedWindows(float partialTicks)
     {
         GL11.glDisable(GL11.GL_CULL_FACE);
         GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glEnable(GL_BLEND);
-        GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glShadeModel(GL11.GL_SMOOTH);
         GL11.glLineWidth(1);
 
@@ -579,7 +564,8 @@ public final class ClickGui
         GL11.glEnable(GL11.GL_TEXTURE_2D);
     }
 
-    public void updateColors() {
+    public void updateColors()
+    {
         HackList hax = ForgeWurst.getForgeWurst().getHax();
 
         opacity = hax.clickGuiHack.getOpacity();
@@ -592,7 +578,6 @@ public final class ClickGui
     private void renderWindow(Window window, int mouseX, int mouseY,
                               float partialTicks)
     {
-        windowww = window;
         int x1 = window.getX();
         int y1 = window.getY();
         int x2 = x1 + window.getWidth();
@@ -763,7 +748,7 @@ public final class ClickGui
         if(!window.isMinimized())
         {
             // title bar outline
-            GL11.glBegin(GL11.GL_LINE_LOOP);
+            GL11.glBegin(GL11.GL_LINES);
             GL11.glVertex2i(x1, y3);
             GL11.glVertex2i(x2, y3);
             GL11.glEnd();
@@ -957,13 +942,13 @@ public final class ClickGui
             GL11.glVertex2d(xk2, yk2);
             GL11.glVertex2d(xk1, yk2);
             GL11.glEnd();
-            GL11.glBegin(GL11.GL_QUADS);
+            GL11.glBegin(GL11.GL_LINE_LOOP);
             GL11.glVertex2d(xk3, yk2);
             GL11.glVertex2d(xk4, yk2);
             GL11.glVertex2d(xk4, yk3);
             GL11.glVertex2d(xk3, yk3);
             GL11.glEnd();
-            GL11.glBegin(GL11.GL_QUADS);
+            GL11.glBegin(GL11.GL_LINE_LOOP);
             GL11.glVertex2d(xn1, yn1);
             GL11.glVertex2d(xn2, yn1);
             GL11.glVertex2d(xn2, yn2);
@@ -1023,13 +1008,13 @@ public final class ClickGui
             GL11.glVertex2d(xk3, yk3);
             GL11.glVertex2d(xk4, yk4);
             GL11.glEnd();
-            GL11.glBegin(GL11.GL_QUADS);
+            GL11.glBegin(GL11.GL_LINE_LOOP);
             GL11.glVertex2d(xk5, yk5);
             GL11.glVertex2d(xk6, yk6);
             GL11.glVertex2d(xk3, yk7);
             GL11.glVertex2d(xk7, yk4);
             GL11.glEnd();
-            GL11.glBegin(GL11.GL_QUADS);
+            GL11.glBegin(GL11.GL_LINE_LOOP);
             GL11.glVertex2d(xn1, yn1);
             GL11.glVertex2d(xn2, yn2);
             GL11.glVertex2d(xn3, yn3);
@@ -1120,5 +1105,68 @@ public final class ClickGui
     public void addPopup(Popup popup)
     {
         popups.add(popup);
+    }
+
+    public static class Particle {
+        private int x, y;
+        private int vx, vy;
+
+        private Particle(int x, int y, int vx, int vy) {
+            this.x = x;
+            this.y = y;
+            this.vx = vx;
+            this.vy = vy;
+        }
+
+        private void update() {
+            x += vx;
+            y += vy;
+
+            float guiScale = Minecraft.getMinecraft().gameSettings.guiScale;
+            int screenWidth = (int) (Minecraft.getMinecraft().displayWidth / guiScale);
+            int screenHeight = (int) (Minecraft.getMinecraft().displayHeight / guiScale);
+
+            // Bounce off walls
+            if (x < 0) {
+                vx = abs(vx);  // reverse the sign of vx to reflect the particle
+            } else if (x > screenWidth) {
+                vx = -abs(vx);  // reverse the sign of vx to reflect the particle
+            }
+
+            if (y < 0) {
+                vy = abs(vy);  // reverse the sign of vy to reflect the particle
+            } else if (y > screenHeight) {
+                vy = -abs(vy);  // reverse the sign of vy to reflect the particle
+            }
+
+            // Calculate velocity magnitude
+            float speed = (float) Math.sqrt(vx * vx + vy * vy);
+
+            // Limit speed to maximum allowed value
+            if (speed > ClickGuiHack.particleSpeed.getValue()) {
+                float factor = ClickGuiHack.particleSpeed.getValueF() / speed;
+                vx *= factor;
+                vy *= factor;
+            }
+        }
+
+        private void render() {
+            if (ClickGuiHack.particles.isChecked()) {
+                GL11.glPushMatrix();
+                GL11.glTranslated(x, y, 0);
+                GL11.glColor4d(ClickGuiHack.partRed.getValue(), ClickGuiHack.partGreen.getValue(), ClickGuiHack.partBlue.getValue(), ClickGuiHack.patAlpha.getValueF());
+                GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+                GL11.glVertex2d(0, 0);
+                int numSegments = 32;
+                for (int i = 0; i <= numSegments; i++) {
+                    double angle = Math.toRadians(i * (360.0 / numSegments));
+                    double vx = ClickGuiHack.partSize.getValue() * Math.cos(angle);
+                    double vy = ClickGuiHack.partSize.getValue() * Math.sin(angle);
+                    GL11.glVertex2d(vx, vy);
+                }
+                GL11.glEnd();
+                GL11.glPopMatrix();
+            }
+        }
     }
 }

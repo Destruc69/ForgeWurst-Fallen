@@ -10,12 +10,11 @@ package net.wurstclient.forge.clickgui;
 import java.io.IOException;
 
 import net.minecraft.client.gui.GuiScreen;
-import org.lwjgl.LWJGLException;
 
 public final class ClickGuiScreen extends GuiScreen
 {
 	private final ClickGui gui;
-	
+
 	public ClickGuiScreen(ClickGui gui)
 	{
 		this.gui = gui;
@@ -26,15 +25,15 @@ public final class ClickGuiScreen extends GuiScreen
 	{
 		return false;
 	}
-	
+
 	@Override
 	protected void mouseClicked(int mouseX, int mouseY, int mouseButton)
-		throws IOException
+			throws IOException
 	{
 		super.mouseClicked(mouseX, mouseY, mouseButton);
 		gui.handleMouseClick(mouseX, mouseY, mouseButton);
 	}
-	
+
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks)
 	{

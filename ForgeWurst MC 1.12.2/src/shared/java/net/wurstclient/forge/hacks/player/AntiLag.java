@@ -5,7 +5,7 @@
  * License, version 3. If a copy of the GPL was not distributed with this
  * file, You can obtain one at: https://www.gnu.org/licenses/gpl-3.0.txt
  */
-package net.wurstclient.forge.hacks.render;
+package net.wurstclient.forge.hacks.player;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -15,26 +15,13 @@ import net.wurstclient.forge.Hack;
 
 public final class AntiLag extends Hack {
 	public AntiLag() {
-		super("AntiLag", "Optimizes for best performance.");
-		setCategory(Category.RENDER);
+		super("AntiLag", "Working out of the pocket anti-lag (this anti lag is really simple).");
+		setCategory(Category.WORLD);
 	}
 
 	@Override
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
-
-		mc.gameSettings.chatOpacity = 0;
-		mc.gameSettings.enableVsync = true;
-		mc.gameSettings.chatColours = false;
-		mc.gameSettings.limitFramerate = 60;
-		mc.gameSettings.forceUnicodeFont = false;
-		mc.gameSettings.clouds = 0;
-		mc.gameSettings.entityShadows = false;
-		mc.gameSettings.fancyGraphics = false;
-		mc.gameSettings.particleSetting = 0;
-		mc.gameSettings.viewBobbing = false;
-		mc.player.setInvisible(true);
-		mc.player.setGlowing(false);
 	}
 
 	@Override
@@ -44,7 +31,7 @@ public final class AntiLag extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		if (Runtime.getRuntime ().totalMemory () - Runtime.getRuntime ().freeMemory () > Runtime.getRuntime().maxMemory() / 3) {
+		if (mc.player.ticksExisted % 100 == 0) {
 			Runtime.getRuntime().gc();
 		}
 	}

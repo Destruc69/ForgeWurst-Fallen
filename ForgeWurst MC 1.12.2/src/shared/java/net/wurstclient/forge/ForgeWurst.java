@@ -16,6 +16,7 @@ import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRema
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.wurstclient.forge.clickgui.ClickGui;
+import net.wurstclient.forge.gui.MainMenuGUI;
 import net.wurstclient.forge.update.WurstUpdater;
 
 import java.io.IOException;
@@ -46,6 +47,7 @@ public final class ForgeWurst
 	private CommandProcessor cmdProcessor;
 	private KeybindProcessor keybindProcessor;
 	private WurstUpdater updater;
+	private MainMenuGUI mainMenuGUI;
 
 	@EventHandler
 	public void init(FMLInitializationEvent event)
@@ -91,6 +93,9 @@ public final class ForgeWurst
 
 		updater = new WurstUpdater();
 		MinecraftForge.EVENT_BUS.register(updater);
+
+		mainMenuGUI = new MainMenuGUI();
+		MinecraftForge.EVENT_BUS.register(mainMenuGUI);
 	}
 
 	public static ForgeWurst getForgeWurst()

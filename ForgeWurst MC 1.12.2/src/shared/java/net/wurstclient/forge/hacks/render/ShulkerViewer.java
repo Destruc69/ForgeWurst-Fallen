@@ -60,7 +60,7 @@ public final class ShulkerViewer extends Hack {
 	private static final ResourceLocation RES_MAP_BACKGROUND = new ResourceLocation("textures/map/map_background.png");
 
 	public ShulkerViewer() {
-		super("Peek", "Shows you whats inside a shulker, thank you spect client by beloved even though i noticed you skidded you ac from postman.");
+		super("Peek", "Shows you whats inside a shulker, thank you spect client by beloved.");
 		setCategory(Category.RENDER);
 	}
 

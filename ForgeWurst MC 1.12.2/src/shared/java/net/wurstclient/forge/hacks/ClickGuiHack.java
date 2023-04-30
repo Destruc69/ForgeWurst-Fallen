@@ -13,8 +13,11 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WGuiInventoryButtonEvent;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.clickgui.ClickGui;
 import net.wurstclient.forge.clickgui.ClickGuiScreen;
+import net.wurstclient.forge.hacks.movement.AutoSprintHack;
 import net.wurstclient.forge.settings.CheckboxSetting;
+import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.settings.SliderSetting.ValueDisplay;
 import net.wurstclient.forge.utils.TimerUtils;
@@ -45,19 +48,76 @@ public final class ClickGuiHack extends Hack
     private final SliderSetting acBlue = new SliderSetting("AC blue",
             "Accent blue", 16, 0, 255, 0.01, ValueDisplay.INTEGER);
 
-    private static final SliderSetting scaleGUI = new SliderSetting("GUIScale", 3, 1, 10, 1, ValueDisplay.INTEGER);
-
     private final CheckboxSetting nogui =
             new CheckboxSetting("NoGUI",
                     "Hide the UI",
                     false);
 
-    public static final CheckboxSetting inventoryButton =
+    private static final CheckboxSetting inventoryButton =
             new CheckboxSetting("Inventory Button",
                     "A button that lets you open the\n"
                             + "ClickGUI from the inventory screen.\n"
                             + "Useful if you can't or don't want\n" + "to use a keybind.",
                     true);
+
+    public static final CheckboxSetting particles =
+            new CheckboxSetting("Particles",
+                    "Makes little particles in the background.",
+                    false);
+
+    public static final CheckboxSetting matrix =
+            new CheckboxSetting("Matrix",
+                    "Connects the particles with a line.",
+                    false);
+
+    public static SliderSetting clickLineSize = new SliderSetting("ClickGUI LineSize",
+            "Size of the lines for the ClickGUI", 1, 0.1, 20, 0.1, ValueDisplay.DECIMAL);
+
+    public static SliderSetting partRed = new SliderSetting("Particle red",
+            "Accent red", 16, 0, 255, 0.01, ValueDisplay.INTEGER);
+    public static SliderSetting partGreen = new SliderSetting("Particle green",
+            "Accent green", 16, 0, 255, 0.01, ValueDisplay.INTEGER);
+    public static SliderSetting partBlue = new SliderSetting("Particle blue",
+            "Accent blue", 16, 0, 255, 0.01, ValueDisplay.INTEGER);
+
+    public static SliderSetting matRed = new SliderSetting("Matrix red",
+            "Accent red", 16, 0, 255, 0.01, ValueDisplay.INTEGER);
+    public static SliderSetting matGreen = new SliderSetting("Matrix green",
+            "Accent green", 16, 0, 255, 0.01, ValueDisplay.INTEGER);
+    public static SliderSetting matBlue = new SliderSetting("Matrix blue",
+            "Accent blue", 16, 0, 255, 0.01, ValueDisplay.INTEGER);
+
+    public static SliderSetting matAlpha = new SliderSetting("Matrix alpha",
+            "Alpha of the Matrix lines", 1, 0.1, 1, 0.1, ValueDisplay.DECIMAL);
+
+    public static SliderSetting patAlpha = new SliderSetting("Particle alpha",
+            "Alpha of the Particles", 1, 0.1, 1, 0.1, ValueDisplay.DECIMAL);
+
+    public static SliderSetting matSize = new SliderSetting("Matrix size",
+            "Size of the matrix", 1, 0.1, 20, 0.1, ValueDisplay.DECIMAL);
+
+    public static SliderSetting partSize = new SliderSetting("Particle size",
+            "Size of the particle", 1, 0.1, 20, 0.1, ValueDisplay.DECIMAL);
+
+    public static SliderSetting backgroundColor = new SliderSetting("Back color",
+            "The color of the background.", -1072689136, -1072689136 - 1072689136, -1072689136 + 1072689136, 1, ValueDisplay.DECIMAL);
+
+    public static final CheckboxSetting resetBackColor =
+            new CheckboxSetting("ResetBackColor",
+                    "Resets the background color.",
+                    false);
+
+    public static final SliderSetting maxParticles = new SliderSetting("MaxParticles",
+            "The max amount of particles for the background", 1500, 0, 5000, 5,
+            ValueDisplay.DECIMAL);
+
+    public static final SliderSetting particleSpawnRate = new SliderSetting("ParticleSpawnRate",
+            "How fast the particles are spawned", 0.05, 0.01, 0.1, 0.01,
+            ValueDisplay.DECIMAL);
+
+    public static final SliderSetting particleSpeed = new SliderSetting("ParticleSpeed",
+            "How fast are the particles?", 1, 0.05, 3, 0.001,
+            ValueDisplay.DECIMAL);
 
     public ClickGuiHack()
     {
@@ -71,7 +131,24 @@ public final class ClickGuiHack extends Hack
         addSetting(acBlue);
         addSetting(nogui);
         addSetting(inventoryButton);
-
+        addSetting(particles);
+        addSetting(matrix);
+        addSetting(clickLineSize);
+        addSetting(partRed);
+        addSetting(partGreen);
+        addSetting(partBlue);
+        addSetting(matRed);
+        addSetting(matGreen);
+        addSetting(matBlue);
+        addSetting(patAlpha);
+        addSetting(matAlpha);
+        addSetting(matSize);
+        addSetting(partSize);
+        addSetting(backgroundColor);
+        addSetting(resetBackColor);
+        addSetting(maxParticles);
+        addSetting(particleSpawnRate);
+        addSetting(particleSpeed);
 
         MinecraftForge.EVENT_BUS.register(new InventoryButtonAdder());
     }
@@ -81,7 +158,7 @@ public final class ClickGuiHack extends Hack
     {
         mc.displayGuiScreen(new ClickGuiScreen(wurst.getGui()));
         setEnabled(false);
-        TimerUtils.reset();
+        ClickGui.particles.clear();
     }
 
     public float getOpacity()
@@ -103,10 +180,6 @@ public final class ClickGuiHack extends Hack
         this.maxHeight.setValue(maxHeight);
     }
 
-    public static float getScale() {
-        return scaleGUI.getValueF();
-    }
-
     public float[] getBgColor()
     {
         return new float[]{bgRed.getValueI() / 255F, bgGreen.getValueI() / 255F,
@@ -119,7 +192,7 @@ public final class ClickGuiHack extends Hack
                 acBlue.getValueI() / 255F};
     }
 
-    public boolean isInventoryButton()
+    public static boolean isInventoryButton()
     {
         return inventoryButton.isChecked();
     }

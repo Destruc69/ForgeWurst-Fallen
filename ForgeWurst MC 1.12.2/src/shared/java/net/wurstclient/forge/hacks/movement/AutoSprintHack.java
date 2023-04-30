@@ -11,10 +11,14 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
+import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.HackList;
 import net.wurstclient.forge.settings.EnumSetting;
+import net.wurstclient.forge.utils.ChatUtils;
 import net.wurstclient.forge.utils.KeyBindingUtils;
-import net.wurstclient.forge.utils.NotiUtils;
+
+import java.util.ArrayList;
 
 public final class AutoSprintHack extends Hack {
 

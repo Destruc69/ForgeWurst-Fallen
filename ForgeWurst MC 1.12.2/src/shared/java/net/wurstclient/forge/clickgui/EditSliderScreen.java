@@ -23,36 +23,36 @@ public final class EditSliderScreen extends GuiScreen
 {
 	private final GuiScreen prevScreen;
 	private final SliderSetting slider;
-	
+
 	private GuiTextField valueField;
 	private GuiButton doneButton;
-	
+
 	public EditSliderScreen(GuiScreen prevScreen, SliderSetting slider)
 	{
 		this.prevScreen = prevScreen;
 		this.slider = slider;
 	}
-	
+
 	@Override
 	public boolean doesGuiPauseGame()
 	{
 		return false;
 	}
-	
+
 	@Override
 	public void initGui()
 	{
 		valueField = new GuiTextField(1, WMinecraft.getFontRenderer(),
-			width / 2 - 100, 60, 200, 20);
+				width / 2 - 100, 60, 200, 20);
 		valueField
-			.setText(ValueDisplay.DECIMAL.getValueString(slider.getValue()));
+				.setText(ValueDisplay.DECIMAL.getValueString(slider.getValue()));
 		valueField.setSelectionPos(0);
 		valueField.setFocused(true);
-		
+
 		buttonList.add(doneButton =
-			new GuiButton(0, width / 2 - 100, height / 3 * 2, "Done"));
+				new GuiButton(0, width / 2 - 100, height / 3 * 2, "Done"));
 	}
-	
+
 	@Override
 	protected void actionPerformed(GuiButton button) throws IOException
 	{
@@ -61,38 +61,38 @@ public final class EditSliderScreen extends GuiScreen
 			slider.setValue(Double.parseDouble(value));
 		mc.displayGuiScreen(prevScreen);
 	}
-	
+
 	@Override
 	protected void mouseClicked(int mouseX, int mouseY, int mouseButton)
-		throws IOException
+			throws IOException
 	{
 		super.mouseClicked(mouseX, mouseY, mouseButton);
 		valueField.mouseClicked(mouseX, mouseY, mouseButton);
 	}
-	
+
 	@Override
 	protected void keyTyped(char typedChar, int keyCode) throws IOException
 	{
 		valueField.textboxKeyTyped(typedChar, keyCode);
-		
+
 		if(keyCode == Keyboard.KEY_RETURN)
 			actionPerformed(doneButton);
 		else if(keyCode == Keyboard.KEY_ESCAPE)
 			mc.displayGuiScreen(prevScreen);
 	}
-	
+
 	@Override
 	public void updateScreen()
 	{
 		valueField.updateCursorCounter();
 	}
-	
+
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks)
 	{
 		drawDefaultBackground();
 		drawCenteredString(WMinecraft.getFontRenderer(), slider.getName(),
-			width / 2, 20, 0xffffff);
+				width / 2, 20, 0xffffff);
 		valueField.drawTextBox();
 		super.drawScreen(mouseX, mouseY, partialTicks);
 	}
