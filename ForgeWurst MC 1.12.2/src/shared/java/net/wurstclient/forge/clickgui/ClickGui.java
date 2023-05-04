@@ -1118,54 +1118,45 @@ public final class ClickGui
             this.vy = vy;
         }
 
+
         private void update() {
+            // Get screen dimensions
+            Minecraft minecraft = Minecraft.getMinecraft();
+            ScaledResolution scaledResolution = new ScaledResolution(minecraft);
+            int screenWidth = scaledResolution.getScaledWidth();
+            int screenHeight = scaledResolution.getScaledHeight();
+
+            // Update position
             x += vx;
             y += vy;
 
-            float guiScale = Minecraft.getMinecraft().gameSettings.guiScale;
-            int screenWidth = (int) (Minecraft.getMinecraft().displayWidth / guiScale);
-            int screenHeight = (int) (Minecraft.getMinecraft().displayHeight / guiScale);
-
             // Bounce off walls
-            if (x < 0) {
-                vx = abs(vx);  // reverse the sign of vx to reflect the particle
-            } else if (x > screenWidth) {
-                vx = -abs(vx);  // reverse the sign of vx to reflect the particle
+            if (x < 0 || x > screenWidth) {
+                vx = -vx;
             }
 
-            if (y < 0) {
-                vy = abs(vy);  // reverse the sign of vy to reflect the particle
-            } else if (y > screenHeight) {
-                vy = -abs(vy);  // reverse the sign of vy to reflect the particle
+            if (y < 0 || y > screenHeight) {
+                vy = -vy;
             }
 
-            // Calculate velocity magnitude
-            float speed = (float) Math.sqrt(vx * vx + vy * vy);
-
-            // Limit speed to maximum allowed value
-            if (speed > ClickGuiHack.particleSpeed.getValue()) {
-                float factor = ClickGuiHack.particleSpeed.getValueF() / speed;
-                vx *= factor;
-                vy *= factor;
+            // Clamp velocity magnitude
+            double speed = ClickGuiHack.particleSpeed.getValue();
+            double velocityMagnitude = Math.sqrt(vx * vx + vy * vy);
+            if (velocityMagnitude > speed) {
+                double scale = speed / velocityMagnitude;
+                vx *= scale;
+                vy *= scale;
             }
         }
 
         private void render() {
             if (ClickGuiHack.particles.isChecked()) {
-                GL11.glPushMatrix();
-                GL11.glTranslated(x, y, 0);
-                GL11.glColor4d(ClickGuiHack.partRed.getValue(), ClickGuiHack.partGreen.getValue(), ClickGuiHack.partBlue.getValue(), ClickGuiHack.patAlpha.getValueF());
-                GL11.glBegin(GL11.GL_TRIANGLE_FAN);
-                GL11.glVertex2d(0, 0);
-                int numSegments = 32;
-                for (int i = 0; i <= numSegments; i++) {
-                    double angle = Math.toRadians(i * (360.0 / numSegments));
-                    double vx = ClickGuiHack.partSize.getValue() * Math.cos(angle);
-                    double vy = ClickGuiHack.partSize.getValue() * Math.sin(angle);
-                    GL11.glVertex2d(vx, vy);
+                int size = ClickGuiHack.partSize.getValueI();
+                for (int a = -size; a <= size; a++) {
+                    for (int b = -size; b <= size; b++) {
+                        drawRect(x + a, y + b, x + a + 1, y + b + 1, 0xFFFFFFFF);
+                    }
                 }
-                GL11.glEnd();
-                GL11.glPopMatrix();
             }
         }
     }

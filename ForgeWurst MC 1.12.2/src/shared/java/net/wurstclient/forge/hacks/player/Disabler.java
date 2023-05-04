@@ -7,14 +7,12 @@
  */
 package net.wurstclient.forge.hacks.player;
 
-import com.sun.org.apache.bcel.internal.generic.FADD;
 import net.minecraft.entity.player.PlayerCapabilities;
+import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketConfirmTransaction;
 import net.minecraft.network.play.client.CPacketKeepAlive;
 import net.minecraft.network.play.client.CPacketPlayerAbilities;
 import net.minecraft.network.play.client.CPacketSpectate;
-import net.minecraft.network.play.server.SPacketPlayerPosLook;
-import net.minecraft.network.status.client.CPacketPing;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WPacketInputEvent;
@@ -23,6 +21,8 @@ import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.EnumSetting;
+
+import java.util.ArrayList;
 
 public final class Disabler extends Hack {
 
@@ -36,11 +36,12 @@ public final class Disabler extends Hack {
 	}
 
 	private enum Mode {
-		CANCEL("Cancel", true, false, false, false, false),
-		SPOOF("Spoof", false, true, false, false, false),
-		FUCKTHESERVER("FUCKTHESERVER", false, false, true, false, false),
-		ABILITIES("Abilities", false, false, false, true, false),
-		SPECTATE("Spectate", false, false, false, false, true);
+		CANCEL("Cancel", true, false, false, false, false, false),
+		SPOOF("Spoof", false, true, false, false, false, false),
+		FUCKTHESERVER("FUCKTHESERVER", false, false, true, false, false, false),
+		ABILITIES("Abilities", false, false, false, true, false, false),
+		SPECTATE("Spectate", false, false, false, false, true, false),
+		LAG("Lag", false, false, false, false, false, true);
 
 		private final String name;
 		private final boolean cancel;
@@ -48,14 +49,16 @@ public final class Disabler extends Hack {
 		private final boolean fucktheserver;
 		private final boolean abilities;
 		private final boolean spectate;
+		private final boolean lag;
 
-		private Mode(String name, boolean cancel, boolean spoof, boolean fucktheserver, boolean abilities, boolean spectate) {
+		private Mode(String name, boolean cancel, boolean spoof, boolean fucktheserver, boolean abilities, boolean spectate, boolean  lag) {
 			this.name = name;
 			this.cancel = cancel;
 			this.spoof = spoof;
 			this.fucktheserver = fucktheserver;
 			this.abilities = abilities;
 			this.spectate = spectate;
+			this.lag = lag;
 		}
 
 		public String toString() {
@@ -90,6 +93,8 @@ public final class Disabler extends Hack {
 		}
 	}
 
+	private static final ArrayList<Packet> savedPackets = new ArrayList<>();
+
 	@SubscribeEvent
 	public void inPacketEvent(WPacketInputEvent event) {
 		try {
@@ -106,6 +111,14 @@ public final class Disabler extends Hack {
 				if (event.getPacket() instanceof CPacketKeepAlive) {
 					mc.player.connection.sendPacket(new CPacketKeepAlive((long) (Integer.MIN_VALUE + Math.random() * 1)));
 					event.setCanceled(true);
+				}
+			} else if (mode.getSelected().lag) {
+				if (!(mc.player.ticksExisted % 10 == 0)) {
+					savedPackets.add(event.getPacket());
+					event.setCanceled(true);
+				} else {
+					mc.player.connection.sendPacket((Packet<?>) savedPackets);
+					savedPackets.clear();
 				}
 			}
 		} catch (Exception ignored) {
