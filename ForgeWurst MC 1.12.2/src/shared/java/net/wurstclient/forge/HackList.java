@@ -73,7 +73,6 @@ public final class HackList extends WHackList
 	public final AntiBlockLag antiBlockLag = register(new AntiBlockLag());
 	public final AntiHunger antiHunger = register(new AntiHunger());
 	public final Jesus jesus = register(new Jesus());
-	public final Console console = register(new Console());
 	public final AntiFog antiFog = register(new AntiFog());
 	public final AntiWeather antiWeather = register(new AntiWeather());
 	public final AntiKick antiKick = register(new AntiKick());
@@ -95,6 +94,7 @@ public final class HackList extends WHackList
 	public final FastBreak fastBreak = register(new FastBreak());
 	public final FastPlace fastPlace = register(new FastPlace());
 	public final Tunneler tunneler = register(new Tunneler());
+	public final AutoLeave autoLeave = register(new AutoLeave());
 	public final PacketCanceler packetCanceler = register(new PacketCanceler());
 	public final PacketSender packetSender = register(new PacketSender());
 	public final EntityFlight entityFlight = register(new EntityFlight());

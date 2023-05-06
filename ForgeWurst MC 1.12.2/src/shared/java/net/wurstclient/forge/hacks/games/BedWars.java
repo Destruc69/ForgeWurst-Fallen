@@ -60,8 +60,6 @@ public final class BedWars extends Hack {
 		for (BlockPos blockPosss : theBeds) {
 			BlockUtils.breakBlockSimple(blockPosss);
 			lookAtPacket(blockPosss.getX(), blockPosss.getY(), blockPosss.getZ(), mc.player);
-			lookAtPacket(blockPosss.getX(), blockPosss.getY(), blockPosss.getZ(), mc.player);
-			lookAtPacket(blockPosss.getX(), blockPosss.getY(), blockPosss.getZ(), mc.player);
 		}
 	}
 

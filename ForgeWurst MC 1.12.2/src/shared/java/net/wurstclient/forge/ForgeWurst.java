@@ -15,6 +15,7 @@ import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
+import net.wurstclient.forge.utils.MinecraftCrashReportWrapper;
 import net.wurstclient.forge.clickgui.ClickGui;
 import net.wurstclient.forge.update.WurstUpdater;
 
@@ -48,8 +49,7 @@ public final class ForgeWurst
 	private WurstUpdater updater;
 
 	@EventHandler
-	public void init(FMLInitializationEvent event)
-	{
+	public void init(FMLInitializationEvent event) throws Exception {
 		if(event.getSide() == Side.SERVER)
 			return;
 

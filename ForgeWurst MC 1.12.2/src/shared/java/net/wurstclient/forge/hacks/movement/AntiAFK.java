@@ -44,14 +44,14 @@ public final class AntiAFK extends Hack {
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
 		if (!crazy.isChecked()) {
-			if (mc.player.ticksExisted % 3 == 0) {
+			if (mc.player.ticksExisted % 2 == 0) {
 				mc.player.rotationYaw = mc.player.rotationYaw + 5;
 				mc.player.rotationPitch = mc.player.rotationPitch + 1;
 				KeyBindingUtils.setPressed(mc.gameSettings.keyBindSneak, true);
 				KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, false);
 			} else {
+				mc.player.rotationYaw = mc.player.rotationYaw - 5;
 				mc.player.rotationPitch = mc.player.rotationPitch - 1;
-				mc.player.rotationYaw = mc.player.rotationYaw - 2;
 				KeyBindingUtils.setPressed(mc.gameSettings.keyBindSneak, false);
 				KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, true);
 			}

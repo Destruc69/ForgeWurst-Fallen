@@ -7,16 +7,10 @@
  */
 package net.wurstclient.forge.hacks.pathing;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -24,17 +18,18 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.pathfinding.AirPathUtils;
+import net.wurstclient.forge.pathfinding.LandPathUtils;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.ChatUtils;
 import net.wurstclient.forge.utils.KeyBindingUtils;
+import net.wurstclient.forge.utils.MathUtils;
 import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
 
 public final class AutoPilot extends Hack {
 
@@ -71,6 +66,9 @@ public final class AutoPilot extends Hack {
 			"How smooth is the turning? \n" +
 					"If its not smooth enough it may start spinning in circles.", 0.2, 0, 2, 0.01, SliderSetting.ValueDisplay.DECIMAL);
 
+	private final EnumSetting<Type> type =
+			new EnumSetting<>("Type(terrain)", Type.values(), Type.LAND);
+
 	public AutoPilot() {
 		super("AutoPilot", "Simple automation for navigation.");
 		setCategory(Category.PATHING);
@@ -82,6 +80,7 @@ public final class AutoPilot extends Hack {
 		addSetting(lineWidth);
 		addSetting(modeType);
 		addSetting(smoothingFactor);
+		addSetting(type);
 	}
 
 	private enum Mode {
@@ -92,7 +91,7 @@ public final class AutoPilot extends Hack {
 		private final boolean baritone;
 		private final boolean tesla;
 
-		private Mode(String name, boolean baritone, boolean tesla) {
+		Mode(String name, boolean baritone, boolean tesla) {
 			this.name = name;
 			this.tesla = tesla;
 			this.baritone = baritone;
@@ -103,18 +102,35 @@ public final class AutoPilot extends Hack {
 		}
 	}
 
+	private enum Type {
+		LAND("Land", true, false),
+		AIR("Air", false, true);
+
+		private final String name;
+		private final boolean land;
+		private final boolean air;
+
+		private Type(String name, boolean land, boolean air) {
+			this.name = name;
+			this.air = air;
+			this.land = land;
+		}
+
+		public String toString() {
+			return name;
+		}
+	}
+
 	private enum ModeType {
-		AUTO("Auto", true, false),
-		RENDER("Render", false, true);
+		AUTO("Auto", true),
+		RENDER("Render", false);
 
 		private final String name;
 		private final boolean auto;
-		private final boolean render;
 
-		private ModeType(String name, boolean auto, boolean render) {
+		ModeType(String name, boolean auto) {
 			this.name = name;
 			this.auto = auto;
-			this.render = render;
 		}
 
 		public String toString() {
@@ -125,8 +141,12 @@ public final class AutoPilot extends Hack {
 	@Override
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
-		blockPosArrayList = createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg));
-		ChatUtils.message("You can still use this module, but right now it pretty sucks. Still working on it.");
+
+		if (type.getSelected().land) {
+			blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
+		} else if (type.getSelected().air) {
+			blockPosArrayList = AirPathUtils.createPath(mc.player.getPosition(),  new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
+		}
 	}
 
 	@Override
@@ -140,7 +160,7 @@ public final class AutoPilot extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) throws IOException {
-		if (!isSystemOverloaded()) {
+		if (type.getSelected().land) {
 			if (modeType.getSelected().auto) {
 				mc.player.rotationYaw = (float) getYawAndPitchForPath(mc.player.getPosition(), blockPosArrayList)[0];
 
@@ -187,30 +207,82 @@ public final class AutoPilot extends Hack {
 				}
 
 				if (!onPath) {
-					blockPosArrayList = createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg));
+					blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
 				}
-
-				assert blockPosArrayList != null;
 
 				for (int y = -50; y < 50; y++) {
 					if (mc.player.getPosition().add(0, y, 0).equals(new BlockPos(xTarg, yTarg, zTarg))) {
 						setEnabled(false);
 						ChatUtils.message("[AUTOPILOT] We have arrived, Disengaging.");
 					} else if (mc.player.getPosition().add(0, y, 0).equals(new BlockPos(xTargA, yTargA, zTargA)) && !(mc.player.getPosition().add(0, y, 0).equals(new BlockPos(xTarg, yTarg, zTarg)))) {
-						blockPosArrayList = createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg));
+						blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
 						ChatUtils.message("Starting next section...");
 					}
 				}
 			} else {
 				if (mc.player.ticksExisted % 20 == 0) {
-					blockPosArrayList = createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg));
+					blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
 				}
 			}
 		} else {
-			setEnabled(false);
-			try {
-				ChatUtils.error("[AUTOPILOT] System overloaded.");
-			} catch (Exception ignored) {
+			if (mc.player.isElytraFlying()) {
+				if (modeType.getSelected().auto) {
+					setEnabled(false);
+					try {
+						ChatUtils.error("Sorry the air one for this isnt done yet");
+					} catch (Exception ignored) {
+					}
+					mc.player.rotationYaw = (float) getYawAndPitchForPath(mc.player.getPosition(), blockPosArrayList)[0];
+
+					KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
+					double[] dir = MathUtils.directionSpeed(0.2);
+					mc.player.motionX = dir[0];
+					mc.player.motionZ = dir[1];
+
+					double r = AirPathUtils.getClosestSolidBlock(new BlockPos(xTargA, yTarg, zTarg)).getY();
+					if (r < mc.player.posY) {
+						mc.player.jump();
+					}
+
+					boolean onPath = false;
+					int range = 2; // Check blocks 2 blocks away from the player in all directions
+
+					for (int x = -range; x <= range; x++) {
+						for (int y = -range; y <= range; y++) {
+							for (int z = -range; z <= range; z++) {
+								BlockPos blockPos = new BlockPos(mc.player.posX + x, mc.player.posY + y, mc.player.posZ + z);
+								if (blockPosArrayList.contains(blockPos)) {
+									onPath = true;
+									break; // Break out of the loops once a block on the path is found
+								}
+							}
+							if (onPath) {
+								break; // Break out of the loops once a block on the path is found
+							}
+						}
+						if (onPath) {
+							break; // Break out of the loops once a block on the path is found
+						}
+					}
+
+					if (!onPath) {
+						blockPosArrayList = AirPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
+					}
+
+					for (int y = -50; y < 50; y++) {
+						if (mc.player.getPosition().add(0, y, 0).equals(new BlockPos(xTarg, yTarg, zTarg))) {
+							setEnabled(false);
+							ChatUtils.message("[AUTOPILOT] We have arrived, Disengaging.");
+						} else if (mc.player.getPosition().add(0, y, 0).equals(new BlockPos(xTargA, yTargA, zTargA)) && !(mc.player.getPosition().add(0, y, 0).equals(new BlockPos(xTarg, yTarg, zTarg)))) {
+							blockPosArrayList = AirPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
+							ChatUtils.message("Starting next section...");
+						}
+					}
+				} else {
+					if (mc.player.ticksExisted % 20 == 0) {
+						blockPosArrayList = AirPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
+					}
+				}
 			}
 		}
 	}
@@ -221,30 +293,6 @@ public final class AutoPilot extends Hack {
 		boolean isStable = Math.round(Math.abs(yaw - prevYaw)) < 0.01; // set a threshold value for stable yaw
 		prevYaw = Math.round(yaw);
 		return isStable;
-	}
-
-	public static boolean isSystemOverloaded() throws IOException {
-		double memUsage = ((double)(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())) / Runtime.getRuntime().maxMemory();
-
-		ProcessBuilder pb = new ProcessBuilder("minecraft.exe");
-
-		return memUsage >= Runtime.getRuntime().maxMemory() || isProcessNotResponding(pb.start());
-	}
-
-	public static boolean isProcessNotResponding(Process process) {
-		try {
-			// Wait for process to exit for 1 second
-			if (!process.waitFor(1, TimeUnit.SECONDS)) {
-				// If process is still alive after 1 second, it's not responding
-				return true;
-			}
-		} catch (InterruptedException e) {
-			// Exception occurred, assume process is not responding
-			return true;
-		}
-
-		// Process has exited, it's not not responding
-		return false;
 	}
 
 	@SubscribeEvent
@@ -292,7 +340,6 @@ public final class AutoPilot extends Hack {
 			// Calculate the player's direction vector
 			Vec3d lookVec = player.getLook(1.0f);
 			double lookX = lookVec.x;
-			double lookY = lookVec.y;
 			double lookZ = lookVec.z;
 
 			// Calculate the offset vector perpendicular to the player's direction vector
@@ -349,191 +396,14 @@ public final class AutoPilot extends Hack {
 			GL11.glEnable(GL11.GL_TEXTURE_2D);
 			GL11.glPopMatrix();
 		}
+
+
 	}
 
 	public static void setTarg(double x, double y, double z) {
 		xTarg = x;
 		yTarg = y;
 		zTarg = z;
-	}
-
-	public ArrayList<BlockPos> createPath(BlockPos start, BlockPos target) {
-		int numNodesVisited = 0;
-		int numNodesConsidered = 0;
-		int maxOpenListSize = 0;
-
-		assert start != null;
-		assert target != null;
-
-		if (start.getDistance(target.getX(), target.getY(), target.getZ()) < mc.gameSettings.renderDistanceChunks * 16) {
-			PriorityQueue<BlockPos> openList = new PriorityQueue<>(Comparator.comparingDouble(pos -> getDistance(pos, target)));
-			HashMap<BlockPos, BlockPos> cameFrom = new HashMap<>();
-			HashMap<BlockPos, Double> gScore = new HashMap<>();
-			openList.add(start);
-			gScore.put(start, 0.0);
-
-			assert openList != null;
-			assert cameFrom != null;
-			assert gScore != null;
-
-			while (!openList.isEmpty()) {
-				BlockPos current = openList.poll();
-
-				numNodesVisited++;
-				maxOpenListSize = Math.max(maxOpenListSize, openList.size());
-
-				if (current.equals(target)) {
-					// Reconstruct the path
-					ArrayList<BlockPos> path = new ArrayList<>();
-					path.add(current);
-					while (cameFrom.containsKey(current)) {
-						current = cameFrom.get(current);
-						path.add(0, current);
-					}
-
-					if (debug.isChecked()) {
-						ChatUtils.message("Path found!");
-						ChatUtils.message("Number of nodes visited: " + numNodesVisited);
-						ChatUtils.message("Number of nodes considered: " + numNodesConsidered);
-						ChatUtils.message("Maximum size of open list: " + maxOpenListSize);
-						ChatUtils.message("Length of path: " + path.size());
-					} else {
-						ChatUtils.message("Path found.");
-					}
-
-					return path;
-				}
-
-				for (BlockPos neighbor : getNeighbors(current)) {
-					double tentativeGScore = gScore.get(current) + getDistance(current, neighbor);
-					if (tentativeGScore < gScore.getOrDefault(neighbor, Double.POSITIVE_INFINITY)) {
-						cameFrom.put(neighbor, current);
-						gScore.put(neighbor, tentativeGScore);
-						if (!openList.contains(neighbor)) {
-							openList.add(neighbor);
-							numNodesConsidered++;
-						}
-					}
-				}
-			}
-		} else {
-			BlockPos blockPos = getClosestSolidBlock(target);
-			PriorityQueue<BlockPos> openList = new PriorityQueue<>(Comparator.comparingDouble(pos -> getDistance(pos, blockPos)));
-			HashMap<BlockPos, BlockPos> cameFrom = new HashMap<>();
-			HashMap<BlockPos, Double> gScore = new HashMap<>();
-			openList.add(start);
-			gScore.put(start, 0.0);
-
-			assert blockPos != null;
-			assert openList != null;
-			assert cameFrom != null;
-			assert gScore != null;
-
-			xTargA = blockPos.getX();
-			yTargA = blockPos.getY();
-			zTargA = blockPos.getZ();
-
-			while (!openList.isEmpty()) {
-				BlockPos current = openList.poll();
-
-				numNodesVisited++;
-				maxOpenListSize = Math.max(maxOpenListSize, openList.size());
-
-				if (current.equals(blockPos)) {
-					// Reconstruct the path
-					ArrayList<BlockPos> path = new ArrayList<>();
-					path.add(current);
-					while (cameFrom.containsKey(current)) {
-						current = cameFrom.get(current);
-						path.add(0, current);
-					}
-
-					if (debug.isChecked()) {
-						ChatUtils.message("Path found!");
-						ChatUtils.message("Number of nodes visited: " + numNodesVisited);
-						ChatUtils.message("Number of nodes considered: " + numNodesConsidered);
-						ChatUtils.message("Maximum size of open list: " + maxOpenListSize);
-						ChatUtils.message("Length of path: " + path.size());
-					} else {
-						ChatUtils.message("Path found.");
-					}
-
-					return path;
-				}
-
-				for (BlockPos neighbor : getNeighbors(current)) {
-					double tentativeGScore = gScore.get(current) + getDistance(current, neighbor);
-					if (tentativeGScore < gScore.getOrDefault(neighbor, Double.POSITIVE_INFINITY)) {
-						cameFrom.put(neighbor, current);
-						gScore.put(neighbor, tentativeGScore);
-						if (!openList.contains(neighbor)) {
-							openList.add(neighbor);
-							numNodesConsidered++;
-						}
-					}
-				}
-			}
-		}
-		return new ArrayList<>();
-	}
-
-	public static BlockPos getClosestSolidBlock(BlockPos targetPos) {
-		int renderDistanceChunks = mc.gameSettings.renderDistanceChunks;
-
-		assert targetPos != null;
-
-		double closestDistance = Double.MAX_VALUE;
-		BlockPos closestBlock = null;
-		for (int x = mc.player.chunkCoordX - renderDistanceChunks; x <= mc.player.chunkCoordX + renderDistanceChunks; x++) {
-			for (int z = mc.player.chunkCoordZ - renderDistanceChunks; z <= mc.player.chunkCoordZ + renderDistanceChunks; z++) {
-				for (int y = 0; y <= 256; y++) {
-					BlockPos blockPos = new BlockPos(x * 16, y, z * 16);
-					double distance = blockPos.distanceSq(targetPos);
-					if (distance < closestDistance && !isBlockAboveAir(blockPos) && isBlockAboveAir(blockPos.up()) && isBlockAboveAir(blockPos.up(2))) {
-						closestDistance = distance;
-						closestBlock = blockPos;
-					}
-				}
-			}
-		}
-		assert closestBlock != null;
-		return closestBlock;
-	}
-
-	private static boolean isBlockAboveAir(BlockPos pos) {
-		Block block = mc.world.getBlockState(pos).getBlock();
-		assert pos != null;
-		return block.equals(Blocks.AIR);
-	}
-
-	private static ArrayList<BlockPos> getNeighbors(BlockPos pos) {
-		ArrayList<BlockPos> neighbors = new ArrayList<>();
-		assert pos != null;
-		for (int x = -1; x <= 1; x++) {
-			for (int y = -1; y <= 1; y++) {
-				for (int z = -1; z <= 1; z++) {
-					if (x == 0 && y == 0 && z == 0) {
-						continue;
-					}
-					BlockPos neighbor = pos.add(x, y, z);
-					if (isWalkable(neighbor)) {
-						neighbors.add(neighbor);
-					}
-				}
-			}
-		}
-		return neighbors;
-	}
-
-	private double getDistance(BlockPos a, BlockPos b) {
-		assert a != null;
-		assert b != null;
-		return Math.sqrt(a.distanceSq(b));
-	}
-
-	public static boolean isWalkable(BlockPos pos) {
-		assert pos != null;
-		return !mc.world.getBlockState(pos).getBlock().equals(Blocks.AIR) && mc.world.getBlockState(pos.add(0, 1, 0)).getBlock().equals(Blocks.AIR) && mc.world.getBlockState(pos.add(0, 2, 0)).getBlock().equals(Blocks.AIR);
 	}
 
 	private double smoothYaw = 0;

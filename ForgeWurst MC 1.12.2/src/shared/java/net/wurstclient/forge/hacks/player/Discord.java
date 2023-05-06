@@ -26,10 +26,6 @@ public final class Discord extends Hack {
 
 	public static DiscordRPC rpc = DiscordRPC.INSTANCE;
 
-	public static Thread thread;
-
-	public static int index = 1;
-
 	public Discord() {
 		super("DiscordRPC", "Discord rich presence.");
 		setCategory(Category.PLAYER);
@@ -38,6 +34,16 @@ public final class Discord extends Hack {
 	@Override
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
+
+		DiscordEventHandlers handlers = new DiscordEventHandlers();
+		rpc.Discord_Initialize("891902442999017482", handlers, true, "");
+
+		presence.startTimestamp = System.currentTimeMillis() / 1000L;
+		presence.largeImageKey = "fallen";
+		rpc.Discord_UpdatePresence(presence);
+
+		presence.largeImageText = "Fallen Utility Mod";
+		rpc.Discord_UpdatePresence(presence);
 	}
 
 	@Override
@@ -47,21 +53,10 @@ public final class Discord extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-
-		DiscordEventHandlers handlers = new DiscordEventHandlers();
-		rpc.Discord_Initialize("891902442999017482", handlers, true, "");
-		presence.startTimestamp = System.currentTimeMillis() / 1000L;
-		presence.largeImageKey = "fallen";
-		rpc.Discord_UpdatePresence(presence);
-
-		presence.largeImageText = "Fallen Utility Mod";
-		rpc.Discord_UpdatePresence(presence);
-
 		try {
 			presence.details = mc.player.getName() + " | " + Objects.requireNonNull(mc.getCurrentServerData()).serverIP;
 			presence.state = mc.player.getHealth() + " / " + mc.player.getMaxHealth();
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception ignored) {
 		}
 	}
 }
