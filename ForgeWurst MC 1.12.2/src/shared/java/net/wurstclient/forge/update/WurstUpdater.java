@@ -26,32 +26,29 @@ import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.utils.ChatUtils;
 
-public class WurstUpdater
-{
+public class WurstUpdater {
 	private Thread thread;
 	private ITextComponent component;
-	
+
 	@SubscribeEvent
-	public void onUpdate(WUpdateEvent event)
-	{
-		if(thread == null)
-		{
+	public void onUpdate(WUpdateEvent event) {
+		if (thread == null) {
 			thread = new Thread(() -> checkForUpdates());
 			thread.start();
 			return;
 		}
-		
-		if(thread.isAlive())
+
+		if (thread.isAlive())
 			return;
-		
-		if(component != null)
+
+		if (component != null)
 			ChatUtils.component(component);
-		
+
 		MinecraftForge.EVENT_BUS.unregister(this);
 	}
-	
-	private void checkForUpdates()
-	{
+
+	private void checkForUpdates() {
+		/*
 		Version newVersion = null;
 		
 		try
@@ -90,12 +87,16 @@ public class WurstUpdater
 		component.getStyle().setClickEvent(event);
 	}
 	
-	private JsonElement fetchJson(String url) throws IOException
-	{
+	private JsonElement fetchJson(String url) throws IOException {
 		try(InputStream in = URI.create(url).toURL().openStream())
 		{
 			return new JsonParser()
 				.parse(new BufferedReader(new InputStreamReader(in)));
 		}
+	}
+}
+
+
+		 */
 	}
 }

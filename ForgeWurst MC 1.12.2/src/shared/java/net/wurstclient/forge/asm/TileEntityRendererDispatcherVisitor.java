@@ -25,7 +25,7 @@ public final class TileEntityRendererDispatcherVisitor extends WurstClassVisitor
 		String render_desc = "(L" + tileEntity + ";FI)V";
 		
 		registerMethodVisitor(render_name, render_desc,
-			mv -> new RenderVisitor(mv));
+				RenderVisitor::new);
 	}
 	
 	private static class RenderVisitor extends MethodVisitor

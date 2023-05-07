@@ -15,8 +15,8 @@ import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
-import net.wurstclient.forge.utils.MinecraftCrashReportWrapper;
 import net.wurstclient.forge.clickgui.ClickGui;
+import net.wurstclient.forge.other.GUITweaks;
 import net.wurstclient.forge.update.WurstUpdater;
 
 import java.io.IOException;
@@ -42,6 +42,7 @@ public final class ForgeWurst
 	private CommandList cmds;
 	private KeybindList keybinds;
 	private ClickGui gui;
+	private GUITweaks guiTweaks;
 
 	private IngameHUD hud;
 	private CommandProcessor cmdProcessor;
@@ -91,6 +92,9 @@ public final class ForgeWurst
 
 		updater = new WurstUpdater();
 		MinecraftForge.EVENT_BUS.register(updater);
+
+		guiTweaks = new GUITweaks();
+		MinecraftForge.EVENT_BUS.register(guiTweaks);
 	}
 
 	public static ForgeWurst getForgeWurst()

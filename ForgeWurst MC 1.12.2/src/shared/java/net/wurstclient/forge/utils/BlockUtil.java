@@ -76,10 +76,10 @@ public final class BlockUtil extends Hack {
 				}
 			}
 
-			Collections.sort(list, new Comparator<BlockPos>() {
+			list.sort(new Comparator<BlockPos>() {
 				@Override
 				public int compare(BlockPos lhs, BlockPos rhs) {
-					return mc.player.getDistanceSq(lhs) > mc.player.getDistanceSq(rhs) ? 1 : (mc.player.getDistanceSq(lhs) < mc.player.getDistanceSq(rhs)) ? -1 : 0;
+					return Double.compare(mc.player.getDistanceSq(lhs), mc.player.getDistanceSq(rhs));
 				}
 			});
 

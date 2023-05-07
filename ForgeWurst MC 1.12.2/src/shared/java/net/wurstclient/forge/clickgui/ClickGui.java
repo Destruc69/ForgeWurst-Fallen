@@ -11,8 +11,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.util.ResourceLocation;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.Hack;
@@ -188,8 +190,6 @@ public final class ClickGui
 
         windows.removeIf(w -> w.isClosing());
         popups.removeIf(p -> p.isClosing());
-
-        Minecraft.getMinecraft().player.playSound(SoundEvents.UI_BUTTON_CLICK, 1, 1);
     }
 
     private boolean handlePopupMouseClick(int mouseX, int mouseY,
@@ -369,6 +369,15 @@ public final class ClickGui
     public void render(int mouseX, int mouseY, float partialTicks)
     {
         Minecraft mc = Minecraft.getMinecraft();
+
+        ScaledResolution sr = new ScaledResolution(mc);
+        FontRenderer fontRenderer = mc.fontRenderer;
+        String text = "Fallen is a utility client that is derived from ForgeWurst and it is distributed under the GNU General Public License version 3.0.";
+        int length = fontRenderer.getStringWidth(text);
+        int j = (sr.getScaledWidth() - length) / 2; // The x-coordinate to center the text
+        int h = sr.getScaledHeight() - fontRenderer.FONT_HEIGHT - 60; // The y-coordinate to render the text at (5 pixels from the bottom)
+        int color = 0xFFFFFF; // The color of the text (in hexadecimal)
+        fontRenderer.drawString(text, j, h, color);
 
         GL11.glDisable(GL11.GL_CULL_FACE);
         GL11.glDisable(GL11.GL_TEXTURE_2D);

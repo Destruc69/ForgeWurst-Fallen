@@ -20,114 +20,117 @@ public class LandPathUtils {
     private static final Minecraft mc = Minecraft.getMinecraft();
 
     public static ArrayList<BlockPos> createPath(BlockPos start, BlockPos target, boolean debug) {
-        int numNodesVisited = 0;
-        int numNodesConsidered = 0;
-        int maxOpenListSize = 0;
+        if (mc.player.onGround) {
+            int numNodesVisited = 0;
+            int numNodesConsidered = 0;
+            int maxOpenListSize = 0;
 
-        assert start != null;
-        assert target != null;
+            assert start != null;
+            assert target != null;
 
-        if (start.getDistance(target.getX(), target.getY(), target.getZ()) < mc.gameSettings.renderDistanceChunks * 16) {
-            PriorityQueue<BlockPos> openList = new PriorityQueue<>(Comparator.comparingDouble(pos -> getDistance(pos, target)));
-            HashMap<BlockPos, BlockPos> cameFrom = new HashMap<>();
-            HashMap<BlockPos, Double> gScore = new HashMap<>();
-            openList.add(start);
-            gScore.put(start, 0.0);
+            if (start.getDistance(target.getX(), target.getY(), target.getZ()) < mc.gameSettings.renderDistanceChunks * 16) {
+                PriorityQueue<BlockPos> openList = new PriorityQueue<>(Comparator.comparingDouble(pos -> getDistance(pos, target)));
+                HashMap<BlockPos, BlockPos> cameFrom = new HashMap<>();
+                HashMap<BlockPos, Double> gScore = new HashMap<>();
+                openList.add(start);
+                gScore.put(start, 0.0);
 
-            while (!openList.isEmpty()) {
-                BlockPos current = openList.poll();
+                while (!openList.isEmpty()) {
+                    BlockPos current = openList.poll();
 
-                numNodesVisited++;
-                maxOpenListSize = Math.max(maxOpenListSize, openList.size());
+                    numNodesVisited++;
+                    maxOpenListSize = Math.max(maxOpenListSize, openList.size());
 
-                if (current.equals(target)) {
-                    // Reconstruct the path
-                    ArrayList<BlockPos> path = new ArrayList<>();
-                    path.add(current);
-                    while (cameFrom.containsKey(current)) {
-                        current = cameFrom.get(current);
-                        path.add(0, current);
+                    if (current.equals(target)) {
+                        // Reconstruct the path
+                        ArrayList<BlockPos> path = new ArrayList<>();
+                        path.add(current);
+                        while (cameFrom.containsKey(current)) {
+                            current = cameFrom.get(current);
+                            path.add(0, current);
+                        }
+
+                        if (debug) {
+                            ChatUtils.message("Path found!");
+                            ChatUtils.message("Number of nodes visited: " + numNodesVisited);
+                            ChatUtils.message("Number of nodes considered: " + numNodesConsidered);
+                            ChatUtils.message("Maximum size of open list: " + maxOpenListSize);
+                            ChatUtils.message("Length of path: " + path.size());
+                        } else {
+
+                        }
+
+                        return path;
                     }
 
-                    if (debug) {
-                        ChatUtils.message("Path found!");
-                        ChatUtils.message("Number of nodes visited: " + numNodesVisited);
-                        ChatUtils.message("Number of nodes considered: " + numNodesConsidered);
-                        ChatUtils.message("Maximum size of open list: " + maxOpenListSize);
-                        ChatUtils.message("Length of path: " + path.size());
-                    } else {
-
+                    for (BlockPos neighbor : getNeighbors(current)) {
+                        double tentativeGScore = gScore.get(current) + getDistance(current, neighbor);
+                        if (tentativeGScore < gScore.getOrDefault(neighbor, Double.POSITIVE_INFINITY)) {
+                            cameFrom.put(neighbor, current);
+                            gScore.put(neighbor, tentativeGScore);
+                            if (!openList.contains(neighbor)) {
+                                openList.add(neighbor);
+                                numNodesConsidered++;
+                            }
+                        }
                     }
-
-                    return path;
                 }
+            } else {
+                BlockPos blockPos = getClosestSolidBlock(target);
+                PriorityQueue<BlockPos> openList = new PriorityQueue<>(Comparator.comparingDouble(pos -> getDistance(pos, blockPos)));
+                HashMap<BlockPos, BlockPos> cameFrom = new HashMap<>();
+                HashMap<BlockPos, Double> gScore = new HashMap<>();
+                openList.add(start);
+                gScore.put(start, 0.0);
 
-                for (BlockPos neighbor : getNeighbors(current)) {
-                    double tentativeGScore = gScore.get(current) + getDistance(current, neighbor);
-                    if (tentativeGScore < gScore.getOrDefault(neighbor, Double.POSITIVE_INFINITY)) {
-                        cameFrom.put(neighbor, current);
-                        gScore.put(neighbor, tentativeGScore);
-                        if (!openList.contains(neighbor)) {
-                            openList.add(neighbor);
-                            numNodesConsidered++;
+                assert blockPos != null;
+
+                xTargA = blockPos.getX();
+                yTargA = blockPos.getY();
+                zTargA = blockPos.getZ();
+
+                while (!openList.isEmpty()) {
+                    BlockPos current = openList.poll();
+
+                    numNodesVisited++;
+                    maxOpenListSize = Math.max(maxOpenListSize, openList.size());
+
+                    if (current.equals(blockPos)) {
+                        // Reconstruct the path
+                        ArrayList<BlockPos> path = new ArrayList<>();
+                        path.add(current);
+                        while (cameFrom.containsKey(current)) {
+                            current = cameFrom.get(current);
+                            path.add(0, current);
+                        }
+
+                        if (debug) {
+                            ChatUtils.message("Path found!");
+                            ChatUtils.message("Number of nodes visited: " + numNodesVisited);
+                            ChatUtils.message("Number of nodes considered: " + numNodesConsidered);
+                            ChatUtils.message("Maximum size of open list: " + maxOpenListSize);
+                            ChatUtils.message("Length of path: " + path.size());
+                        } else {
+
+                        }
+
+                        return path;
+                    }
+
+                    for (BlockPos neighbor : getNeighbors(current)) {
+                        double tentativeGScore = gScore.get(current) + getDistance(current, neighbor);
+                        if (tentativeGScore < gScore.getOrDefault(neighbor, Double.POSITIVE_INFINITY)) {
+                            cameFrom.put(neighbor, current);
+                            gScore.put(neighbor, tentativeGScore);
+                            if (!openList.contains(neighbor)) {
+                                openList.add(neighbor);
+                                numNodesConsidered++;
+                            }
                         }
                     }
                 }
             }
-        } else {
-            BlockPos blockPos = getClosestSolidBlock(target);
-            PriorityQueue<BlockPos> openList = new PriorityQueue<>(Comparator.comparingDouble(pos -> getDistance(pos, blockPos)));
-            HashMap<BlockPos, BlockPos> cameFrom = new HashMap<>();
-            HashMap<BlockPos, Double> gScore = new HashMap<>();
-            openList.add(start);
-            gScore.put(start, 0.0);
-
-            assert blockPos != null;
-
-            xTargA = blockPos.getX();
-            yTargA = blockPos.getY();
-            zTargA = blockPos.getZ();
-
-            while (!openList.isEmpty()) {
-                BlockPos current = openList.poll();
-
-                numNodesVisited++;
-                maxOpenListSize = Math.max(maxOpenListSize, openList.size());
-
-                if (current.equals(blockPos)) {
-                    // Reconstruct the path
-                    ArrayList<BlockPos> path = new ArrayList<>();
-                    path.add(current);
-                    while (cameFrom.containsKey(current)) {
-                        current = cameFrom.get(current);
-                        path.add(0, current);
-                    }
-
-                    if (debug) {
-                        ChatUtils.message("Path found!");
-                        ChatUtils.message("Number of nodes visited: " + numNodesVisited);
-                        ChatUtils.message("Number of nodes considered: " + numNodesConsidered);
-                        ChatUtils.message("Maximum size of open list: " + maxOpenListSize);
-                        ChatUtils.message("Length of path: " + path.size());
-                    } else {
-
-                    }
-
-                    return path;
-                }
-
-                for (BlockPos neighbor : getNeighbors(current)) {
-                    double tentativeGScore = gScore.get(current) + getDistance(current, neighbor);
-                    if (tentativeGScore < gScore.getOrDefault(neighbor, Double.POSITIVE_INFINITY)) {
-                        cameFrom.put(neighbor, current);
-                        gScore.put(neighbor, tentativeGScore);
-                        if (!openList.contains(neighbor)) {
-                            openList.add(neighbor);
-                            numNodesConsidered++;
-                        }
-                    }
-                }
-            }
+            return new ArrayList<>();
         }
         return new ArrayList<>();
     }

@@ -24,7 +24,7 @@ public final class NetHandlerPlayClientVisitor extends WurstClassVisitor
 		String sendPacket_desc = "(L" + packet + ";)V";
 		
 		registerMethodVisitor(sendPacket_name, sendPacket_desc,
-			mv -> new SendPacketVisitor(mv));
+				SendPacketVisitor::new);
 	}
 	
 	private static class SendPacketVisitor extends MethodVisitor

@@ -25,7 +25,7 @@ public final class NetworkManagerVisitor extends WurstClassVisitor
 			"(Lio/netty/channel/ChannelHandlerContext;L" + packet + ";)V";
 		
 		registerMethodVisitor(channelRead0_name, channelRead0_desc,
-			mv -> new ChannelRead0Visitor(mv));
+				ChannelRead0Visitor::new);
 	}
 	
 	private static class ChannelRead0Visitor extends MethodVisitor

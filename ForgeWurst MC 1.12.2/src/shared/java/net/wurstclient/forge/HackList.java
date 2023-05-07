@@ -100,6 +100,7 @@ public final class HackList extends WHackList
 	public final EntityFlight entityFlight = register(new EntityFlight());
 	public final EntitySpeed entitySpeed = register(new EntitySpeed());
 	public final NCPFly packetFly = register(new NCPFly());
+	public final HoleESP holeESP = register(new HoleESP());
 	public final ElytraFlight elytraFlight = register(new ElytraFlight());
 	public final AntiAFK antiAFK = register(new AntiAFK());
 	public final HackerDedector hackerDedector = register(new HackerDedector());

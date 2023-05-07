@@ -18,7 +18,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.pathfinding.AirPathUtils;
 import net.wurstclient.forge.pathfinding.LandPathUtils;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.EnumSetting;
@@ -66,9 +65,6 @@ public final class AutoPilot extends Hack {
 			"How smooth is the turning? \n" +
 					"If its not smooth enough it may start spinning in circles.", 0.2, 0, 2, 0.01, SliderSetting.ValueDisplay.DECIMAL);
 
-	private final EnumSetting<Type> type =
-			new EnumSetting<>("Type(terrain)", Type.values(), Type.LAND);
-
 	public AutoPilot() {
 		super("AutoPilot", "Simple automation for navigation.");
 		setCategory(Category.PATHING);
@@ -80,7 +76,6 @@ public final class AutoPilot extends Hack {
 		addSetting(lineWidth);
 		addSetting(modeType);
 		addSetting(smoothingFactor);
-		addSetting(type);
 	}
 
 	private enum Mode {
@@ -142,11 +137,7 @@ public final class AutoPilot extends Hack {
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
 
-		if (type.getSelected().land) {
-			blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
-		} else if (type.getSelected().air) {
-			blockPosArrayList = AirPathUtils.createPath(mc.player.getPosition(),  new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
-		}
+		blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
 	}
 
 	@Override
@@ -160,44 +151,39 @@ public final class AutoPilot extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) throws IOException {
-		if (type.getSelected().land) {
-			if (modeType.getSelected().auto) {
-				mc.player.rotationYaw = (float) getYawAndPitchForPath(mc.player.getPosition(), blockPosArrayList)[0];
+		if (modeType.getSelected().auto) {
+			mc.player.rotationYaw = (float) getYawAndPitchForPath(mc.player.getPosition(), blockPosArrayList)[0];
 
-				//Basic stuff for terrain
+			//Basic stuff for terrain
 
-				//Jumping when collided
-				if (mc.player.onGround && mc.player.collidedHorizontally) {
-					mc.player.jump();
-				}
+			//Jumping when collided
+			if (mc.player.onGround && mc.player.collidedHorizontally) {
+				mc.player.jump();
+			}
 
-				//Swimming
-				if (mc.player.isInWater() && !mc.player.collidedHorizontally) {
-					mc.player.motionY = 0.05;
-				}
+			//Swimming
+			if (mc.player.isInWater() && !mc.player.collidedHorizontally) {
+				mc.player.motionY = 0.05;
+			}
 
-				//Sprint jumping
-				if (isYawStable(Math.round(mc.player.rotationYaw))) {
-					KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
-					KeyBindingUtils.setPressed(mc.gameSettings.keyBindSprint, true);
-				} else {
-					KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
-					KeyBindingUtils.setPressed(mc.gameSettings.keyBindSprint, false);
-				}
+			//Sprint jumping
+			if (isYawStable(Math.round(mc.player.rotationYaw))) {
+				KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
+				KeyBindingUtils.setPressed(mc.gameSettings.keyBindSprint, true);
+			} else {
+				KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
+				KeyBindingUtils.setPressed(mc.gameSettings.keyBindSprint, false);
+			}
 
-				boolean onPath = false;
-				int range = 2; // Check blocks 2 blocks away from the player in all directions
+			boolean onPath = false;
+			int range = 2; // Check blocks 2 blocks away from the player in all directions
 
-				for (int x = -range; x <= range; x++) {
-					for (int y = -range; y <= range; y++) {
-						for (int z = -range; z <= range; z++) {
-							BlockPos blockPos = new BlockPos(mc.player.posX + x, mc.player.posY + y, mc.player.posZ + z);
-							if (blockPosArrayList.contains(blockPos)) {
-								onPath = true;
-								break; // Break out of the loops once a block on the path is found
-							}
-						}
-						if (onPath) {
+			for (int x = -range; x <= range; x++) {
+				for (int y = -range; y <= range; y++) {
+					for (int z = -range; z <= range; z++) {
+						BlockPos blockPos = new BlockPos(mc.player.posX + x, mc.player.posY + y, mc.player.posZ + z);
+						if (blockPosArrayList.contains(blockPos)) {
+							onPath = true;
 							break; // Break out of the loops once a block on the path is found
 						}
 					}
@@ -205,84 +191,27 @@ public final class AutoPilot extends Hack {
 						break; // Break out of the loops once a block on the path is found
 					}
 				}
-
-				if (!onPath) {
-					blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
+				if (onPath) {
+					break; // Break out of the loops once a block on the path is found
 				}
+			}
 
-				for (int y = -50; y < 50; y++) {
-					if (mc.player.getPosition().add(0, y, 0).equals(new BlockPos(xTarg, yTarg, zTarg))) {
-						setEnabled(false);
-						ChatUtils.message("[AUTOPILOT] We have arrived, Disengaging.");
-					} else if (mc.player.getPosition().add(0, y, 0).equals(new BlockPos(xTargA, yTargA, zTargA)) && !(mc.player.getPosition().add(0, y, 0).equals(new BlockPos(xTarg, yTarg, zTarg)))) {
-						blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
-						ChatUtils.message("Starting next section...");
-					}
-				}
-			} else {
-				if (mc.player.ticksExisted % 20 == 0) {
+			if (!onPath) {
+				blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
+			}
+
+			for (int y = -50; y < 50; y++) {
+				if (mc.player.getPosition().add(0, y, 0).equals(new BlockPos(xTarg, yTarg, zTarg))) {
+					setEnabled(false);
+					ChatUtils.message("[AUTOPILOT] We have arrived, Disengaging.");
+				} else if (mc.player.getPosition().add(0, y, 0).equals(new BlockPos(xTargA, yTargA, zTargA)) && !(mc.player.getPosition().add(0, y, 0).equals(new BlockPos(xTarg, yTarg, zTarg)))) {
 					blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
+					ChatUtils.message("Starting next section...");
 				}
 			}
 		} else {
-			if (mc.player.isElytraFlying()) {
-				if (modeType.getSelected().auto) {
-					setEnabled(false);
-					try {
-						ChatUtils.error("Sorry the air one for this isnt done yet");
-					} catch (Exception ignored) {
-					}
-					mc.player.rotationYaw = (float) getYawAndPitchForPath(mc.player.getPosition(), blockPosArrayList)[0];
-
-					KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
-					double[] dir = MathUtils.directionSpeed(0.2);
-					mc.player.motionX = dir[0];
-					mc.player.motionZ = dir[1];
-
-					double r = AirPathUtils.getClosestSolidBlock(new BlockPos(xTargA, yTarg, zTarg)).getY();
-					if (r < mc.player.posY) {
-						mc.player.jump();
-					}
-
-					boolean onPath = false;
-					int range = 2; // Check blocks 2 blocks away from the player in all directions
-
-					for (int x = -range; x <= range; x++) {
-						for (int y = -range; y <= range; y++) {
-							for (int z = -range; z <= range; z++) {
-								BlockPos blockPos = new BlockPos(mc.player.posX + x, mc.player.posY + y, mc.player.posZ + z);
-								if (blockPosArrayList.contains(blockPos)) {
-									onPath = true;
-									break; // Break out of the loops once a block on the path is found
-								}
-							}
-							if (onPath) {
-								break; // Break out of the loops once a block on the path is found
-							}
-						}
-						if (onPath) {
-							break; // Break out of the loops once a block on the path is found
-						}
-					}
-
-					if (!onPath) {
-						blockPosArrayList = AirPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
-					}
-
-					for (int y = -50; y < 50; y++) {
-						if (mc.player.getPosition().add(0, y, 0).equals(new BlockPos(xTarg, yTarg, zTarg))) {
-							setEnabled(false);
-							ChatUtils.message("[AUTOPILOT] We have arrived, Disengaging.");
-						} else if (mc.player.getPosition().add(0, y, 0).equals(new BlockPos(xTargA, yTargA, zTargA)) && !(mc.player.getPosition().add(0, y, 0).equals(new BlockPos(xTarg, yTarg, zTarg)))) {
-							blockPosArrayList = AirPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
-							ChatUtils.message("Starting next section...");
-						}
-					}
-				} else {
-					if (mc.player.ticksExisted % 20 == 0) {
-						blockPosArrayList = AirPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
-					}
-				}
+			if (mc.player.ticksExisted % 20 == 0) {
+				blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
 			}
 		}
 	}
