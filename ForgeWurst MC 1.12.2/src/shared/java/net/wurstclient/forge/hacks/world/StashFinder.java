@@ -57,18 +57,15 @@ public final class StashFinder extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		if (mc.player.ticksExisted % 20 != 0) {
-			for (int x = -radius.getValueI(); x < radius.getValueF(); x++) {
-				for (int z = -radius.getValueI(); z < radius.getValueF(); z++) {
-					BlockPos blockPos = new BlockPos(mc.player.getPosition().add(x, 0, z));
-					if (!blockPosArrayList.contains(blockPos)) {
-						blockPosArrayList.add(blockPos);
-					}
+		for (int x = -radius.getValueI(); x < radius.getValueF(); x++) {
+			for (int z = -radius.getValueI(); z < radius.getValueF(); z++) {
+				BlockPos blockPos = new BlockPos(mc.player.getPosition().add(x, 0, z));
+				if (!blockPosArrayList.contains(blockPos)) {
+					blockPosArrayList.add(blockPos);
 				}
 			}
-		} else {
-			blockPosArrayList.clear();
 		}
+
 		for (BlockPos blockPos : blockPosArrayList) {
 			IBlockState iBlockState = mc.world.getBlockState(blockPos);
 			boolean shulkers = iBlockState.getBlock() instanceof BlockShulkerBox;
@@ -76,6 +73,8 @@ public final class StashFinder extends Hack {
 			boolean enderchests = iBlockState.getBlock() instanceof BlockEnderChest;
 			if (shulkers || chest || enderchests) {
 				targBlocks.add(blockPos);
+			} else {
+				targBlocks.remove(blockPos);
 			}
 		}
 	}
@@ -83,7 +82,8 @@ public final class StashFinder extends Hack {
 	@SubscribeEvent
 	public void onRender(RenderWorldLastEvent event) {
 		for (BlockPos blockPos : targBlocks) {
-			FallenRenderUtils.renderPosFilled(blockPos, event.getPartialTicks(), 1, 0, 0, 0.2f);
+			for (int y = -100; y < 100; y++)
+				FallenRenderUtils.renderPosFilled(blockPos.add(0, y, 0), event.getPartialTicks(), 1, 0, 0, 0.2f);
 		}
 	}
 }

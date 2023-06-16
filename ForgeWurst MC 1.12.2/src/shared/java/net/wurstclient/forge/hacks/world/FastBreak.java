@@ -47,42 +47,48 @@ public final class FastBreak extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) throws ReflectiveOperationException {
-		if (!damage.isChecked()) {
-			try {
-				PlayerControllerUtils.setBlockHitDelay(0);
+		try {
+			if (!damage.isChecked()) {
+				try {
+					PlayerControllerUtils.setBlockHitDelay(0);
 
-			} catch (ReflectiveOperationException e) {
-				setEnabled(false);
-				throw new RuntimeException(e);
-			}
-			BlockPos blockPos = mc.objectMouseOver.getBlockPos();
-			mc.world.getBlockState(blockPos).getBlock().setHardness(mc.world.getBlockState(blockPos).getBlockHardness(mc.world, blockPos));
-		} else {
-			if (mc.playerController.getIsHittingBlock()) {
+				} catch (ReflectiveOperationException e) {
+					setEnabled(false);
+					throw new RuntimeException(e);
+				}
 				BlockPos blockPos = mc.objectMouseOver.getBlockPos();
-				mc.world.getBlockState(blockPos).getBlock().setHardness(0);
+				mc.world.getBlockState(blockPos).getBlock().setHardness(mc.world.getBlockState(blockPos).getBlockHardness(mc.world, blockPos));
+			} else {
+				if (mc.playerController.getIsHittingBlock()) {
+					BlockPos blockPos = mc.objectMouseOver.getBlockPos();
+					mc.world.getBlockState(blockPos).getBlock().setHardness(0);
+				}
 			}
+		} catch (RuntimeException ignored) {
 		}
 	}
 
 	@SubscribeEvent
 	public void onPlayerDamageBlock(WPlayerDamageBlockEvent event) {
-		if (!damage.isChecked()) {
-			try {
-				float progress = PlayerControllerUtils.getCurBlockDamageMP()
-						+ BlockUtils.getHardness(event.getPos());
+		try {
+			if (!damage.isChecked()) {
+				try {
+					float progress = PlayerControllerUtils.getCurBlockDamageMP()
+							+ BlockUtils.getHardness(event.getPos());
 
-				if (progress >= 1)
-					return;
+					if (progress >= 1)
+						return;
 
-			} catch (ReflectiveOperationException e) {
-				setEnabled(false);
-				throw new RuntimeException(e);
+				} catch (ReflectiveOperationException e) {
+					setEnabled(false);
+					throw new RuntimeException(e);
+				}
+
+				WMinecraft.getPlayer().connection.sendPacket(new CPacketPlayerDigging(
+						CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK, event.getPos(),
+						event.getFacing()));
 			}
-
-			WMinecraft.getPlayer().connection.sendPacket(new CPacketPlayerDigging(
-					CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK, event.getPos(),
-					event.getFacing()));
+		} catch (RuntimeException ignored) {
 		}
 	}
 }

@@ -409,12 +409,6 @@ public final class ClickGui
             }
         }
 
-        for (int x = 0; x < particles.size() - 1; x ++) {
-            Particle fromP = particles.get(x);
-            Particle toP = particles.get(x + 1);
-            renderMatrix(fromP, toP);
-        }
-
         for (Particle particle : particles) {
             particle.update();
             particle.render();
@@ -541,18 +535,6 @@ public final class ClickGui
         GL11.glEnable(GL11.GL_CULL_FACE);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glDisable(GL11.GL_BLEND);
-    }
-
-    public static void renderMatrix(Particle from, Particle to) {
-        if (ClickGuiHack.matrix.isChecked()) {
-            GL11.glLineWidth(ClickGuiHack.matSize.getValueF());
-            GL11.glBegin(GL11.GL_LINES);
-            GL11.glColor4f(ClickGuiHack.matRed.getValueF(), ClickGuiHack.matGreen.getValueF(), ClickGuiHack.matBlue.getValueF(), ClickGuiHack.matAlpha.getValueF()); // set line color to white
-            GL11.glVertex3d(from.x, from.y, 0); // start point of the line
-            GL11.glVertex3d(to.x, to.y, 0); // end point of the line
-            GL11.glEnd();
-            GL11.glLineWidth(1.0f); // reset line width to default
-        }
     }
 
     public void renderPinnedWindows(float partialTicks)
@@ -1128,6 +1110,7 @@ public final class ClickGui
         }
 
 
+        double lastNonZeroSpeed = 0;
         private void update() {
             // Get screen dimensions
             Minecraft minecraft = Minecraft.getMinecraft();
@@ -1151,19 +1134,40 @@ public final class ClickGui
             // Clamp velocity magnitude
             double speed = ClickGuiHack.particleSpeed.getValue();
             double velocityMagnitude = Math.sqrt(vx * vx + vy * vy);
-            if (velocityMagnitude > speed) {
+            if (velocityMagnitude < 0.0001) { // check for zero magnitude
+                // Randomly assign non-zero velocity
+                if (lastNonZeroSpeed == 0) {
+                    // if there is no last non-zero speed, assign a random velocity
+                    vx = (int) ((Math.random() - 0.5) * speed);
+                    vy = (int) ((Math.random() - 0.5) * speed);
+                } else {
+                    // otherwise, use the last non-zero speed
+                    double scale = lastNonZeroSpeed / velocityMagnitude;
+                    vx *= scale;
+                    vy *= scale;
+                }
+            } else if (velocityMagnitude > speed) {
                 double scale = speed / velocityMagnitude;
                 vx *= scale;
                 vy *= scale;
+                lastNonZeroSpeed = speed;
+            } else {
+                lastNonZeroSpeed = speed;
             }
         }
 
         private void render() {
             if (ClickGuiHack.particles.isChecked()) {
                 int size = ClickGuiHack.partSize.getValueI();
+                int alpha = 255; // fully opaque alpha value
+                int color = (alpha << 24) // set the alpha value
+                        | (ClickGuiHack.partRed.getValueI() << 16) // set the red value
+                        | (ClickGuiHack.partGreen.getValueI() << 8) // set the green value
+                        | ClickGuiHack.partBlue.getValueI(); // set the blue value
+
                 for (int a = -size; a <= size; a++) {
                     for (int b = -size; b <= size; b++) {
-                        drawRect(x + a, y + b, x + a + 1, y + b + 1, 0xFFFFFFFF);
+                        drawRect(x + a, y + b, x + a + 1, y + b + 1, color);
                     }
                 }
             }

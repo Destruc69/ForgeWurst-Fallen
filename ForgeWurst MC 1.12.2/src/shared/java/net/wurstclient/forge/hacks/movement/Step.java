@@ -7,10 +7,13 @@
  */
 package net.wurstclient.forge.hacks.movement;
 
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.entity.MoverType;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.util.Timer;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
@@ -19,18 +22,30 @@ import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.EnumSetting;
+import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.KeyBindingUtils;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public final class Step extends Hack {
-	private final EnumSetting<Mode> mode =
-			new EnumSetting<>("Mode", Mode.values(), Mode.NCP);
+	private final EnumSetting<Mode> mode = new EnumSetting<>("Mode",
+			"\u00a7lSimple\u00a7r mode can step up multiple blocks (enables Height slider).\n"
+					+ "\u00a7lLegit\u00a7r mode can bypass NoCheat+.",
+			Mode.values(), Mode.LEGIT);
+
+	private final SliderSetting height =
+			new SliderSetting("Height", "Only works in \u00a7lSimple\u00a7r mode.",
+					1, 1, 10, 1, SliderSetting.ValueDisplay.INTEGER);
 
 	public Step() {
-		super("Step", "thank you cookie client by beloved.");
+		super("Step", "Allows you to step up blocks instantly.");
 		setCategory(Category.MOVEMENT);
 		addSetting(mode);
+		addSetting(height);
 	}
 
 	@Override
@@ -41,55 +56,82 @@ public final class Step extends Hack {
 	@Override
 	protected void onDisable() {
 		MinecraftForge.EVENT_BUS.unregister(this);
+		mc.player.stepHeight = 0.5F;
 	}
+
+	//
+	// WURST 7 STEP
+	//
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		if (mode.getSelected().ncp) {
-			if (mc.player.collidedHorizontally && mc.player.onGround && mc.player.fallDistance == 0.0f && !mc.player.isOnLadder() && !mc.player.movementInput.jump) {
-				AxisAlignedBB box = mc.player.getEntityBoundingBox().offset(0.0, 0.05, 0.0).grow(0.05);
-				if (!mc.world.getCollisionBoxes(mc.player, box.offset(0.0, 1.0, 0.0)).isEmpty()) {
-					return;
-				}
+		if (mode.getSelected() == Mode.SIMPLE) {
+			// simple mode
+			mc.player.stepHeight = height.getValueF();
+			return;
+		}
 
-				mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.41999998688698D, mc.player.posZ, true));
-				mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.7531999805211997D, mc.player.posZ, true));
-				mc.player.setPosition(mc.player.posX, mc.player.posY + 0.7531999805211997D, mc.player.posZ);
-			}
-		} else if (mode.getSelected().aac) {
-			if (!mc.gameSettings.keyBindJump.isKeyDown()) {
-				mc.player.motionY = -999;
-			}
-		} else if (mode.getSelected().basic) {
-			if (mc.player.collidedHorizontally && mc.player.onGround && mc.player.fallDistance == 0.0f && !mc.player.isOnLadder() && !mc.player.movementInput.jump) {
-				AxisAlignedBB box = mc.player.getEntityBoundingBox().offset(0.0, 0.05, 0.0).grow(0.05);
-				if (!mc.world.getCollisionBoxes(mc.player, box.offset(0.0, 1.0, 0.0)).isEmpty())
-					return;
+		// legit mode
+		EntityPlayerSP player = mc.player;
+		player.stepHeight = 0.5F;
 
-				mc.player.jump();
-				mc.player.motionX = 0;
-				mc.player.motionZ = 0;
+		if (!player.onGround || player.isInWater() || player.isInLava()) {
+			return;
+		}
+
+		if (player.moveForward == 0 && player.moveStrafing == 0) {
+			return;
+		}
+
+		if (player.movementInput.jump) {
+			return;
+		}
+
+		AxisAlignedBB box = player.getEntityBoundingBox().offset(0, 0.05, 0).grow(0.05);
+
+		if (!mc.world.getCollisionBoxes(player, box.offset(0, 1, 0)).isEmpty()) {
+			return;
+		}
+
+		double stepHeight = Double.NEGATIVE_INFINITY;
+
+		ArrayList<AxisAlignedBB> blockCollisions = new ArrayList<>(mc.world.getCollisionBoxes(player, box));
+
+		for (AxisAlignedBB bb : blockCollisions) {
+			if (bb.maxY > stepHeight) {
+				stepHeight = bb.maxY;
 			}
 		}
+
+		stepHeight = stepHeight - player.posY;
+
+		if (stepHeight < 0 || stepHeight > 1) {
+			return;
+		}
+
+		NetHandlerPlayClient netHandler = player.connection;
+
+		netHandler.sendPacket(new CPacketPlayer.Position(player.posX, player.posY + 0.42 * stepHeight, player.posZ, player.onGround));
+		netHandler.sendPacket(new CPacketPlayer.Position(player.posX, player.posY + 0.753 * stepHeight, player.posZ, player.onGround));
+
+		player.setPosition(player.posX, player.posY + 1 * stepHeight, player.posZ);
 	}
-	private enum Mode {
-		NCP("NCP", true, false, false),
-		AAC("AAC", false, true, false),
-		BASIC("Basic", false, false, true);
+
+	private enum Mode
+	{
+		SIMPLE("Simple"),
+		LEGIT("Legit");
 
 		private final String name;
-		private final boolean ncp;
-		private final boolean aac;
-		private final boolean basic;
 
-		private Mode(String name, boolean ncp, boolean aac, boolean basic) {
+		private Mode(String name)
+		{
 			this.name = name;
-			this.aac = aac;
-			this.ncp = ncp;
-			this.basic = basic;
 		}
 
-		public String toString() {
+		@Override
+		public String toString()
+		{
 			return name;
 		}
 	}

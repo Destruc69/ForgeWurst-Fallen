@@ -50,13 +50,7 @@ public final class CPvPViewer extends Hack {
 					ItemStack itemStackOff = new ItemStack(((EntityPlayer) entity).getHeldItemOffhand().getItem());
 					mc.player.getHeldItemMainhand().getItem().setContainerItem(itemStackMain.getItem());
 					mc.player.getHeldItemOffhand().getItem().setContainerItem(itemStackOff.getItem());
-					if (TimerUtils.hasReached(5000)) {
-						ChatUtils.message("--------------------------------");
-						ChatUtils.message("Currently Viewing:" + " " + entity.getName());
-						ChatUtils.message("Health:" + " " + Math.round(((EntityPlayer) entity).getHealth()));
-						ChatUtils.message("--------------------------------");
-						TimerUtils.reset();
-					}
+					mc.ingameGUI.setOverlayMessage(entity.getName() + " | " + ((EntityPlayer) entity).getHealth(), false);
 				}
 			}
 		}

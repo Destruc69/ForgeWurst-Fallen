@@ -92,9 +92,6 @@ public final class HackerDedector extends Hack {
 			world = mc.world;
 		}
 
-		if (mc.world != world)
-			return;
-
 		if (mc.player.ticksExisted % 2 == 0) {
 			if (limit == 0)
 				return;
@@ -110,9 +107,6 @@ public final class HackerDedector extends Hack {
 		for (Entity entity : mc.world.loadedEntityList) {
 			if (entity instanceof EntityPlayer) {
 				if (entity != mc.player) {
-
-					if (entity == mc.player)
-						return;
 
 					currentX = entity.lastTickPosX;
 					currentZ = entity.lastTickPosZ;

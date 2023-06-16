@@ -7,13 +7,17 @@
  */
 package net.wurstclient.forge.hacks.movement;
 
+import net.minecraft.inventory.IInventory;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.EntityMountEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.SliderSetting;
+import org.lwjgl.input.Keyboard;
 
 import java.util.Objects;
 
@@ -21,6 +25,10 @@ public final class EntityFlight extends Hack {
 
 	private final CheckboxSetting bypass =
 			new CheckboxSetting("Bypass", "Bypass some anti cheats.",
+					false);
+
+	private final CheckboxSetting velocity =
+			new CheckboxSetting("Velocity", "Holds you still in the air if jump is not present.",
 					false);
 
 	private final SliderSetting upSpeed =
@@ -36,6 +44,7 @@ public final class EntityFlight extends Hack {
 		addSetting(upSpeed);
 		addSetting(downSpeed);
 		addSetting(bypass);
+		addSetting(velocity);
 	}
 
 	@Override
@@ -69,13 +78,41 @@ public final class EntityFlight extends Hack {
 								Objects.requireNonNull(mc.player.getRidingEntity()).motionY -= downSpeed.getValueF();
 							}
 						} else {
-							mc.player.setVelocity(0, 0, 0);
+							if (mc.gameSettings.keyBindJump.isKeyDown()) {
+								mc.player.getRidingEntity().motionY /= 2;
+							}
+						}
+					}
+					if (velocity.isChecked()) {
+						if (!mc.gameSettings.keyBindJump.isKeyDown() && !mc.gameSettings.keyBindSneak.isKeyDown()) {
+							mc.player.getRidingEntity().motionY = 0.04;
+						}
+					}
+
+					//lil anti kick
+					if (!(mc.player.getRidingEntity().onGround)) {
+						if (mc.player.ticksExisted % 2 == 0) {
+							mc.player.getRidingEntity().setPosition(mc.player.getRidingEntity().posX + 0.00000001, mc.player.getRidingEntity().posY + 0.00000001, mc.player.getRidingEntity().posZ - 0.00000001);
+						} else {
+							mc.player.getRidingEntity().setPosition(mc.player.getRidingEntity().posX - 0.00000001, mc.player.getRidingEntity().posY - 0.00000001, mc.player.getRidingEntity().posZ + 0.00000001);
 						}
 					}
 				}
+				//I find you can fly better when collided
+				mc.player.getRidingEntity().collidedHorizontally = true;
+				mc.player.getRidingEntity().collidedVertically = true;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	@SubscribeEvent
+	public void onExitVehicle(EntityMountEvent event) {
+		if (event.isDismounting()) {
+			if (!(event.getEntityBeingMounted().onGround)) {
+				event.setCanceled(true);
+			}
 		}
 	}
 }

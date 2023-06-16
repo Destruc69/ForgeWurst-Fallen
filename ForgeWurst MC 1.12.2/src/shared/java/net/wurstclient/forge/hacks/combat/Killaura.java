@@ -43,7 +43,7 @@ public final class Killaura extends Hack {
 				assert mc.player != null;
 				if (entity != mc.player) {
 					if (mc.player.getDistance(entity) <= 3) {
-						if (mc.player.ticksExisted % 5 == 0) {
+						if (mc.player.ticksExisted % 10 == 0) {
 							if (entity.isEntityAlive() && !entity.isDead) {
 								if (entity instanceof EntityPlayer || entity instanceof EntityMob || entity instanceof EntityAnimal) {
 									mc.playerController.attackEntity(mc.player, entity);

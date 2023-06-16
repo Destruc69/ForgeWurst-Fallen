@@ -181,7 +181,7 @@ public final class Nuker extends Hack
 			}
 		} else {
 			for (int x = -range.getValueI(); x < range.getValueI(); x++) {
-				for (int y = 0; y < 2; y++) {
+				for (int y = 0; y < 4; y++) {
 					for (int z = -range.getValueI(); z < range.getValueI(); z++) {
 						BlockPos blockPos = new BlockPos(mc.player.posX + x, mc.player.posY + y, mc.player.posZ + z);
 						if (!(mc.world.getBlockState(blockPos)).getBlock().equals(Blocks.AIR)) {

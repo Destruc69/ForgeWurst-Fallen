@@ -25,11 +25,5 @@ public final class FaceCMD extends Command {
 
         float[] rot = RotationUtils.getNeededRotations(new Vec3d(xCoord, mc.player.posY, zCoord));
         mc.player.rotationYaw = rot[0];
-
-        try {
-            ChatUtils.message("[FACECMD] Pathing modules may change yaw, only rely on them for easy terrain and to get close to your destanation, In the future i will make it compatible to aim for coords");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

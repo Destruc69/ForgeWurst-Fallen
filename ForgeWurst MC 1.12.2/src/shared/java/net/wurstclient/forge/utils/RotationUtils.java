@@ -1,7 +1,5 @@
 package net.wurstclient.forge.utils;
 
-import java.lang.reflect.Field;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayer;
@@ -16,7 +14,7 @@ import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.compatibility.WVec3d;
 
-import static net.wurstclient.forge.hacks.render.FreeCam.normalizeAngle;
+import java.lang.reflect.Field;
 
 @Mod.EventBusSubscriber
 public final class RotationUtils {
@@ -55,6 +53,22 @@ public final class RotationUtils {
 		double pitch = normalizeAngle(Math.toDegrees(-Math.atan2(vec.y, xz)));
 		return new double[]{yaw, pitch};
 	}
+
+	public static double normalizeAngle(double angle) {
+		angle %= 360.0;
+
+		if (angle >= 180.0) {
+			angle -= 360.0;
+		}
+
+		if (angle < -180.0) {
+			angle += 360.0;
+		}
+
+		return angle;
+	}
+
+
 
 	public static Vec3d getEyesPos() {
 		return new Vec3d(WMinecraft.getPlayer().posX,

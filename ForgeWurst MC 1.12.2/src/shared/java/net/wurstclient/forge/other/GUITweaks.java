@@ -1,14 +1,17 @@
 package net.wurstclient.forge.other;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiMainMenu;
-import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.gui.*;
+import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.forge.ForgeWurst;
+import net.wurstclient.forge.other.customs.ClickGUIButtonMainMenu;
 import org.lwjgl.opengl.GL11;
+
+import java.awt.*;
+import java.util.List;
 
 public class GUITweaks {
     @SubscribeEvent
@@ -50,6 +53,27 @@ public class GUITweaks {
             int logo2Y = 10;
 
             Gui.drawModalRectWithCustomSizedTexture(logo2X, logo2Y, 0, 0, logoWidth2, logoHeight2, logoWidth2, logoHeight2);
+        }
+    }
+
+    @SubscribeEvent
+    public void onGUI(GuiScreenEvent.InitGuiEvent event) {
+        if (event.getGui() instanceof GuiMainMenu) {
+            int buttonWidth = 100;
+            int buttonHeight = 20;
+            int buttonMargin = 5; // Margin between buttons
+
+            List<GuiButton> buttonList = event.getButtonList();
+            int numButtons = buttonList.size();
+
+            int buttonX = event.getGui().width / 2 - (buttonWidth / 2); // Center the button horizontally
+            int buttonY = event.getGui().height / 2 + (numButtons * (buttonHeight + buttonMargin)) - 140; // Position the button below the existing buttons with a margin
+
+            GuiButton guiButton = new ClickGUIButtonMainMenu(numButtons + 1, buttonX, buttonY, buttonWidth, buttonHeight, "ClickGUI");
+
+            guiButton.packedFGColour = 0xadd8e6;
+
+            event.getButtonList().add(guiButton);
         }
     }
 }

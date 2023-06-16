@@ -7,6 +7,20 @@
  */
 package net.wurstclient.forge.hacks.movement;
 
+import net.minecraft.entity.item.EntityBoat;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityTippedArrow;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
+import net.minecraft.potion.PotionUtils;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
@@ -14,6 +28,8 @@ import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.utils.KeyBindingUtils;
+
+import java.util.Collection;
 
 public final class AutoSprintHack extends Hack {
 
@@ -45,9 +61,7 @@ public final class AutoSprintHack extends Hack {
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
 		if (mode.getSelected().rage) {
-			if (mc.player.moveForward != 0 || mc.player.moveStrafing != 0) {
-				mc.player.setSprinting(true);
-			}
+			mc.player.setSprinting(mc.player.moveForward != 0 || mc.player.moveStrafing != 0);
 		} else {
 			KeyBindingUtils.setPressed(mc.gameSettings.keyBindSprint, true);
 		}

@@ -5,6 +5,7 @@ import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WPacketInputEvent;
+import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.CheckboxSetting;
@@ -46,7 +47,7 @@ public final class PacketCanceler extends Hack {
 	}
 
 	@SubscribeEvent
-	public void onPacketInput(WPacketInputEvent event) {
+	public void onPacketInput(WPacketOutputEvent event) {
 		if (this.Animation.isChecked() &&
 				event.getPacket() instanceof net.minecraft.network.play.client.CPacketAnimation)
 			event.setCanceled(true);

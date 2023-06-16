@@ -10,9 +10,11 @@ package net.wurstclient.forge.hacks.movement;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiIngameMenu;
 import net.minecraft.client.gui.GuiMainMenu;
+import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.network.play.client.CPacketClickWindow;
+import net.minecraft.network.play.client.CPacketCloseWindow;
 import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.pathfinding.PathFinder;
 import net.minecraft.pathfinding.WalkNodeProcessor;
@@ -24,18 +26,37 @@ import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.CheckboxSetting;
+import net.wurstclient.forge.settings.EnumSetting;
 import org.lwjgl.input.Keyboard;
 
 public final class InvMove extends Hack {
 
-	private final CheckboxSetting bypass =
-			new CheckboxSetting("Bypass", "Bypass anticheats.",
-					false);
+	private final EnumSetting<Mode> bypass =
+			new EnumSetting<>("BypassMethod", Mode.values(), Mode.A);
 
 	public InvMove() {
 		super("InvMove", "Allows you to move with your inventory.");
 		setCategory(Category.MOVEMENT);
 		addSetting(bypass);
+	}
+
+	private enum Mode {
+		A("A", true, false),
+		B("B", false, true);
+
+		private final String name;
+		private final boolean a;
+		private final boolean b;
+
+		private Mode(String name, boolean a, boolean b) {
+			this.name = name;
+			this.a = a;
+			this.b = b;
+		}
+
+		public String toString() {
+			return name;
+		}
 	}
 
 	@Override
@@ -54,29 +75,46 @@ public final class InvMove extends Hack {
 		try {
 			if (mc.currentScreen instanceof GuiChat)
 				return;
-			if (Keyboard.isKeyDown(Keyboard.KEY_W) || mc.gameSettings.keyBindForward.isKeyDown()) {
+			if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
 				event.getMovementInput().moveForward++;
 			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_S) || mc.gameSettings.keyBindBack.isKeyDown()) {
+			if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
 				event.getMovementInput().moveForward--;
 			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_D) || mc.gameSettings.keyBindRight.isKeyDown()) {
+			if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
 				event.getMovementInput().moveStrafe--;
 			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_A) || mc.gameSettings.keyBindLeft.isKeyDown()) {
+			if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
 				event.getMovementInput().moveStrafe++;
 			}
-			event.getMovementInput().jump = Keyboard.isKeyDown(Keyboard.KEY_SPACE) || mc.gameSettings.keyBindJump.isKeyDown();
-			event.getMovementInput().sneak = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || mc.gameSettings.keyBindSneak.isKeyDown();
-		} catch (Exception e) {
-			e.printStackTrace();
+			if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
+				mc.player.rotationYaw = mc.player.rotationYaw + 3;
+			}
+			if (Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
+				mc.player.rotationYaw = mc.player.rotationYaw - 3;
+			}
+			if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
+				mc.player.rotationPitch = mc.player.rotationPitch - 3;
+			}
+			if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
+				mc.player.rotationPitch = mc.player.rotationPitch + 3;
+			}
+			event.getMovementInput().jump = Keyboard.isKeyDown(Keyboard.KEY_SPACE);
+			event.getMovementInput().sneak = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT);
+
+			if (bypass.getSelected().b) {
+				if (mc.player.ticksExisted % 20 == 0) {
+					mc.player.connection.sendPacket(new CPacketCloseWindow(mc.player.openContainer.windowId));
+				}
+			}
+		} catch (Exception ignored) {
 		}
 	}
 
 	@SubscribeEvent
 	public void onPacketIn(WPacketInputEvent event) {
 		try {
-			if (bypass.isChecked()) {
+			if (bypass.getSelected().a) {
 				if (event.getPacket() instanceof CPacketEntityAction) {
 					CPacketEntityAction cPacketEntityAction = (CPacketEntityAction) event.getPacket();
 					if (cPacketEntityAction.getAction().equals(CPacketEntityAction.Action.OPEN_INVENTORY)) {
@@ -84,14 +122,13 @@ public final class InvMove extends Hack {
 					}
 				}
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception ignored) {
 		}
 	}
 	@SubscribeEvent
 	public void onPacketOut(WPacketOutputEvent event) {
 		try {
-			if (bypass.isChecked()) {
+			if (bypass.getSelected().a) {
 				if (event.getPacket() instanceof CPacketEntityAction) {
 					CPacketEntityAction cPacketEntityAction = (CPacketEntityAction) event.getPacket();
 					if (cPacketEntityAction.getAction().equals(CPacketEntityAction.Action.OPEN_INVENTORY)) {
@@ -99,8 +136,7 @@ public final class InvMove extends Hack {
 					}
 				}
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception ignored) {
 		}
 	}
 }

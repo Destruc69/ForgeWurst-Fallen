@@ -7,17 +7,12 @@
  */
 package net.wurstclient.forge.hacks.player;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.settings.EnumSetting;
-import net.wurstclient.forge.utils.KeyBindingUtils;
 
 public final class AutoClicker extends Hack {
 	public AutoClicker() {
@@ -38,21 +33,8 @@ public final class AutoClicker extends Hack {
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
 		try {
-			BlockPos blockPos = mc.objectMouseOver.getBlockPos();
-
-			if (mc.player.ticksExisted % 2 == 0) {
-				mc.playerController.clickBlock(blockPos, mc.player.getHorizontalFacing());
-				for (Entity entity : mc.world.loadedEntityList) {
-					if (entity instanceof EntityItem) {
-						if (entity.getPosition() == blockPos) {
-							mc.playerController.interactWithEntity(mc.player, entity, EnumHand.MAIN_HAND);
-						}
-					}
-				}
-				mc.player.swingArm(EnumHand.MAIN_HAND);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
+			mc.playerController.processRightClick(mc.player, mc.world, EnumHand.MAIN_HAND);
+		} catch (Exception ignored) {
 		}
 	}
 }

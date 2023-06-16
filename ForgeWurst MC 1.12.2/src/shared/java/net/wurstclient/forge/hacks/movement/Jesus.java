@@ -7,18 +7,12 @@
  */
 package net.wurstclient.forge.hacks.movement;
 
-import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.settings.GameSettings;
-import net.minecraft.enchantment.EnchantmentFrostWalker;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketPlayer;
-import net.minecraft.util.Timer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -33,75 +27,41 @@ import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.compatibility.WPlayer;
 import net.wurstclient.forge.settings.CheckboxSetting;
-import net.wurstclient.forge.settings.EnumSetting;
-import net.wurstclient.forge.utils.*;
+import net.wurstclient.forge.utils.BlockUtils;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-
-public final class Jesus extends Hack {
-
-	ArrayList<BlockPos> testpos = new ArrayList<>();
-
-	private final EnumSetting<Mode> mode =
-			new EnumSetting<>("Mode", Mode.values(), Mode.NCP);
+public final class Jesus extends Hack
+{
+	private final CheckboxSetting bypass =
+			new CheckboxSetting("Bypass",
+					false);
 
 	private int tickTimer;
 
-	public Jesus() {
+	public Jesus()
+	{
 		super("Jesus", "Allows you to walk on water.\n"
 				+ "Jesus used this hack ~2000 years ago.");
 		setCategory(Category.MOVEMENT);
-		addSetting(mode);
+		addSetting(bypass);
 	}
 
 	@Override
-	protected void onEnable() {
+	protected void onEnable()
+	{
 		MinecraftForge.EVENT_BUS.register(this);
 		tickTimer = 2;
 	}
 
 	@Override
-	public String getRenderName()
+	protected void onDisable()
 	{
-		return getName() + " [" + mode.getSelected().name() + "]";
-	}
-
-	@Override
-	protected void onDisable() {
 		MinecraftForge.EVENT_BUS.unregister(this);
 	}
 
+	private boolean riseUp;
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		if (mode.getSelected().test) {
-			if (!mc.player.collidedHorizontally) {
-				if (mc.player.isInWater()) {
-					mc.player.motionY = 0.005;
-				}
-			}
-		}
-		if (!mc.player.collidedHorizontally) {
-			if (mode.getSelected().ncp) {
-				if (mc.player.isInWater()) {
-					KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, true);
-
-					mc.player.motionY = 0;
-					try {
-						Field isInWater = Entity.class.getDeclaredField(
-								wurst.isObfuscated() ? "field_70171_ac" : "inWater");
-						isInWater.setAccessible(true);
-						EntityPlayerSP player = mc.player;
-						isInWater.setBoolean(player, false);
-					} catch (ReflectiveOperationException e) {
-						setEnabled(false);
-						throw new RuntimeException(e);
-					}
-				}
-			}
-		}
-
-		if (mode.getSelected().normal) {
+		if (!bypass.isChecked()) {
 			EntityPlayerSP player = event.getPlayer();
 
 			// check if sneaking
@@ -124,19 +84,44 @@ public final class Jesus extends Hack {
 
 			// update timer
 			tickTimer++;
-		}
-		if (mc.player.isInWater()) {
-			if (mode.getSelected().vannilaplus) {
-				if (mc.player.isOverWater()) {
-					mc.player.motionY = 0;
+		} else if (bypass.isChecked()) {
+			if (!mc.player.collidedHorizontally) {
+				if (mc.player.world.handleMaterialAcceleration(mc.player.getEntityBoundingBox().expand(0.0D, 0.05D, 0.0D).contract(0.001D, 0.001D, 0.001D), Material.WATER, mc.player)) {
+					if ((mc.player.fallDistance >= 0.0000000000000000000000000001 && !mc.player.isInWater()) || !riseUp) {
+
+						riseUp = true;
+
+						double y, y1;
+						mc.player.motionY = 0;
+
+						if (mc.player.ticksExisted % 3 == 0) {
+
+							y = mc.player.posY - 1.0E-10D;
+							mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, y, mc.player.posZ, true));
+
+						}
+
+						y1 = mc.player.posY + 1.0E-10D;
+						mc.player.setPosition(mc.player.posX, y1, mc.player.posZ);
+						mc.player.connection.sendPacket(new CPacketPlayer(true));
+
+					} else {
+						mc.player.motionY = 0;
+					}
+				} else {
+
+					riseUp = false;
 				}
+			} else if (mc.player.collidedHorizontally && mc.player.isOverWater() || mc.player.collidedHorizontally && mc.player.isInWater()) {
+				mc.player.motionY = 0.1;
 			}
 		}
 	}
 
 	@SubscribeEvent
-	public void onPacketOutput(WPacketOutputEvent event) {
-		if (mode.getSelected().normal) {
+	public void onPacketOutput(WPacketOutputEvent event)
+	{
+		if (!bypass.isChecked()) {
 			// check packet type
 			if (!(event.getPacket() instanceof CPacketPlayer))
 				return;
@@ -183,8 +168,9 @@ public final class Jesus extends Hack {
 	}
 
 	@SubscribeEvent
-	public void onGetLiquidCollisionBox(WGetLiquidCollisionBoxEvent event) {
-		if (mode.getSelected().normal) {
+	public void onGetLiquidCollisionBox(WGetLiquidCollisionBoxEvent event)
+	{
+		if (!bypass.isChecked()) {
 			EntityPlayerSP player = WMinecraft.getPlayer();
 
 			if (isLiquidCollisionEnabled(player))
@@ -194,7 +180,7 @@ public final class Jesus extends Hack {
 
 	@SubscribeEvent
 	public void onEntityPlayerJump(WEntityPlayerJumpEvent event) {
-		if (mode.getSelected().normal) {
+		if (!bypass.isChecked()) {
 			EntityPlayer player = event.getPlayer();
 			if (player != WMinecraft.getPlayer())
 				return;
@@ -214,22 +200,24 @@ public final class Jesus extends Hack {
 		}
 	}
 
-	private boolean isLiquidCollisionEnabled(EntityPlayer player) {
-		if (player == null)
+	private boolean isLiquidCollisionEnabled(EntityPlayer player)
+	{
+		if(player == null)
 			return false;
 
-		if (player.isSneaking()
+		if(player.isSneaking()
 				&& GameSettings.isKeyDown(mc.gameSettings.keyBindSneak))
 			return false;
 
-		if (player.isInWater() || player.fallDistance > 3)
+		if(player.isInWater() || player.fallDistance > 3)
 			return false;
 
 		return true;
 	}
 
-	private boolean isStandingOnLiquid(EntityPlayer player) {
-		if (!isLiquidCollisionEnabled(player))
+	private boolean isStandingOnLiquid(EntityPlayer player)
+	{
+		if(!isLiquidCollisionEnabled(player))
 			return false;
 
 		World world = WPlayer.getWorld(player);
@@ -241,42 +229,17 @@ public final class Jesus extends Hack {
 		playerBox = playerBox.union(playerBox.offset(0, -0.5, 0));
 		// Using expand() with negative values doesn't work in 1.10.2.
 
-		for (AxisAlignedBB box : world.getCollisionBoxes(player, playerBox)) {
+		for(AxisAlignedBB box : world.getCollisionBoxes(player, playerBox))
+		{
 			BlockPos pos = new BlockPos(box.getCenter());
 			Material material = BlockUtils.getMaterial(pos);
 
-			if (material == Material.WATER || material == Material.LAVA)
+			if(material == Material.WATER || material == Material.LAVA)
 				foundLiquid = true;
-			else if (material != Material.AIR)
+			else if(material != Material.AIR)
 				foundSolid = true;
 		}
 
 		return foundLiquid && !foundSolid;
-	}
-
-
-	private enum Mode {
-		NCP("NCP", false, true, false, false),
-		NORMAL("Normal", true, false, false, false),
-		TEST("Test", false, false, true, false),
-		VannilaPlus("Vanilla", false, false, false, true);
-
-		private final String name;
-		private final boolean normal;
-		private final boolean ncp;
-		private final boolean test;
-		private final boolean vannilaplus;
-
-		private Mode(String name, boolean normal, boolean ncp, boolean test, boolean vannilaplus) {
-			this.name = name;
-			this.normal = normal;
-			this.ncp = ncp;
-			this.test = test;
-			this.vannilaplus = vannilaplus;
-		}
-
-		public String toString() {
-			return name;
-		}
 	}
 }

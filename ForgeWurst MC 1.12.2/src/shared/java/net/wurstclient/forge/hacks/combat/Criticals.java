@@ -11,6 +11,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WPacketInputEvent;
 import net.wurstclient.fmlevents.WPacketOutputEvent;
@@ -34,6 +35,11 @@ public final class Criticals extends Hack {
 	}
 
 	@SubscribeEvent
+	public void onAttackEntity(AttackEntityEvent event) {
+		mc.player.onCriticalHit(event.getTarget());
+	}
+
+	@SubscribeEvent
 	public void onPacket(WPacketInputEvent event) {
 		try {
 			if (event.getPacket() instanceof CPacketUseEntity) {
@@ -46,7 +52,6 @@ public final class Criticals extends Hack {
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -63,7 +68,6 @@ public final class Criticals extends Hack {
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 

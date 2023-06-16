@@ -23,7 +23,7 @@ public abstract class Component
 
 	public abstract void render(int mouseX, int mouseY, float partialTicks);
 
-	public abstract int getDefaultWidth();
+    public abstract int getDefaultWidth();
 
 	public abstract int getDefaultHeight();
 

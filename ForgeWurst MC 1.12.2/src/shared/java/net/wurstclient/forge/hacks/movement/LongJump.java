@@ -120,19 +120,11 @@ public final class LongJump extends Hack {
 					mc.player.jump();
 					mc.player.motionX = dir[0];
 					mc.player.motionZ = dir[1];
+					setEnabled(false);
 				} else {
 					NotiUtils.render("WAIT!", "Until were hurt, we cant move.", true);
-					if (mc.player.ticksExisted % 20 == 0) {
-						for (int a = 0; a < 65 * 1.5; a++) {
-							mc.player.connection.sendPacket(new CPacketPlayer.Position(x, y + 0.049, z, false));
-							mc.player.connection.sendPacket(new CPacketPlayer.Position(x, y, z, false));
-						}
-						mc.player.connection.sendPacket(new CPacketPlayer.Position(x, y, z, true));
-					}
-					mc.player.setPosition(mc.player.prevPosX, mc.player.prevPosY, mc.player.prevPosZ);
+					mc.player.setPosition(mc.player.lastTickPosX, mc.player.posY - 0.00000001, mc.player.lastTickPosZ);
 				}
-			} else {
-				setEnabled(false);
 			}
 		}
 		if (mode.getSelected().aac3) {

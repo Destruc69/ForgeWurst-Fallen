@@ -9,8 +9,17 @@ package net.wurstclient.forge.hacks.movement;
 
 import com.sun.media.jfxmedia.events.PlayerStateEvent;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.ModelBiped;
+import net.minecraft.client.model.ModelElytra;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityFireworkRocket;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.ItemElytra;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketConfirmTeleport;
 import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.network.play.client.CPacketInput;
@@ -72,6 +81,10 @@ public final class ElytraFlight extends Hack {
 			new CheckboxSetting("FortyPitch", "Maintain a 0 to 40 to -40",
 					false);
 
+	private final CheckboxSetting antilag =
+			new CheckboxSetting("AntiLag", "Prevents lags.",
+					false);
+
 	public ElytraFlight() {
 		super("ElytraFlight", "Fly with elytras.");
 		setCategory(Category.MOVEMENT);
@@ -83,13 +96,17 @@ public final class ElytraFlight extends Hack {
 		addSetting(timerSpeed);
 		addSetting(bypass);
 		addSetting(fortyPitch);
+		addSetting(antilag);
 	}
 
 	@Override
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
-		startYNCP = mc.player.posY;
-		jumpY = mc.player.posY;
+		try {
+			startYNCP = mc.player.posY;
+			jumpY = mc.player.posY;
+		} catch (Exception e) {
+		}
 	}
 
 	@Override
@@ -166,10 +183,24 @@ public final class ElytraFlight extends Hack {
 				} else {
 					setTickLength(50);
 					if (takeoff.isChecked()) {
-						if (mc.player.ticksExisted % 5 == 0) {
+						if (mc.player.ticksExisted % 10 == 0) {
 							mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_FALL_FLYING));
 						}
 					}
+				}
+			}
+		}
+
+		if (mode.getSelected().fireworkrocket) {
+			if (mc.player.getHeldItemMainhand().getItem().equals(Items.FIREWORKS)) {
+				mc.playerController.processRightClick(mc.player, mc.world, EnumHand.MAIN_HAND);
+				mc.player.swingArm(EnumHand.MAIN_HAND);
+			} else {
+				setEnabled(false);
+				try {
+					ChatUtils.error("[EF] You need to be holding a firework to work for this mode!");
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		}
@@ -191,6 +222,7 @@ public final class ElytraFlight extends Hack {
 	}
 
 	public static double jumpY = 0;
+
 	public void jumpElytraFlight() {
 		if (mc.gameSettings.keyBindJump.isKeyDown()) {
 			jumpY = jumpY + 1;
@@ -224,8 +256,8 @@ public final class ElytraFlight extends Hack {
 	public void devElytraFlight() {
 		double[] dir = MathUtils.directionSpeed(baseSpeed.getValueF());
 
-		mc.player.motionX = mc.player.motionX + dir[0];
-		mc.player.motionZ = mc.player.motionZ + dir[1];
+		mc.player.motionX = dir[0];
+		mc.player.motionZ = dir[1];
 
 		mc.player.rotateElytraX = 0;
 		mc.player.rotateElytraY = 0;
@@ -289,6 +321,7 @@ public final class ElytraFlight extends Hack {
 			}
 		}
 	}
+
 	@SubscribeEvent
 	public void onUpdateNCP(WUpdateEvent event) {
 		if (mc.player.isElytraFlying()) {
@@ -351,13 +384,14 @@ public final class ElytraFlight extends Hack {
 	}
 
 	private enum Mode {
-		BOOST("Boost", true, false, false, false, false, false, false),
-		CONTROL("Control", false, true, false, false, false, false, false),
-		BOOSTNOY("Boost-NO-Y", false, false, true, false, false, false, false),
-		NCP("NCP", false, false, false, true, false, false, false),
-		DEV("Dev", false, false, false, false, true, false, false),
-		JUMP("Jump", false, false, false, false, false, true, false),
-		FIREWORK("Firework", false, false, false, false, false, false, true);
+		BOOST("Boost", true, false, false, false, false, false, false, false),
+		CONTROL("Control", false, true, false, false, false, false, false, false),
+		BOOSTNOY("Boost-NO-Y", false, false, true, false, false, false, false, false),
+		NCP("NCP", false, false, false, true, false, false, false, false),
+		DEV("Dev", false, false, false, false, true, false, false, false),
+		JUMP("Jump", false, false, false, false, false, true, false, false),
+		FIREWORK("Firework", false, false, false, false, false, false, true, false),
+		FIREWORKROCKET("FireWorkRocket", false, false, false, false, false, false, false, true);
 
 		private final String name;
 		private final boolean boost;
@@ -367,8 +401,9 @@ public final class ElytraFlight extends Hack {
 		private final boolean dev;
 		private final boolean jump;
 		private final boolean firework;
+		private final boolean fireworkrocket;
 
-		private Mode(String name, boolean boost, boolean control, boolean boostnoy, boolean ncp, boolean dev, boolean jump, boolean firework) {
+		private Mode(String name, boolean boost, boolean control, boolean boostnoy, boolean ncp, boolean dev, boolean jump, boolean firework, boolean fireworkrocket) {
 			this.name = name;
 			this.boost = boost;
 			this.control = control;
@@ -377,6 +412,7 @@ public final class ElytraFlight extends Hack {
 			this.dev = dev;
 			this.jump = jump;
 			this.firework = firework;
+			this.fireworkrocket = fireworkrocket;
 		}
 
 		public String toString() {
@@ -384,32 +420,40 @@ public final class ElytraFlight extends Hack {
 		}
 	}
 
-	private void setTickLength(float tickLength)
-	{
-		try
-		{
+	private void setTickLength(float tickLength) {
+		try {
 			Field fTimer = mc.getClass().getDeclaredField(
 					wurst.isObfuscated() ? "field_71428_T" : "timer");
 			fTimer.setAccessible(true);
 
-			if(WMinecraft.VERSION.equals("1.10.2"))
-			{
+			if (WMinecraft.VERSION.equals("1.10.2")) {
 				Field fTimerSpeed = Timer.class.getDeclaredField(
 						wurst.isObfuscated() ? "field_74278_d" : "timerSpeed");
 				fTimerSpeed.setAccessible(true);
 				fTimerSpeed.setFloat(fTimer.get(mc), 50 / tickLength);
 
-			}else
-			{
+			} else {
 				Field fTickLength = Timer.class.getDeclaredField(
 						wurst.isObfuscated() ? "field_194149_e" : "tickLength");
 				fTickLength.setAccessible(true);
 				fTickLength.setFloat(fTimer.get(mc), tickLength);
 			}
 
-		}catch(ReflectiveOperationException e)
-		{
+		} catch (ReflectiveOperationException e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	@SubscribeEvent
+	public void forAntiLag(WUpdateEvent event) {
+		if (antilag.isChecked()) {
+			for (Entity entity : mc.world.loadedEntityList) {
+				if (entity instanceof EntityFireworkRocket) {
+					if (entity.ticksExisted > 0) {
+						mc.world.removeEntity(entity);
+					}
+				}
+			}
 		}
 	}
 }

@@ -48,7 +48,7 @@ public final class GodMode extends Hack {
 	}
 
 	@SubscribeEvent
-	public void onUpdate(WPacketInputEvent event) {
+	public void onUpdate(WPacketOutputEvent event) {
 		if (mode.getSelected().aac) {
 			mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY - 0.1, mc.player.posZ, true));
 		} else if (mode.getSelected().portal) {

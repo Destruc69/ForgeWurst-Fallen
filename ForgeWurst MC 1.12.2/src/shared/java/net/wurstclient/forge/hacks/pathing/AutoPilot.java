@@ -24,7 +24,6 @@ import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.ChatUtils;
 import net.wurstclient.forge.utils.KeyBindingUtils;
-import net.wurstclient.forge.utils.MathUtils;
 import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
@@ -74,7 +73,6 @@ public final class AutoPilot extends Hack {
 		addSetting(pathGreen);
 		addSetting(pathBlue);
 		addSetting(lineWidth);
-		addSetting(modeType);
 		addSetting(smoothingFactor);
 	}
 
@@ -90,25 +88,6 @@ public final class AutoPilot extends Hack {
 			this.name = name;
 			this.tesla = tesla;
 			this.baritone = baritone;
-		}
-
-		public String toString() {
-			return name;
-		}
-	}
-
-	private enum Type {
-		LAND("Land", true, false),
-		AIR("Air", false, true);
-
-		private final String name;
-		private final boolean land;
-		private final boolean air;
-
-		private Type(String name, boolean land, boolean air) {
-			this.name = name;
-			this.air = air;
-			this.land = land;
 		}
 
 		public String toString() {

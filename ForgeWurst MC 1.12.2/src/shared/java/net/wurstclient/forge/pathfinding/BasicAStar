@@ -1,0 +1,66 @@
+public ArrayList<BlockPos> createPath(BlockPos start, BlockPos target) {
+	int numNodesVisited = 0;
+	int numNodesConsidered = 0;
+	int maxOpenListSize = 0;
+
+		PriorityQueue<BlockPos> openList = new PriorityQueue<>(Comparator.comparingDouble(pos -> getDistance(pos, target)));
+		HashMap<BlockPos, BlockPos> cameFrom = new HashMap<>();
+		HashMap<BlockPos, Double> gScore = new HashMap<>();
+		openList.add(start);
+		gScore.put(start, 0.0);
+
+		while (!openList.isEmpty()) {
+			BlockPos current = openList.poll();
+
+			numNodesVisited++;
+			maxOpenListSize = Math.max(maxOpenListSize, openList.size());
+
+			if (current.equals(target)) {
+				// Reconstruct the path
+				ArrayList<BlockPos> path = new ArrayList<>();
+				path.add(current);
+				while (cameFrom.containsKey(current)) {
+					current = cameFrom.get(current);
+					path.add(0, current);
+				}
+					return path;
+				}
+
+				for (BlockPos neighbor : getNeighbors(current)) {
+					double tentativeGScore = gScore.get(current) + getDistance(current, neighbor);
+					if (tentativeGScore < gScore.getOrDefault(neighbor, Double.POSITIVE_INFINITY)) {
+						cameFrom.put(neighbor, current);
+						gScore.put(neighbor, tentativeGScore);
+						if (!openList.contains(neighbor)) {
+							openList.add(neighbor);
+							numNodesConsidered++;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private static ArrayList<BlockPos> getNeighbors(BlockPos pos) {
+		ArrayList<BlockPos> neighbors = new ArrayList<>();
+		for (int x = -1; x <= 1; x++) {
+			for (int y = -1; y <= 1; y++) {
+				for (int z = -1; z <= 1; z++) {
+					if (x == 0 && y == 0 && z == 0) {
+						continue;
+					}
+					BlockPos neighbor = pos.add(x, y, z);
+					if (isWalkable(neighbor)) {
+						neighbors.add(neighbor);
+					}
+				}
+			}
+		}
+		return neighbors;
+	}
+
+	    public static boolean isWalkable(BlockPos pos) {
+            assert pos != null;
+
+            return !mc.world.getBlockState(pos).getBlock().equals(Blocks.AIR) && mc.world.getBlockState(pos.add(0, 1, 0)).getBlock().equals(Blocks.AIR) && mc.world.getBlockState(pos.add(0, 2, 0)).getBlock().equals(Blocks.AIR);
+        }

@@ -7,56 +7,54 @@
  */
 package net.wurstclient.forge.hacks.player;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumHand;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.SliderSetting;
-import org.lwjgl.util.vector.Quaternion;
+import org.lwjgl.opengl.GL11;
 
 public final class Animations extends Hack {
 
-	private final SliderSetting xv =
-			new SliderSetting("X", 0, -2, 2, 0.01, SliderSetting.ValueDisplay.DECIMAL);
+	private static final Minecraft mc = Minecraft.getMinecraft();
 
-	private final SliderSetting yv =
-			new SliderSetting("Y", 0, -2, 2, 0.01, SliderSetting.ValueDisplay.DECIMAL);
+	private static final SliderSetting xv =
+			new SliderSetting("X", 0, -2, 2, 0.1, SliderSetting.ValueDisplay.DECIMAL);
 
-	private final SliderSetting zv =
-			new SliderSetting("Z", 0, -2, 2, 0.01, SliderSetting.ValueDisplay.DECIMAL);
+	private static final SliderSetting yv =
+			new SliderSetting("Y", 0, -2, 2, 0.1, SliderSetting.ValueDisplay.DECIMAL);
 
+	private static final SliderSetting zv =
+			new SliderSetting("Z", 0, -2, 2, 0.1, SliderSetting.ValueDisplay.DECIMAL);
 
-	private final CheckboxSetting swing =
-			new CheckboxSetting("OnlyOnSwing", "Only while hand is active",
-					false);
+	private static final SliderSetting angle =
+			new SliderSetting("Angle", 0, -9999, 9999, 0.1, SliderSetting.ValueDisplay.DECIMAL);
 
-	private final SliderSetting angle =
-			new SliderSetting("Angle", 0, -2, 2, 0.01, SliderSetting.ValueDisplay.DECIMAL);
+	private static final SliderSetting rx =
+			new SliderSetting("Rotate-X", 0, -9999, 9999, 0.1, SliderSetting.ValueDisplay.DECIMAL);
 
-	private final SliderSetting rx =
-			new SliderSetting("Rotate-X", 0,-100, 100, 0.01, SliderSetting.ValueDisplay.DECIMAL);
+	private static final SliderSetting ry =
+			new SliderSetting("Rotate-Y", 0, -9999, 9999, 0.1, SliderSetting.ValueDisplay.DECIMAL);
 
-	private final SliderSetting ry =
-			new SliderSetting("Rotate-Y", 0,-100, 100, 0.01, SliderSetting.ValueDisplay.DECIMAL);
-
-	private final SliderSetting rz =
-			new SliderSetting("Rotate-Z", 0,-100, 100, 0.01, SliderSetting.ValueDisplay.DECIMAL);
-
+	private static final SliderSetting rz =
+			new SliderSetting("Rotate-Z", 0, -9999, 9999, 0.1, SliderSetting.ValueDisplay.DECIMAL);
 
 	public Animations() {
-		super("ArmModel", "Change arm model pos");
+		super("Animations", "Animations, explains its self.");
 		setCategory(Category.PLAYER);
 		addSetting(xv);
 		addSetting(yv);
 		addSetting(zv);
-		addSetting(swing);
 		addSetting(angle);
 		addSetting(rx);
 		addSetting(ry);
@@ -71,22 +69,22 @@ public final class Animations extends Hack {
 	@Override
 	protected void onDisable() {
 		MinecraftForge.EVENT_BUS.unregister(this);
+		xv.setValue(0);
+		yv.setValue(0);
+		zv.setValue(0);
+
+		angle.setValue(0);
+
+		rx.setValue(0);
+		ry.setValue(0);
+		rz.setValue(0);
 	}
 
 	@SubscribeEvent
-	public void onUpdate(RenderHandEvent event) {
-		if (!swing.isChecked()) {
-			ItemRenderer ir = mc.getItemRenderer();
-			GlStateManager.translate(xv.getValueI(), yv.getValueF(), zv.getValueI());
-			GlStateManager.rotate(angle.getValueF(), rx.getValueI(), ry.getValueF(), rz.getValueI());
-			ir.updateEquippedItem();
-		} else {
-			if (mc.player.isSwingInProgress) {
-				ItemRenderer ir = mc.getItemRenderer();
-				GlStateManager.translate(xv.getValueI(), yv.getValueF(), zv.getValueI());
-				GlStateManager.rotate(angle.getValueF(), rx.getValueI(), ry.getValueF(), rz.getValueI());
-				ir.updateEquippedItem();
-			}
-		}
+	public void onRenderHand(RenderHandEvent event) {
+		ItemRenderer ir = mc.getItemRenderer();
+		GlStateManager.translate(xv.getValueI(), yv.getValueF(), zv.getValueI());
+		GlStateManager.rotate(angle.getValueF(), rx.getValueI(), ry.getValueF(), rz.getValueI());
+		ir.updateEquippedItem();
 	}
 }

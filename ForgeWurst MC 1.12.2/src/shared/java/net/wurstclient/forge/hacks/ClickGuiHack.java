@@ -65,11 +65,6 @@ public final class ClickGuiHack extends Hack
                     "Makes little particles in the background.",
                     false);
 
-    public static final CheckboxSetting matrix =
-            new CheckboxSetting("Matrix",
-                    "Connects the particles with a line.",
-                    false);
-
     public static SliderSetting clickLineSize = new SliderSetting("ClickGUI LineSize",
             "Size of the lines for the ClickGUI", 1, 0.1, 20, 0.1, ValueDisplay.DECIMAL);
 
@@ -80,21 +75,8 @@ public final class ClickGuiHack extends Hack
     public static SliderSetting partBlue = new SliderSetting("Particle blue",
             "Accent blue", 16, 0, 255, 0.01, ValueDisplay.INTEGER);
 
-    public static SliderSetting matRed = new SliderSetting("Matrix red",
-            "Accent red", 16, 0, 255, 0.01, ValueDisplay.INTEGER);
-    public static SliderSetting matGreen = new SliderSetting("Matrix green",
-            "Accent green", 16, 0, 255, 0.01, ValueDisplay.INTEGER);
-    public static SliderSetting matBlue = new SliderSetting("Matrix blue",
-            "Accent blue", 16, 0, 255, 0.01, ValueDisplay.INTEGER);
-
-    public static SliderSetting matAlpha = new SliderSetting("Matrix alpha",
-            "Alpha of the Matrix lines", 1, 0.1, 1, 0.1, ValueDisplay.DECIMAL);
-
     public static SliderSetting patAlpha = new SliderSetting("Particle alpha",
             "Alpha of the Particles", 1, 0.1, 1, 0.1, ValueDisplay.DECIMAL);
-
-    public static SliderSetting matSize = new SliderSetting("Matrix size",
-            "Size of the matrix", 1, 0.1, 20, 0.1, ValueDisplay.DECIMAL);
 
     public static SliderSetting partSize = new SliderSetting("Particle size",
             "Size of the particle", 1, 0.1, 20, 0.1, ValueDisplay.DECIMAL);
@@ -132,17 +114,11 @@ public final class ClickGuiHack extends Hack
         addSetting(nogui);
         addSetting(inventoryButton);
         addSetting(particles);
-        addSetting(matrix);
         addSetting(clickLineSize);
         addSetting(partRed);
         addSetting(partGreen);
         addSetting(partBlue);
-        addSetting(matRed);
-        addSetting(matGreen);
-        addSetting(matBlue);
         addSetting(patAlpha);
-        addSetting(matAlpha);
-        addSetting(matSize);
         addSetting(partSize);
         addSetting(backgroundColor);
         addSetting(resetBackColor);

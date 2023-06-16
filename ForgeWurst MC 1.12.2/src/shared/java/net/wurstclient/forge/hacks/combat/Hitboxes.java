@@ -8,17 +8,22 @@
 package net.wurstclient.forge.hacks.combat;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.SliderSetting;
 
+import java.util.Objects;
+
 public final class Hitboxes extends Hack {
 
-	private final SliderSetting grow = new SliderSetting("AddAmount", "how much we add to the bounding boxes", 5.0D, 1.0D, 80.0D, 1.0D, SliderSetting.ValueDisplay.DECIMAL);
+	private static final SliderSetting grow = new SliderSetting("AddAmount", "how much we add to the bounding boxes", 5.0D, 1.0D, 80.0D, 1.0D, SliderSetting.ValueDisplay.DECIMAL);
 
 
 	public Hitboxes() {
@@ -38,14 +43,13 @@ public final class Hitboxes extends Hack {
 	}
 
 	@SubscribeEvent
-	public void onUpdate(WUpdateEvent event) {
+	public static void onUpdate(WUpdateEvent event) {
 		for (Entity entity : mc.world.loadedEntityList) {
-			entity.getEntityBoundingBox().grow(grow.getValueI());
-			entity.getEntityBoundingBox().expand(grow.getValueI(), grow.getValueF(), grow.getValue());
-			entity.getEntityBoundingBox().contract(grow.getValueI(), grow.getValueF(),grow.getValue());
-			entity.getRenderBoundingBox().grow(grow.getValueI());
-			entity.getRenderBoundingBox().expand(grow.getValueI(), grow.getValueF(), grow.getValue());
-			entity.getRenderBoundingBox().contract(grow.getValueI(), grow.getValueF(),grow.getValue());
+			if (entity != mc.player) {
+				entity.getEntityBoundingBox().expand(grow.getValueI(), grow.getValueI(), grow.getValueI());
+				Objects.requireNonNull(entity.getCollisionBoundingBox()).expand(grow.getValueI(), grow.getValueF(), grow.getValueI());
+				entity.getRenderBoundingBox().expand(grow.getValueI(), grow.getValueF(), grow.getValueI());
+			}
 		}
 	}
 }

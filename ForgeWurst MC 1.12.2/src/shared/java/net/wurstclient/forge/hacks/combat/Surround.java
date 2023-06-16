@@ -64,30 +64,33 @@ public final class Surround extends Hack {
 		BlockPos blockPos3 = new BlockPos(vec3d.addVector(0, 0, 1)).add(0.5, 0.5, 0.5);
 		BlockPos blockPos4 = new BlockPos(vec3d.addVector(0, 0, -1)).add(0.5, 0.5, 0.5);
 		if (mc.player.ticksExisted % 5 == 0) {
-			mc.playerController.processRightClickBlock(mc.player, mc.world, blockPos1, EnumFacing.DOWN, new Vec3d(0.5, 0.5, 0.5), EnumHand.MAIN_HAND);
+			mc.playerController.processRightClick(mc.player, mc.world, EnumHand.MAIN_HAND);
+			mc.player.swingArm(EnumHand.MAIN_HAND);
 			float[] rot = RotationUtils.getNeededRotations(new Vec3d(blockPos1.getX(), blockPos1.getY(), blockPos1.getZ()).addVector(0.5, 0.5, 0.5));
 			mc.player.rotationYaw = rot[0];
 			mc.player.rotationPitch = rot[1];
 		}
 		if (mc.player.ticksExisted % 10 == 0) {
-			mc.playerController.processRightClickBlock(mc.player, mc.world, blockPos2, EnumFacing.DOWN, new Vec3d(0.5, 0.5, 0.5), EnumHand.MAIN_HAND);
+			mc.playerController.processRightClick(mc.player, mc.world, EnumHand.MAIN_HAND);
+			mc.player.swingArm(EnumHand.MAIN_HAND);
 			float[] rot = RotationUtils.getNeededRotations(new Vec3d(blockPos2.getX(), blockPos2.getY(), blockPos2.getZ()).addVector(0.5, 0.5, 0.5));
 			mc.player.rotationYaw = rot[0];
 			mc.player.rotationPitch = rot[1];
 		}
 		if (mc.player.ticksExisted % 15 == 0) {
-			mc.playerController.processRightClickBlock(mc.player, mc.world, blockPos3, EnumFacing.DOWN, new Vec3d(0.5, 0.5, 0.5), EnumHand.MAIN_HAND);
+			mc.playerController.processRightClick(mc.player, mc.world, EnumHand.MAIN_HAND);
+			mc.player.swingArm(EnumHand.MAIN_HAND);
 			float[] rot = RotationUtils.getNeededRotations(new Vec3d(blockPos3.getX(), blockPos3.getY(), blockPos3.getZ()).addVector(0.5, 0.5, 0.5));
 			mc.player.rotationYaw = rot[0];
 			mc.player.rotationPitch = rot[1];
 		}
 		if (mc.player.ticksExisted % 20 == 0) {
-			mc.playerController.processRightClickBlock(mc.player, mc.world, blockPos4, EnumFacing.DOWN, new Vec3d(0.5, 0.5, 0.5), EnumHand.MAIN_HAND);
+			mc.playerController.processRightClick(mc.player, mc.world, EnumHand.MAIN_HAND);
+			mc.player.swingArm(EnumHand.MAIN_HAND);
 			float[] rot = RotationUtils.getNeededRotations(new Vec3d(blockPos4.getX(), blockPos4.getY(), blockPos4.getZ()).addVector(0.5, 0.5, 0.5));
 			mc.player.rotationYaw = rot[0];
 			mc.player.rotationPitch = rot[1];
 		}
-		mc.player.swingArm(EnumHand.MAIN_HAND);
 		if (!toggle.isChecked()) {
 			if (mc.world.getBlockState(blockPos1).getBlock().equals(Block.getBlockFromItem(mc.player.getHeldItemMainhand().getItem())) && mc.world.getBlockState(blockPos2).getBlock().equals(Block.getBlockFromItem(mc.player.getHeldItemMainhand().getItem())) && mc.world.getBlockState(blockPos3).getBlock().equals(Block.getBlockFromItem(mc.player.getHeldItemMainhand().getItem())) && mc.world.getBlockState(blockPos4).getBlock().equals(Block.getBlockFromItem(mc.player.getHeldItemMainhand().getItem()))) {
 				setEnabled(false);
