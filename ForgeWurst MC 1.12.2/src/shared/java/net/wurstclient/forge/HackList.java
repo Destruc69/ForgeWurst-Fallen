@@ -37,6 +37,7 @@ public final class HackList extends WHackList
 	public final AutoClicker autoClicker = register(new AutoClicker());
 	public final NewChunks newChunks = register(new NewChunks());
 	public final Giant giant = register(new Giant());
+	public final BoatTank boatTank = register(new BoatTank());
 	public final DamageHack damageHack = register(new DamageHack());
 	public final HudModules hudModules = register(new HudModules());
 	public final ChunkKeeper chunkKeeper = register(new ChunkKeeper());
@@ -94,12 +95,12 @@ public final class HackList extends WHackList
 	public final FastBreak fastBreak = register(new FastBreak());
 	public final FastPlace fastPlace = register(new FastPlace());
 	public final Tunneler tunneler = register(new Tunneler());
+	public final Freeze freeze = register(new Freeze());
 	public final AutoLeave autoLeave = register(new AutoLeave());
 	public final PacketCanceler packetCanceler = register(new PacketCanceler());
 	public final PacketSender packetSender = register(new PacketSender());
 	public final EntityFlight entityFlight = register(new EntityFlight());
 	public final EntitySpeed entitySpeed = register(new EntitySpeed());
-	public final NCPFly packetFly = register(new NCPFly());
 	public final HoleESP holeESP = register(new HoleESP());
 	public final ElytraFlight elytraFlight = register(new ElytraFlight());
 	public final AntiAFK antiAFK = register(new AntiAFK());

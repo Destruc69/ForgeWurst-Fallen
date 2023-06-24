@@ -50,7 +50,7 @@ public final class Speed extends Hack {
 				}
 			}
 		}
-		double[] spd = MathUtils.directionSpeed(speed.getValueF() - Math.random() * 0.005);
+		double[] spd = MathUtils.directionSpeed(speed.getValueF() - Math.random() * 0.003);
 		mc.player.motionX = spd[0];
 		mc.player.motionZ = spd[1];
 	}

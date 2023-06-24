@@ -55,21 +55,26 @@ public final class GodMode extends Hack {
 			if (event.getPacket() instanceof CPacketConfirmTeleport) {
 				event.setCanceled(true);
 			}
+		} else if (mode.getSelected().dev) {
+			mc.player.motionY = 9999;
 		}
 	}
 
 	private enum Mode {
-		PORTAL("Portal", true, false),
-		AAC("AAC", false, true);
+		PORTAL("Portal", true, false, false),
+		AAC("AAC", false, true, false),
+		DEV("Dev", false, false, true);
 
 		private final String name;
 		private final boolean portal;
 		private final boolean aac;
+		private final boolean dev;
 
-		private Mode(String name, boolean portal, boolean aac) {
+		private Mode(String name, boolean portal, boolean aac, boolean dev) {
 			this.name = name;
 			this.portal = portal;
 			this.aac = aac;
+			this.dev = dev;
 		}
 
 		public String toString() {

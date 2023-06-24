@@ -1,15 +1,11 @@
 package net.wurstclient.forge.hacks.player;
 
-import net.minecraft.init.SoundEvents;
 import net.minecraft.network.play.server.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WPacketInputEvent;
-import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.settings.CheckboxSetting;
-import net.wurstclient.forge.settings.Setting;
 
 public final class AntiKick extends Hack {
 	public AntiKick() {
@@ -26,7 +22,7 @@ public final class AntiKick extends Hack {
 	}
 
 	@SubscribeEvent
-	public void onPacketOut(WPacketOutputEvent event) {
+	public void onPacketOut(WPacketInputEvent event) {
 		if (event.getPacket() instanceof SPacketAdvancementInfo)
 			event.setCanceled(true);
 		if (event.getPacket() instanceof SPacketParticles)

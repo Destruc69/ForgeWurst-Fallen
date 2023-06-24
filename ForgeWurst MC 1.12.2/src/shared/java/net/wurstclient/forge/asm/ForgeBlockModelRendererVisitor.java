@@ -34,9 +34,9 @@ public final class ForgeBlockModelRendererVisitor extends WurstClassVisitor
 			+ bufferBuilder + ";ZJ)Z";
 		
 		registerMethodVisitor(renderModelFlat_name, renderModel_desc,
-			mv -> new RenderModelFlatVisitor(mv));
+				RenderModelFlatVisitor::new);
 		registerMethodVisitor(renderModelSmooth_name, renderModel_desc,
-			mv -> new RenderModelSmoothVisitor(mv));
+				RenderModelSmoothVisitor::new);
 	}
 	
 	private static class RenderModelFlatVisitor extends MethodVisitor

@@ -5,6 +5,7 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.client.CPacketPlayer;
+import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
@@ -15,17 +16,34 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.settings.CheckboxSetting;
 
 public final class Scaffold extends Hack {
+
+	private final CheckboxSetting jump =
+			new CheckboxSetting("Jump", "Scaffold while jumping.",
+					false);
+
+	private final CheckboxSetting packets =
+			new CheckboxSetting("Packets", "Utilizing packets to help scaffold, Can be buggy on servers.",
+					false);
+
+	private double jumpY;
 
 	public Scaffold() {
 		super("Scaffold", "Place blocks underneath you automatically.");
 		setCategory(Category.WORLD);
+		addSetting(jump);
+		addSetting(packets);
 	}
 
 	@Override
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
+		try {
+			jumpY = mc.player.lastTickPosY;
+		} catch (Exception ignored) {
+		}
 	}
 
 	@Override
@@ -38,6 +56,9 @@ public final class Scaffold extends Hack {
 		Minecraft mc = Minecraft.getMinecraft();
 		BlockPos playerBlock = new BlockPos(mc.player.posX, mc.player.getEntityBoundingBox().minY, mc.player.posZ);
 
+		if (jump.isChecked()) {
+			playerBlock = new BlockPos(playerBlock.getX(), jumpY, playerBlock.getZ());
+		}
 		if (mc.world.isAirBlock(playerBlock.add(0, -1, 0))) {
 			if (isValidBlock(playerBlock.add(0, -2, 0))) {
 				place(playerBlock.add(0, -1, 0), EnumFacing.UP);
@@ -113,11 +134,16 @@ public final class Scaffold extends Hack {
 			double yaw = (float) (Math.atan2(var6, var4) * 180.0D / Math.PI) - 90.0F;
 			double pitch = (float) -(Math.atan2(var8, var14) * 180.0D / Math.PI);
 			mc.player.connection.sendPacket(new CPacketPlayer.Rotation((float) yaw, (float) pitch, mc.player.onGround));
+
+			if (packets.isChecked()) {
+				mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(pos, face, EnumHand.MAIN_HAND, (float) var4, (float) var6, (float) var8));
+			}
 		}
 
 		if (mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem() instanceof ItemBlock) {
 			mc.playerController.processRightClickBlock(mc.player, mc.world, pos, face, new Vec3d(0.5D, 0.5D, 0.5D), EnumHand.MAIN_HAND);
 			mc.player.swingArm(EnumHand.MAIN_HAND);
+
 			double var4 = pos.getX() + 0.25D - mc.player.posX;
 			double var6 = pos.getZ() + 0.25D - mc.player.posZ;
 			double var8 = pos.getY() + 0.25D - (mc.player.posY + mc.player.getEyeHeight());
@@ -125,6 +151,10 @@ public final class Scaffold extends Hack {
 			double yaw = (float) (Math.atan2(var6, var4) * 180.0D / Math.PI) - 90.0F;
 			double pitch = (float) -(Math.atan2(var8, var14) * 180.0D / Math.PI);
 			mc.player.connection.sendPacket(new CPacketPlayer.Rotation((float) yaw, (float) pitch, mc.player.onGround));
+
+			if (packets.isChecked()) {
+				mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(pos, face, EnumHand.MAIN_HAND, (float) var4, (float) var6, (float) var8));
+			}
 		}
 	}
 }

@@ -33,7 +33,7 @@ public class WurstUpdater {
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
 		if (thread == null) {
-			thread = new Thread(() -> checkForUpdates());
+			thread = new Thread(this::checkForUpdates);
 			thread.start();
 			return;
 		}

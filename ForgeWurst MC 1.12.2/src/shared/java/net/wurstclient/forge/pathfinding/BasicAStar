@@ -64,3 +64,80 @@ public ArrayList<BlockPos> createPath(BlockPos start, BlockPos target) {
 
             return !mc.world.getBlockState(pos).getBlock().equals(Blocks.AIR) && mc.world.getBlockState(pos.add(0, 1, 0)).getBlock().equals(Blocks.AIR) && mc.world.getBlockState(pos.add(0, 2, 0)).getBlock().equals(Blocks.AIR);
         }
+
+           public static BlockPos getClosestSolidBlock(BlockPos targetPos) {
+                int renderDistanceChunks = mc.gameSettings.renderDistanceChunks;
+
+                assert targetPos != null;
+
+                double closestDistance = Double.MAX_VALUE;
+                BlockPos closestBlock = null;
+                for (int x = mc.player.chunkCoordX - renderDistanceChunks; x <= mc.player.chunkCoordX + renderDistanceChunks; x++) {
+                    for (int z = mc.player.chunkCoordZ - renderDistanceChunks; z <= mc.player.chunkCoordZ + renderDistanceChunks; z++) {
+                        for (int y = 0; y <= 256; y++) {
+                            BlockPos blockPos = new BlockPos(x * 16, y, z * 16);
+                            double distance = blockPos.distanceSq(targetPos);
+                            if (distance < closestDistance && !isBlockAboveAir(blockPos) && isBlockAboveAir(blockPos.up()) && isBlockAboveAir(blockPos.up(2))) {
+                                closestDistance = distance;
+                                closestBlock = blockPos;
+                            }
+                        }
+                    }
+                }
+                assert closestBlock != null;
+                return closestBlock;
+            }
+
+    	private double smoothYaw = 0;
+    	private double smoothPitch = 0;
+
+    	public double[] getYawAndPitchForPath(BlockPos playerPos, ArrayList<BlockPos> path) {
+    		double[] yawAndPitch = new double[]{0, 0};
+
+    		assert playerPos != null;
+    		assert path != null;
+
+    		if (!path.isEmpty()) {
+    			// Find closest block and calculate yaw and pitch
+    			int closestBlockIndex = 0;
+    			double closestBlockDistance = Double.POSITIVE_INFINITY;
+    			for (int i = 0; i < path.size(); i++) {
+    				double distance = playerPos.distanceSq(path.get(i));
+    				if (distance < closestBlockDistance) {
+    					closestBlockDistance = distance;
+    					closestBlockIndex = i;
+    				}
+    			}
+
+    			BlockPos closestBlock = path.get(closestBlockIndex);
+    			BlockPos nextBlock;
+    			if (closestBlockIndex == path.size() - 1) {
+    				nextBlock = closestBlock;
+    			} else {
+    				nextBlock = path.get(closestBlockIndex + 1);
+    			}
+
+    			double xDiff = nextBlock.getX() + 0.5 - playerPos.getX();
+    			double zDiff = nextBlock.getZ() + 0.5 - playerPos.getZ();
+    			double yDiff = nextBlock.getY() + 0.5 - (playerPos.getY() + 1.0);
+    			double distanceXZ = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(zDiff, 2));
+    			double targetYaw = Math.toDegrees(Math.atan2(zDiff, xDiff)) - 90;
+    			double targetPitch = Math.toDegrees(Math.atan2(-yDiff, distanceXZ));
+
+    			double diffYaw = MathHelper.wrapDegrees(targetYaw - smoothYaw);
+    			double diffPitch = MathHelper.wrapDegrees(targetPitch - smoothPitch);
+
+    			// Smooth the values using exponential moving average
+    			double SMOOTHING_FACTOR = smoothingFactor.getValue();
+    			smoothYaw += SMOOTHING_FACTOR * diffYaw;
+    			smoothPitch += SMOOTHING_FACTOR * diffPitch;
+
+    			yawAndPitch[0] = smoothYaw;
+    			yawAndPitch[1] = smoothPitch;
+
+    			return yawAndPitch;
+    		} else {
+    			ChatUtils.error("Error, path is empty, contact dev!");
+    		}
+    		return yawAndPitch;
+    	}

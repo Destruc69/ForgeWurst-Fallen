@@ -74,6 +74,7 @@ public final class AutoPilot extends Hack {
 		addSetting(pathBlue);
 		addSetting(lineWidth);
 		addSetting(smoothingFactor);
+		addSetting(modeType);
 	}
 
 	private enum Mode {
@@ -131,7 +132,7 @@ public final class AutoPilot extends Hack {
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) throws IOException {
 		if (modeType.getSelected().auto) {
-			mc.player.rotationYaw = (float) getYawAndPitchForPath(mc.player.getPosition(), blockPosArrayList)[0];
+			mc.player.rotationYaw = (float) LandPathUtils.getYawAndPitchForPath(mc.player.getPosition(), blockPosArrayList, smoothingFactor.getValue())[0];
 
 			//Basic stuff for terrain
 
@@ -179,13 +180,15 @@ public final class AutoPilot extends Hack {
 				blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
 			}
 
-			for (int y = -50; y < 50; y++) {
-				if (mc.player.getPosition().add(0, y, 0).equals(new BlockPos(xTarg, yTarg, zTarg))) {
-					setEnabled(false);
-					ChatUtils.message("[AUTOPILOT] We have arrived, Disengaging.");
-				} else if (mc.player.getPosition().add(0, y, 0).equals(new BlockPos(xTargA, yTargA, zTargA)) && !(mc.player.getPosition().add(0, y, 0).equals(new BlockPos(xTarg, yTarg, zTarg)))) {
-					blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
-					ChatUtils.message("Starting next section...");
+			// Check if the last block of the first leg has been reached
+			for (int x = -2; x < 2; x ++) {
+				for (int y = -2; y < 2; y++) {
+					for (int z = -2; z < 2; z++) {
+						if (blockPosArrayList.size() > 0 && mc.player.getPosition().add(x, y, z).equals(blockPosArrayList.get(blockPosArrayList.size() - 1))) {
+							blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
+							ChatUtils.message("Starting next section...");
+						}
+					}
 				}
 			}
 		} else {
@@ -312,59 +315,5 @@ public final class AutoPilot extends Hack {
 		xTarg = x;
 		yTarg = y;
 		zTarg = z;
-	}
-
-	private double smoothYaw = 0;
-	private double smoothPitch = 0;
-
-	public double[] getYawAndPitchForPath(BlockPos playerPos, ArrayList<BlockPos> path) {
-		double[] yawAndPitch = new double[]{0, 0};
-
-		assert playerPos != null;
-		assert path != null;
-
-		if (!path.isEmpty()) {
-			// Find closest block and calculate yaw and pitch
-			int closestBlockIndex = 0;
-			double closestBlockDistance = Double.POSITIVE_INFINITY;
-			for (int i = 0; i < path.size(); i++) {
-				double distance = playerPos.distanceSq(path.get(i));
-				if (distance < closestBlockDistance) {
-					closestBlockDistance = distance;
-					closestBlockIndex = i;
-				}
-			}
-
-			BlockPos closestBlock = path.get(closestBlockIndex);
-			BlockPos nextBlock;
-			if (closestBlockIndex == path.size() - 1) {
-				nextBlock = closestBlock;
-			} else {
-				nextBlock = path.get(closestBlockIndex + 1);
-			}
-
-			double xDiff = nextBlock.getX() + 0.5 - playerPos.getX();
-			double zDiff = nextBlock.getZ() + 0.5 - playerPos.getZ();
-			double yDiff = nextBlock.getY() + 0.5 - (playerPos.getY() + 1.0);
-			double distanceXZ = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(zDiff, 2));
-			double targetYaw = Math.toDegrees(Math.atan2(zDiff, xDiff)) - 90;
-			double targetPitch = Math.toDegrees(Math.atan2(-yDiff, distanceXZ));
-
-			double diffYaw = MathHelper.wrapDegrees(targetYaw - smoothYaw);
-			double diffPitch = MathHelper.wrapDegrees(targetPitch - smoothPitch);
-
-			// Smooth the values using exponential moving average
-			double SMOOTHING_FACTOR = smoothingFactor.getValue();
-			smoothYaw += SMOOTHING_FACTOR * diffYaw;
-			smoothPitch += SMOOTHING_FACTOR * diffPitch;
-
-			yawAndPitch[0] = smoothYaw;
-			yawAndPitch[1] = smoothPitch;
-
-			return yawAndPitch;
-		} else {
-			ChatUtils.error("Error, path is empty, contact dev!");
-		}
-		return yawAndPitch;
 	}
 }

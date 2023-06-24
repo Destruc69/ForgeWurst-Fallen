@@ -123,9 +123,10 @@ public final class LongJump extends Hack {
 					setEnabled(false);
 				} else {
 					NotiUtils.render("WAIT!", "Until were hurt, we cant move.", true);
-					mc.player.setPosition(mc.player.lastTickPosX, mc.player.posY - 0.00000001, mc.player.lastTickPosZ);
+					mc.player.motionY = 9999;
 				}
 			}
+			KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
 		}
 		if (mode.getSelected().aac3) {
 			mc.player.motionY += 0.05999;

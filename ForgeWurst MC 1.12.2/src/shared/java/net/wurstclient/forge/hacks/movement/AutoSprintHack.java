@@ -7,20 +7,6 @@
  */
 package net.wurstclient.forge.hacks.movement;
 
-import net.minecraft.entity.item.EntityBoat;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.projectile.EntityTippedArrow;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
-import net.minecraft.potion.PotionUtils;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
@@ -28,8 +14,6 @@ import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.utils.KeyBindingUtils;
-
-import java.util.Collection;
 
 public final class AutoSprintHack extends Hack {
 

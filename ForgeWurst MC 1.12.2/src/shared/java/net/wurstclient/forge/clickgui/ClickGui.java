@@ -188,8 +188,8 @@ public final class ClickGui
             if (popup.getOwner().getParent().isClosing())
                 popup.close();
 
-        windows.removeIf(w -> w.isClosing());
-        popups.removeIf(p -> p.isClosing());
+        windows.removeIf(Window::isClosing);
+        popups.removeIf(Popup::isClosing);
     }
 
     private boolean handlePopupMouseClick(int mouseX, int mouseY,

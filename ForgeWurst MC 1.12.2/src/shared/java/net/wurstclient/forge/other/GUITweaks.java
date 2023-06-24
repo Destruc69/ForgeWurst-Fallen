@@ -2,7 +2,6 @@ package net.wurstclient.forge.other;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.*;
-import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -10,7 +9,6 @@ import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.other.customs.ClickGUIButtonMainMenu;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.*;
 import java.util.List;
 
 public class GUITweaks {

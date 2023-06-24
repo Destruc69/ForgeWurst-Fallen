@@ -7,22 +7,28 @@
  */
 package net.wurstclient.forge.hacks.player;
 
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.*;
+import net.minecraft.network.play.client.CPacketConfirmTeleport;
+import net.minecraft.network.play.client.CPacketConfirmTransaction;
+import net.minecraft.network.play.client.CPacketInput;
+import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.wurstclient.fmlevents.WPacketInputEvent;
 import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.settings.EnumSetting;
 
 public final class Disabler extends Hack {
 
-	private long theId;
+	private final EnumSetting<Mode> mode =
+			new EnumSetting<>("PacketAccepted", Mode.values(), Mode.YES);
 
 	public Disabler() {
 		super("Disabler", "Bypass anti cheats.");
 		setCategory(Category.PLAYER);
+		addSetting(mode);
 	}
 
 	@Override
@@ -37,7 +43,21 @@ public final class Disabler extends Hack {
 
 	@SubscribeEvent
 	public void onPacket(WPacketOutputEvent event) {
-		if (event.getPacket() instanceof CPacketConfirmTransaction || event.getPacket() instanceof CPacketCustomPayload || event.getPacket() instanceof CPacketEntityAction) {
+		if (event.getPacket() instanceof CPacketConfirmTransaction) {
+			CPacketConfirmTransaction cPacketConfirmTransaction = (CPacketConfirmTransaction) event.getPacket();
+			mc.player.connection.sendPacket(new CPacketConfirmTransaction(cPacketConfirmTransaction.getWindowId(), cPacketConfirmTransaction.getUid(), mode.getSelected().yes));
+			event.setCanceled(true);
+		}
+	}
+
+	@SubscribeEvent
+	public void onPacketIn(WPacketInputEvent event) {
+		if (event.getPacket() instanceof SPacketPlayerPosLook) {
+			SPacketPlayerPosLook sPacketPlayerPosLook = (SPacketPlayerPosLook) event.getPacket();
+			for (int x = 0; x < 2; x ++) {
+				mc.player.connection.sendPacket(new CPacketConfirmTeleport(sPacketPlayerPosLook.getTeleportId()));
+			}
+			mc.player.setPosition(sPacketPlayerPosLook.getX(), sPacketPlayerPosLook.getY(), sPacketPlayerPosLook.getZ());
 			event.setCanceled(true);
 		}
 	}
@@ -56,6 +76,25 @@ public final class Disabler extends Hack {
 			mc.player.connection.sendPacket(new CPacketInput(Integer.MAX_VALUE, Integer.MIN_VALUE, mc.player.movementInput.jump, mc.player.movementInput.sneak));
 		} else {
 			mc.player.connection.sendPacket(new CPacketInput(0, 0, mc.player.movementInput.jump, mc.player.movementInput.sneak));
+		}
+	}
+
+	private enum Mode {
+		YES("Yes", true, false),
+		NO("No", false, true);
+
+		private final String name;
+		private final boolean yes;
+		private final boolean no;
+
+		private Mode(String name, boolean yes, boolean no) {
+			this.name = name;
+			this.yes = yes;
+			this.no = no;
+		}
+
+		public String toString() {
+			return name;
 		}
 	}
 }

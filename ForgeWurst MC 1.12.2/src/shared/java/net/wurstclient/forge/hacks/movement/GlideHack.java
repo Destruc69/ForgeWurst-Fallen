@@ -7,26 +7,12 @@
  */
 package net.wurstclient.forge.hacks.movement;
 
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import net.minecraft.block.BlockLiquid;
-import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.compatibility.WPlayer;
 import net.wurstclient.forge.settings.EnumSetting;
-import net.wurstclient.forge.settings.SliderSetting;
-import net.wurstclient.forge.settings.SliderSetting.ValueDisplay;
-import net.wurstclient.forge.utils.BlockUtils;
 
 public final class GlideHack extends Hack {
 	private final EnumSetting<Mode> mode =
@@ -89,11 +75,10 @@ public final class GlideHack extends Hack {
 			if (mc.player.motionY <= -0.10) {
 				if (mc.player.ticksExisted % 2 == 0) {
 					mc.player.motionY = -0.1;
-					mc.player.jumpMovementFactor = 0.0265f;
 				} else {
 					mc.player.motionY = -0.16;
-					mc.player.jumpMovementFactor = 0.0265f;
 				}
+				mc.player.jumpMovementFactor = 0.0265f;
 			}
 		}
 	}

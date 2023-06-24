@@ -7,6 +7,8 @@
  */
 package net.wurstclient.forge.hacks.movement;
 
+import net.minecraft.client.gui.GuiGameOver;
+import net.minecraft.client.gui.GuiWinGame;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
