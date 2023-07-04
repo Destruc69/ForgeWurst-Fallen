@@ -33,7 +33,7 @@ public final class ElytraFlight extends Hack {
 			new EnumSetting<>("Mode", Mode.values(), Mode.CONTROL);
 
 	private final SliderSetting upSpeed =
-			new SliderSetting("Up=Speed", 1, 0.05, 5, 0.05, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("Up-Speed", 1, 0.05, 5, 0.05, SliderSetting.ValueDisplay.DECIMAL);
 
 	private final SliderSetting downSpeed =
 			new SliderSetting("Down-Speed", 1, 0.05, 5, 0.05, SliderSetting.ValueDisplay.DECIMAL);

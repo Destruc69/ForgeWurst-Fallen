@@ -7,8 +7,6 @@
  */
 package net.wurstclient.forge.hacks.render;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.init.SoundEvents;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -34,8 +32,6 @@ public final class WallESP extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(RenderWorldLastEvent event) {
-		for (Entity entity : mc.world.loadedEntityList) {
-			mc.getRenderManager().setRenderOutlines(true);
-		}
+		mc.getRenderManager().setRenderOutlines(true);
 	}
 }

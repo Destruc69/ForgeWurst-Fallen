@@ -34,7 +34,17 @@ public final class Phase extends Hack {
 	}
 
 	@SubscribeEvent
-	public void onUpdate(WUpdateEvent event) {
+	public void onPlayerMove(WPlayerMoveEvent event) {
 		event.getPlayer().noClip = true;
+	}
+
+	@SubscribeEvent
+	public void onIsNormalCube(WIsNormalCubeEvent event) {
+		event.setCanceled(true);
+	}
+
+	@SubscribeEvent
+	public void onSetOpaqueCube(WSetOpaqueCubeEvent event) {
+		event.setCanceled(true);
 	}
 }

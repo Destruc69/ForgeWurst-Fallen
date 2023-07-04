@@ -1,6 +1,7 @@
 package net.wurstclient.forge.hacks.world;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
@@ -17,8 +18,14 @@ import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.CheckboxSetting;
+import net.wurstclient.forge.settings.EnumSetting;
+import net.wurstclient.forge.utils.KeyBindingUtils;
+import net.wurstclient.forge.utils.RotationUtils;
 
 public final class Scaffold extends Hack {
+
+	private final EnumSetting<Mode> mode =
+			new EnumSetting<>("Mode", Mode.values(), Mode.LEGIT);
 
 	private final CheckboxSetting jump =
 			new CheckboxSetting("Jump", "Scaffold while jumping.",
@@ -29,10 +36,12 @@ public final class Scaffold extends Hack {
 					false);
 
 	private double jumpY;
+	private float startYaw;
 
 	public Scaffold() {
 		super("Scaffold", "Place blocks underneath you automatically.");
 		setCategory(Category.WORLD);
+		addSetting(mode);
 		addSetting(jump);
 		addSetting(packets);
 	}
@@ -42,6 +51,7 @@ public final class Scaffold extends Hack {
 		MinecraftForge.EVENT_BUS.register(this);
 		try {
 			jumpY = mc.player.lastTickPosY;
+			startYaw = mc.player.rotationYaw;
 		} catch (Exception ignored) {
 		}
 	}
@@ -49,47 +59,90 @@ public final class Scaffold extends Hack {
 	@Override
 	protected void onDisable() {
 		MinecraftForge.EVENT_BUS.unregister(this);
+
+		if (mode.getSelected().legit) {
+			KeyBindingUtils.setPressed(mc.gameSettings.keyBindUseItem, false);
+			KeyBindingUtils.setPressed(mc.gameSettings.keyBindSneak, false);
+			KeyBindingUtils.setPressed(mc.gameSettings.keyBindBack, false);
+			KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, false);
+			KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, false);
+		}
 	}
+
+	private Vec3d vec3d;
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		Minecraft mc = Minecraft.getMinecraft();
-		BlockPos playerBlock = new BlockPos(mc.player.posX, mc.player.getEntityBoundingBox().minY, mc.player.posZ);
+		if (mode.getSelected().normal) {
+			Minecraft mc = Minecraft.getMinecraft();
+			BlockPos playerBlock = new BlockPos(mc.player.posX, mc.player.getEntityBoundingBox().minY, mc.player.posZ);
 
-		if (jump.isChecked()) {
-			playerBlock = new BlockPos(playerBlock.getX(), jumpY, playerBlock.getZ());
-		}
-		if (mc.world.isAirBlock(playerBlock.add(0, -1, 0))) {
-			if (isValidBlock(playerBlock.add(0, -2, 0))) {
-				place(playerBlock.add(0, -1, 0), EnumFacing.UP);
-			} else if (isValidBlock(playerBlock.add(-1, -1, 0))) {
-				place(playerBlock.add(0, -1, 0), EnumFacing.EAST);
-			} else if (isValidBlock(playerBlock.add(1, -1, 0))) {
-				place(playerBlock.add(0, -1, 0), EnumFacing.WEST);
-			} else if (isValidBlock(playerBlock.add(0, -1, -1))) {
-				place(playerBlock.add(0, -1, 0), EnumFacing.SOUTH);
-			} else if (isValidBlock(playerBlock.add(0, -1, 1))) {
-				place(playerBlock.add(0, -1, 0), EnumFacing.NORTH);
-			} else if (isValidBlock(playerBlock.add(1, -1, 1))) {
-				if (isValidBlock(playerBlock.add(0, -1, 1))) {
-					place(playerBlock.add(0, -1, 1), EnumFacing.NORTH);
+			if (jump.isChecked()) {
+				playerBlock = new BlockPos(playerBlock.getX(), jumpY, playerBlock.getZ());
+			}
+			if (mc.world.isAirBlock(playerBlock.add(0, -1, 0))) {
+				if (isValidBlock(playerBlock.add(0, -2, 0))) {
+					place(playerBlock.add(0, -1, 0), EnumFacing.UP);
+				} else if (isValidBlock(playerBlock.add(-1, -1, 0))) {
+					place(playerBlock.add(0, -1, 0), EnumFacing.EAST);
+				} else if (isValidBlock(playerBlock.add(1, -1, 0))) {
+					place(playerBlock.add(0, -1, 0), EnumFacing.WEST);
+				} else if (isValidBlock(playerBlock.add(0, -1, -1))) {
+					place(playerBlock.add(0, -1, 0), EnumFacing.SOUTH);
+				} else if (isValidBlock(playerBlock.add(0, -1, 1))) {
+					place(playerBlock.add(0, -1, 0), EnumFacing.NORTH);
+				} else if (isValidBlock(playerBlock.add(1, -1, 1))) {
+					if (isValidBlock(playerBlock.add(0, -1, 1))) {
+						place(playerBlock.add(0, -1, 1), EnumFacing.NORTH);
+					}
+					place(playerBlock.add(1, -1, 1), EnumFacing.EAST);
+				} else if (isValidBlock(playerBlock.add(-1, -1, 1))) {
+					if (isValidBlock(playerBlock.add(-1, -1, 0))) {
+						place(playerBlock.add(0, -1, 1), EnumFacing.WEST);
+					}
+					place(playerBlock.add(-1, -1, 1), EnumFacing.SOUTH);
+				} else if (isValidBlock(playerBlock.add(-1, -1, -1))) {
+					if (isValidBlock(playerBlock.add(0, -1, -1))) {
+						place(playerBlock.add(0, -1, -1), EnumFacing.SOUTH);
+					}
+					place(playerBlock.add(-1, -1, -1), EnumFacing.WEST);
+				} else if (isValidBlock(playerBlock.add(1, -1, -1))) {
+					if (isValidBlock(playerBlock.add(1, -1, 0))) {
+						place(playerBlock.add(1, -1, 0), EnumFacing.EAST);
+					}
+					place(playerBlock.add(1, -1, -1), EnumFacing.NORTH);
 				}
-				place(playerBlock.add(1, -1, 1), EnumFacing.EAST);
-			} else if (isValidBlock(playerBlock.add(-1, -1, 1))) {
-				if (isValidBlock(playerBlock.add(-1, -1, 0))) {
-					place(playerBlock.add(0, -1, 1), EnumFacing.WEST);
+			}
+		} else if (mode.getSelected().legit) {
+			if (!mc.gameSettings.keyBindJump.isKeyDown()) {mc.player.rotationYaw = startYaw - 180;
+				mc.player.rotationPitch = 82;
+
+				if (mc.world.getBlockState(new BlockPos(mc.player.lastTickPosX, mc.player.lastTickPosY - 1, mc.player.lastTickPosZ)).getBlock().equals(Blocks.AIR)) {
+					KeyBindingUtils.setPressed(mc.gameSettings.keyBindUseItem, true);
+					KeyBindingUtils.setPressed(mc.gameSettings.keyBindSneak, true);
+					KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, false);
+
+					mc.player.rotationYaw = startYaw - 180;
+				} else {
+					KeyBindingUtils.setPressed(mc.gameSettings.keyBindUseItem, false);
+					KeyBindingUtils.setPressed(mc.gameSettings.keyBindSneak, false);
+					KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
+					mc.player.rotationYaw = startYaw;
 				}
-				place(playerBlock.add(-1, -1, 1), EnumFacing.SOUTH);
-			} else if (isValidBlock(playerBlock.add(-1, -1, -1))) {
-				if (isValidBlock(playerBlock.add(0, -1, -1))) {
-					place(playerBlock.add(0, -1, -1), EnumFacing.SOUTH);
+
+				vec3d = new Vec3d(Math.round(mc.player.lastTickPosX), mc.player.lastTickPosY, Math.round(mc.player.lastTickPosZ));
+			} else {
+				mc.player.rotationPitch = 90;
+				float[] rot = RotationUtils.getNeededRotations(new Vec3d(Math.round(vec3d.x), mc.player.lastTickPosY - 1, Math.round(vec3d.z)).addVector(0.5, 0, 0.5));
+				mc.player.rotationYaw = rot[0];
+				if (mc.player.onGround) {
+					KeyBindingUtils.setPressed(mc.gameSettings.keyBindUseItem, false);
+					KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, true);
+				} else {
+					KeyBindingUtils.setPressed(mc.gameSettings.keyBindUseItem, true);
+					KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, false);
 				}
-				place(playerBlock.add(-1, -1, -1), EnumFacing.WEST);
-			} else if (isValidBlock(playerBlock.add(1, -1, -1))) {
-				if (isValidBlock(playerBlock.add(1, -1, 0))) {
-					place(playerBlock.add(1, -1, 0), EnumFacing.EAST);
-				}
-				place(playerBlock.add(1, -1, -1), EnumFacing.NORTH);
+				KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
 			}
 		}
 	}
@@ -155,6 +208,25 @@ public final class Scaffold extends Hack {
 			if (packets.isChecked()) {
 				mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(pos, face, EnumHand.MAIN_HAND, (float) var4, (float) var6, (float) var8));
 			}
+		}
+	}
+
+	private enum Mode {
+		NORMAL("Normal", true, false),
+		LEGIT("Legit", false, true);
+
+		private final String name;
+		private final boolean normal;
+		private final boolean legit;
+
+		private Mode(String name, boolean normal, boolean legit) {
+			this.name = name;
+			this.normal = normal;
+			this.legit = legit;
+		}
+
+		public String toString() {
+			return name;
 		}
 	}
 }

@@ -1,16 +1,19 @@
 package net.wurstclient.forge.hacks.movement;
 
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.network.play.client.CPacketConfirmTeleport;
 import net.minecraft.network.play.client.CPacketInput;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketSpectate;
+import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.wurstclient.fmlevents.WUpdateEvent;
+import net.wurstclient.fmlevents.*;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.EnumSetting;
@@ -55,12 +58,21 @@ public final class Flight extends Hack
 		}
 	}
 
-	private final SliderSetting speed =
-			new SliderSetting("Speed", 1, 0.05, 5, 0.05, ValueDisplay.DECIMAL);
+	private final SliderSetting upSpeed =
+			new SliderSetting("Up-Speed", 1, 0.05, 5, 0.05, ValueDisplay.DECIMAL);
+
+	private final SliderSetting baseSpeed =
+			new SliderSetting("Base-Speed", 1, 0.05, 5, 0.05, ValueDisplay.DECIMAL);
+
+	private final SliderSetting downSpeed =
+			new SliderSetting("Down-Speed", 1, 0.05, 5, 0.05, ValueDisplay.DECIMAL);
 
 	private final EnumSetting<Mode> mode =
 			new EnumSetting<>("Mode", Mode.values(), Mode.HYPIXEL);
 
+	private final SliderSetting ncpStength =
+			new SliderSetting("NCP-Strength", "Strength = How many times we send a packet at once \n" +
+					"To high may kick you or in result may actually perform worse.", 1, 1, 20, 1, ValueDisplay.DECIMAL);
 
 	public Flight()
 	{
@@ -68,7 +80,10 @@ public final class Flight extends Hack
 				"Allows you to fly.");
 		setCategory(Category.MOVEMENT);
 		addSetting(mode);
-		addSetting(speed);
+		addSetting(upSpeed);
+		addSetting(baseSpeed);
+		addSetting(downSpeed);
+		addSetting(ncpStength);
 	}
 
 	@Override
@@ -93,12 +108,12 @@ public final class Flight extends Hack
 			player.motionX = 0;
 			player.motionY = 0;
 			player.motionZ = 0;
-			player.jumpMovementFactor = speed.getValueF();
+			player.jumpMovementFactor = baseSpeed.getValueF();
 
-			if(mc.gameSettings.keyBindJump.isKeyDown())
-				player.motionY += speed.getValue();
-			if(mc.gameSettings.keyBindSneak.isKeyDown())
-				player.motionY -= speed.getValue();
+			if (mc.gameSettings.keyBindJump.isKeyDown())
+				player.motionY = +upSpeed.getValue();
+			if (mc.gameSettings.keyBindSneak.isKeyDown())
+				player.motionY = -downSpeed.getValue();
 		} else if (mode.getSelected().hypixel) {
 			mc.player.motionY = 0.0D;
 			mc.player.onGround = true;
@@ -182,15 +197,58 @@ public final class Flight extends Hack
 					mc.player.motionY = 0.8D;
 				}
 			}
-		 } else if (mode.getSelected().ncp) {
-			if (mc.player.ticksExisted % 2 == 0) {
-				mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + 0.28, mc.player.posZ, true));
-			} else {
-				mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY - 0.28, mc.player.posZ, false));
+		} else if (mode.getSelected().ncp) {
+			if (mc.player.ticksExisted > 20) {
+				if (!mc.player.onGround) {
+					if (mc.gameSettings.keyBindJump.isKeyDown()) {
+						mc.player.setVelocity(0, +upSpeed.getValueF(), 0);
+					} else if (mc.gameSettings.keyBindSneak.isKeyDown()) {
+						mc.player.setVelocity(0, -downSpeed.getValueF(), 0);
+					} else {
+						mc.player.motionY = 0;
+					}
+
+					if (!mc.gameSettings.keyBindForward.isKeyDown() && !mc.gameSettings.keyBindRight.isKeyDown() && !mc.gameSettings.keyBindBack.isKeyDown() && !mc.gameSettings.keyBindLeft.isKeyDown() && !mc.gameSettings.keyBindJump.isKeyDown() && !mc.gameSettings.keyBindSneak.isKeyDown()) {
+						mc.player.setVelocity(0, 0, 0);
+					}
+
+					if (mc.player.ticksExisted % 2 == 0) {
+						mc.player.fallDistance = 50000 + Math.round(Math.random() * 50000);
+					} else {
+						mc.player.fallDistance = 50000 - Math.round(Math.random() * 50000);
+					}
+
+					for (int a = 0; a < ncpStength.getValueI(); a++) {
+						mc.player.connection.sendPacket(new CPacketPlayer.PositionRotation(mc.player.posX + mc.player.motionX, mc.player.posY + mc.player.motionY, mc.player.posZ + mc.player.motionZ, mc.player.rotationYaw, mc.player.rotationPitch, false));
+						if (mc.player.ticksExisted % 2 == 0) {
+							mc.player.connection.sendPacket(new CPacketPlayer.PositionRotation(mc.player.posX + mc.player.motionX, mc.player.posY + mc.player.motionY + 50000 + Math.round(Math.random() * 50000), mc.player.posZ + mc.player.motionZ, mc.player.rotationYaw, mc.player.rotationPitch, false));
+						} else {
+							mc.player.connection.sendPacket(new CPacketPlayer.PositionRotation(mc.player.posX + mc.player.motionX, mc.player.posY + mc.player.motionY - 50000 - Math.round(Math.random() * 50000), mc.player.posZ + mc.player.motionZ, mc.player.rotationYaw, mc.player.rotationPitch, false));
+						}
+					}
+				} else {
+					mc.player.jump();
+				}
 			}
-			mc.player.connection.sendPacket(new CPacketSpectate(mc.player.getUniqueID()));
-			mc.player.connection.sendPacket(new CPacketInput(0, 0, true, true));
-			mc.player.motionY = 0;
+		}
+	}
+
+	@SubscribeEvent
+	public void onPackets(WPacketInputEvent event) {
+		if (mc.player.ticksExisted > 20) {
+			if (!mc.player.onGround) {
+				if (mode.getSelected().ncp) {
+					if (event.getPacket() instanceof SPacketPlayerPosLook) {
+						SPacketPlayerPosLook sPacketPlayerPosLook = (SPacketPlayerPosLook) event.getPacket();
+						for (int x = 0; x < ncpStength.getValueI(); x++) {
+							mc.player.connection.sendPacket(new CPacketConfirmTeleport(sPacketPlayerPosLook.getTeleportId()));
+							mc.player.connection.sendPacket(new CPacketPlayer.PositionRotation(sPacketPlayerPosLook.getX(), sPacketPlayerPosLook.getY(), sPacketPlayerPosLook.getZ(), sPacketPlayerPosLook.getYaw(), sPacketPlayerPosLook.getPitch(), false));
+						}
+						mc.player.setPosition(sPacketPlayerPosLook.getX(), sPacketPlayerPosLook.getY(), sPacketPlayerPosLook.getZ());
+						event.setCanceled(true);
+					}
+				}
+			}
 		}
 	}
 }

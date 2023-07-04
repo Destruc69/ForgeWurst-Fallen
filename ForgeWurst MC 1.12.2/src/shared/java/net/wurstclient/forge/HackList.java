@@ -96,6 +96,7 @@ public final class HackList extends WHackList
 	public final FastPlace fastPlace = register(new FastPlace());
 	public final Tunneler tunneler = register(new Tunneler());
 	public final Freeze freeze = register(new Freeze());
+	public final HighJump highJump = register(new HighJump());
 	public final AutoLeave autoLeave = register(new AutoLeave());
 	public final PacketCanceler packetCanceler = register(new PacketCanceler());
 	public final PacketSender packetSender = register(new PacketSender());

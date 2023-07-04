@@ -82,17 +82,7 @@ public final class KeybindList
 	public void loadDefaults()
 	{
 		keybinds.clear();
-		keybinds.add(new Keybind("B", "fastplace;fastbreak"));
-		keybinds.add(new Keybind("C", "fullbright"));
-		keybinds.add(new Keybind("G", "flight"));
-		keybinds.add(new Keybind("J", "jesus"));
-		keybinds.add(new Keybind("LCONTROL", "clickgui"));
-		keybinds.add(new Keybind("N", "nuker"));
-		keybinds.add(new Keybind("R", "killaura"));
-		keybinds.add(new Keybind("RSHIFT", "clickgui"));
-		keybinds.add(new Keybind("U", "freecam"));
-		keybinds.add(new Keybind("X", "x-ray"));
-		keybinds.add(new Keybind("Z", "sneak"));
+		keybinds.add(new Keybind("P", "clickgui"));
 		save();
 	}
 	

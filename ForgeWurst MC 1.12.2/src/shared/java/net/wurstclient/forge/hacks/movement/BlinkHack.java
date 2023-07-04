@@ -8,6 +8,7 @@
 package net.wurstclient.forge.hacks.movement;
 
 import java.util.ArrayDeque;
+import java.util.Objects;
 
 import net.minecraft.init.SoundEvents;
 import net.minecraft.network.play.client.CPacketPlayer;
@@ -65,7 +66,7 @@ public final class BlinkHack extends Hack
 		MinecraftForge.EVENT_BUS.unregister(this);
 		
 		fakePlayer.despawn();
-		packets.forEach(p -> mc.getConnection().sendPacket(p));
+		packets.forEach(p -> Objects.requireNonNull(mc.getConnection()).sendPacket(p));
 		packets.clear();
 	}
 	
