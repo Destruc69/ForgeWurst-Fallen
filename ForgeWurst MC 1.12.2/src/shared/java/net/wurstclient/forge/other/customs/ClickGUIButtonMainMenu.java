@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.clickgui.ClickGuiScreen;
+import org.lwjgl.opengl.GL11;
 
 public class ClickGUIButtonMainMenu extends GuiButton  {
 

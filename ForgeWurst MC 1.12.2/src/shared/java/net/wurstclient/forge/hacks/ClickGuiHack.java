@@ -101,6 +101,11 @@ public final class ClickGuiHack extends Hack
             "How fast are the particles?", 1, 0.05, 3, 0.001,
             ValueDisplay.DECIMAL);
 
+    public static final CheckboxSetting blockArrayList =
+            new CheckboxSetting("BlockArrayList",
+                    "A more classy and blocky array list.",
+                    false);
+
     public ClickGuiHack()
     {
         super("ClickGUI", "");
@@ -125,6 +130,7 @@ public final class ClickGuiHack extends Hack
         addSetting(maxParticles);
         addSetting(particleSpawnRate);
         addSetting(particleSpeed);
+        addSetting(blockArrayList);
 
         MinecraftForge.EVENT_BUS.register(new InventoryButtonAdder());
     }

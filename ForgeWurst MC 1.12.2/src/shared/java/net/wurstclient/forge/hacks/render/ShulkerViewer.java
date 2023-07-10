@@ -181,8 +181,7 @@ public final class ShulkerViewer extends Hack {
 			if (itemStack.getItem() instanceof ItemShulkerBox && Mouse.getEventButton() == 1) {
 				Peekcode(itemStack, mc);
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception ignored) {
 		}
 	}
 

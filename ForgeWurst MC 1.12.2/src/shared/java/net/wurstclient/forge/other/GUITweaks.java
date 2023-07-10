@@ -1,16 +1,17 @@
 package net.wurstclient.forge.other;
 
-import javafx.scene.paint.Color;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.*;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiMainMenu;
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.other.customs.ClickGUIButtonMainMenu;
 import net.wurstclient.forge.other.customs.UnlimitedTextField;
-import org.lwjgl.opengl.GL11;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -22,8 +23,6 @@ public class GUITweaks {
     public void onGUI(GuiScreenEvent.DrawScreenEvent.Post event) {
         if (event.getGui() instanceof GuiMainMenu) {
             Minecraft mc = Minecraft.getMinecraft();
-
-            GL11.glColor4f(1, 1, 1, 1);
 
             // Draw Wurst logo at top left
             ResourceLocation resourceLocation1 = new ResourceLocation(ForgeWurst.MODID, "wurst-logo.png");
@@ -108,6 +107,14 @@ public class GUITweaks {
         Calendar calendar = Calendar.getInstance();
         int month = calendar.get(Calendar.MONTH) + 1; // Month is zero-based, so adding 1
         int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
+        int screenWidth = scaledResolution.getScaledWidth();
+        int screenHeight = scaledResolution.getScaledHeight();
+        int bottomHalfY = screenHeight / 2 + screenHeight / 4;
+
+        int x = screenWidth / 2 - (500 / 2);
+        int y = bottomHalfY - (25 / 2);
 
         if (month == 12 && day == 15) {
             return "Today, we celebrate Terry Davis's birth!.";

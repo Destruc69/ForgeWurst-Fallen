@@ -17,11 +17,18 @@ import net.wurstclient.fmlevents.WPacketInputEvent;
 import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.hacks.movement.AutoSprintHack;
+import net.wurstclient.forge.settings.EnumSetting;
 
 public final class Criticals extends Hack {
+
+	private static final EnumSetting<Mode> mode =
+			new EnumSetting<>("Mode", Mode.values(), Mode.BYPASS);
+
 	public Criticals() {
 		super("Criticals", "Get critical hits.");
 		setCategory(Category.COMBAT);
+		addSetting(mode);
 	}
 
 	@Override
@@ -39,46 +46,50 @@ public final class Criticals extends Hack {
 		mc.player.onCriticalHit(event.getTarget());
 	}
 
-	@SubscribeEvent
-	public void onPacket(WPacketInputEvent event) {
-		try {
-			if (event.getPacket() instanceof CPacketUseEntity) {
-				CPacketUseEntity cPacketUseEntity = (CPacketUseEntity) event.getPacket();
+	private enum Mode {
+		BYPASS("Bypass", true, false),
+		BASIC("Basic", false, true);
 
-				if (cPacketUseEntity.getAction().equals(CPacketUseEntity.Action.ATTACK)) {
-					if (cPacketUseEntity.getEntityFromWorld(mc.world) instanceof EntityLivingBase && mc.player.onGround && !mc.gameSettings.keyBindJump.isKeyDown()) {
-						doCrits();
-					}
-				}
-			}
-		} catch (Exception e) {
+		private final String name;
+		private final boolean basic;
+		private final boolean bypass;
+
+		private Mode(String name, boolean basic, boolean bypass) {
+			this.name = name;
+			this.basic = basic;
+			this.bypass = bypass;
+		}
+
+		public String toString() {
+			return name;
 		}
 	}
 
 	@SubscribeEvent
 	public void onPacketOut(WPacketOutputEvent event) {
-		try {
-			if (event.getPacket() instanceof CPacketUseEntity) {
-				CPacketUseEntity cPacketUseEntity = (CPacketUseEntity) event.getPacket();
+		if (event.getPacket() instanceof CPacketUseEntity) {
+			CPacketUseEntity cPacketUseEntity = (CPacketUseEntity) event.getPacket();
 
-				if (cPacketUseEntity.getAction().equals(CPacketUseEntity.Action.ATTACK)) {
-					if (cPacketUseEntity.getEntityFromWorld(mc.world) instanceof EntityLivingBase && mc.player.onGround && !mc.gameSettings.keyBindJump.isKeyDown()) {
-						doCrits();
-					}
+			if (cPacketUseEntity.getAction().equals(CPacketUseEntity.Action.ATTACK)) {
+				if (cPacketUseEntity.getEntityFromWorld(mc.world) instanceof EntityLivingBase && mc.player.onGround && !mc.gameSettings.keyBindJump.isKeyDown()) {
+					doCrits();
 				}
 			}
-		} catch (Exception e) {
+
 		}
 	}
 
 	public static void doCrits() {
-		//0.0625 , 17.64e-8
 		double off = 0.0626;
 		double x = mc.player.posX;
 		double y = mc.player.posY;
 		double z = mc.player.posZ;
-		mc.player.connection.sendPacket(new CPacketPlayer.Position(x, y + off, z, false));
-		mc.player.connection.sendPacket(new CPacketPlayer.Position(x, y + off + 0.00000000001, z, false));
-		mc.player.connection.sendPacket(new CPacketPlayer.Position(x, y, z, false));
+		if (mode.getSelected().bypass) {
+			mc.player.connection.sendPacket(new CPacketPlayer.Position(x, y + off, z, false));
+			mc.player.connection.sendPacket(new CPacketPlayer.Position(x, y + off + 0.00000000001, z, false));
+			mc.player.connection.sendPacket(new CPacketPlayer.Position(x, y, z, false));
+		} else if (mode.getSelected().basic) {
+			mc.player.connection.sendPacket(new CPacketPlayer(false));
+		}
 	}
 }

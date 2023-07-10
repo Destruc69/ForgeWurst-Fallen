@@ -53,7 +53,7 @@ public final class MathUtils {
 	}
 
 	public static int clamp(int num, int min, int max) {
-		return num < min ? min : num > max ? max : num;
+		return num < min ? min : Math.min(num, max);
 	}
 
 	public static float clamp(float num, float min, float max) {
@@ -136,63 +136,28 @@ public final class MathUtils {
 		return new double[0];
 	}
 
-	public static double getFacingX() {
-		final Minecraft mc = Minecraft.getMinecraft();
-		float forward = mc.player.movementInput.moveForward;
-		float side = mc.player.movementInput.moveStrafe;
-		float yaw = mc.player.prevRotationYaw
-				+ (mc.player.rotationYaw - mc.player.prevRotationYaw) * mc.getRenderPartialTicks();
-
-		if (forward != 0) {
-			if (side > 0) {
-				yaw += (forward > 0 ? -45 : 45);
-			} else if (side < 0) {
-				yaw += (forward > 0 ? 45 : -45);
-			}
-			side = 0;
-
-			// forward = clamp(forward, 0, 1);
-			if (forward > 0) {
-				forward = 1;
-			} else if (forward < 0) {
-				forward = -1;
-			}
+	public static void setSpeed(final double speed) {
+		if (Minecraft.getMinecraft().gameSettings.keyBindForward.isKeyDown() ||
+		Minecraft.getMinecraft().gameSettings.keyBindRight.isKeyDown() ||
+		Minecraft.getMinecraft().gameSettings.keyBindBack.isKeyDown() ||
+		Minecraft.getMinecraft().gameSettings.keyBindLeft.isKeyDown()) {
+			Minecraft.getMinecraft().player.motionX = -MathHelper.sin(getDirection()) * speed;
+			Minecraft.getMinecraft().player.motionZ = MathHelper.cos(getDirection()) * speed;
 		}
-
-		final double sin = Math.sin(Math.toRadians(yaw + 90));
-		final double cos = Math.cos(Math.toRadians(yaw + 90));
-		final double posX = (forward * cos + side * sin);
-		final double posZ = (forward * sin - side * cos);
-		return posX;
-	}
-	public static double getFacingZ() {
-		final Minecraft mc = Minecraft.getMinecraft();
-		float forward = mc.player.movementInput.moveForward;
-		float side = mc.player.movementInput.moveStrafe;
-		float yaw = mc.player.prevRotationYaw
-				+ (mc.player.rotationYaw - mc.player.prevRotationYaw) * mc.getRenderPartialTicks();
-
-		if (forward != 0) {
-			if (side > 0) {
-				yaw += (forward > 0 ? -45 : 45);
-			} else if (side < 0) {
-				yaw += (forward > 0 ? 45 : -45);
-			}
-			side = 0;
-
-			// forward = clamp(forward, 0, 1);
-			if (forward > 0) {
-				forward = 1;
-			} else if (forward < 0) {
-				forward = -1;
-			}
-		}
-
-		final double sin = Math.sin(Math.toRadians(yaw + 90));
-		final double cos = Math.cos(Math.toRadians(yaw + 90));
-		final double posX = (forward * cos + side * sin);
-		final double posZ = (forward * sin - side * cos);
-		return posZ;
 	}
 
+	public static float getDirection() {
+		float yaw = Minecraft.getMinecraft().player.rotationYaw;
+		final float forward = Minecraft.getMinecraft().player.moveForward;
+		final float strafe = Minecraft.getMinecraft().player.moveStrafing;
+		yaw += ((forward < 0.0f) ? 180 : 0);
+		int i = (forward < 0.0f) ? -45 : ((forward == 0.0f) ? 90 : 45);
+		if (strafe < 0.0f) {
+			yaw += i;
+		}
+		if (strafe > 0.0f) {
+			yaw -= i;
+		}
+		return yaw * 0.017453292f;
+	}
 }

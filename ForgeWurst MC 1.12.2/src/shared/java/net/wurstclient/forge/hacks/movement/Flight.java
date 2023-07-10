@@ -1,6 +1,7 @@
 package net.wurstclient.forge.hacks.movement;
 
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.init.Blocks;
 import net.minecraft.network.play.client.CPacketConfirmTeleport;
 import net.minecraft.network.play.client.CPacketInput;
 import net.minecraft.network.play.client.CPacketPlayer;
@@ -28,12 +29,13 @@ public final class Flight extends Hack
 	private boolean canFly;
 
 	private enum Mode {
-		AAC("AAC", true, false, false, false, false, false),
-		CUBECRAFT("CubeCraft", false, true, false, false, false, false),
-		HYPIXEL("Hypixel", false, false, true, false, false, false),
-		MINEPLEX("Mineplex", false, false, false, true, false, false),
-		VANILLA("Vanilla", false, false, false, false, true, false),
-		NCP("NCP", false, false, false, false, false, true);
+		AAC("AAC", true, false, false, false, false, false, false),
+		CUBECRAFT("CubeCraft", false, true, false, false, false, false, false),
+		HYPIXEL("Hypixel", false, false, true, false, false, false, false),
+		MINEPLEX("Mineplex", false, false, false, true, false, false, false),
+		VANILLA("Vanilla", false, false, false, false, true, false, false),
+		NCP("NCP", false, false, false, false, false, true, false),
+		BLOCKSPOOF("BlockSpoof", false, false, false, false, false, false, true);
 
 		private final String name;
 		private final boolean aac;
@@ -42,8 +44,9 @@ public final class Flight extends Hack
 		private final boolean mineplex;
 		private final boolean vanilla;
 		private final boolean ncp;
+		private final boolean blockspoof;
 
-		private Mode(String name, boolean aac, boolean cubecraft, boolean hypixel, boolean mineplex, boolean vanilla, boolean ncp) {
+		private Mode(String name, boolean aac, boolean cubecraft, boolean hypixel, boolean mineplex, boolean vanilla, boolean ncp, boolean blockspoof) {
 			this.name = name;
 			this.aac = aac;
 			this.cubecraft = cubecraft;
@@ -51,6 +54,7 @@ public final class Flight extends Hack
 			this.mineplex = mineplex;
 			this.vanilla = vanilla;
 			this.ncp = ncp;
+			this.blockspoof = blockspoof;
 		}
 
 		public String toString() {
@@ -229,6 +233,14 @@ public final class Flight extends Hack
 				} else {
 					mc.player.jump();
 				}
+			}
+		} else if (mode.getSelected().blockspoof) {
+			BlockPos blockPos = new BlockPos(mc.player.lastTickPosX, mc.player.lastTickPosY - 1, mc.player.lastTickPosZ);
+			if (!mc.gameSettings.keyBindSneak.isKeyDown()) {
+				mc.world.setBlockState(blockPos, Blocks.DIRT.getDefaultState(), 1);
+				mc.world.setBlockState(blockPos, Blocks.DIRT.getDefaultState(), 2);
+			} else if (mc.gameSettings.keyBindSneak.isKeyDown()) {
+				mc.world.setBlockToAir(blockPos);
 			}
 		}
 	}

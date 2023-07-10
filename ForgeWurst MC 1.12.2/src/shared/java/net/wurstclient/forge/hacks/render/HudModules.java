@@ -1,29 +1,30 @@
 package net.wurstclient.forge.hacks.render;
 
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.forge.Category;
+import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.IngameHUD;
-import net.wurstclient.forge.compatibility.WMinecraft;
+import net.wurstclient.forge.hacks.ClickGuiHack;
+import net.wurstclient.forge.other.customs.UnlimitedTextField;
 import net.wurstclient.forge.settings.CheckboxSetting;
+import net.wurstclient.forge.settings.SliderSetting;
+import net.wurstclient.forge.utils.GUIUtils;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
+
+import java.awt.*;
 
 public class HudModules extends Hack {
+
+    private int cx;
+    private int cy;
 
     public final CheckboxSetting coords =
             new CheckboxSetting("Coords", "Shows your current position",
                     false);
-    public static double coordX;
-    public static double coordY;
 
-    public final CheckboxSetting speed =
-            new CheckboxSetting("Speed", "Shows your current motion speed",
-                    false);
-    public static double speedX;
-    public static double speedY;
     private final CheckboxSetting hide =
             new CheckboxSetting("Hide", "Wont show this module in enabled hacks",
                     false);
@@ -32,13 +33,20 @@ public class HudModules extends Hack {
         super("HudModules", "Use arrow keys and select move hud elements");
         setCategory(Category.RENDER);
         addSetting(coords);
-        addSetting(speed);
         addSetting(hide);
     }
+
+    private final SliderSetting yCoord =
+            new SliderSetting("X-Coord", "Use arrow keys, this setting is used to save positions.", 40, -9999, 9999, 1, SliderSetting.ValueDisplay.DECIMAL);
+
+    private final SliderSetting xCoord =
+            new SliderSetting("Y-Coord", "Use arrow keys, this setting is used to save positions.", 40, -9999, 9999, 1, SliderSetting.ValueDisplay.DECIMAL);
 
     @Override
     protected void onEnable() {
         MinecraftForge.EVENT_BUS.register(this);
+        cx = xCoord.getValueI();
+        cy = yCoord.getValueI();
     }
 
     @Override
@@ -55,48 +63,24 @@ public class HudModules extends Hack {
         }
     }
 
-
     @SubscribeEvent
     public void onRenderGUI(RenderGameOverlayEvent.Post event) {
-        if (coords.isChecked()) {
-            if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
-                if (mc.player.ticksExisted % 2 == 0) {
-                    coordY = coordY - 0.25;
-                }
-            } else if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
-                if (mc.player.ticksExisted % 2 == 0) {
-                    coordY = coordY + 0.25;
-                }
-            }
-            if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
-                if (mc.player.ticksExisted % 2 == 0) {
-                    coordX = coordX + 0.25;
-                }
-            } else if (Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
-                if (mc.player.ticksExisted % 2 == 0) {
-                    coordX = coordX - 0.25;
-                }
-            }
+        if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
+            cy = (int) (cy + 0.3);
+        } else if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
+            cy = (int) (cy - 0.3);
         }
-        if (speed.isChecked()) {
-            if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
-                if (mc.player.ticksExisted % 2 == 0) {
-                    speedY = speedY - 0.25;
-                }
-            } else if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
-                if (mc.player.ticksExisted % 2 == 0) {
-                    speedY = speedY + 0.25;
-                }
-            }
-            if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
-                if (mc.player.ticksExisted % 2 == 0) {
-                    speedX = speedX + 0.25;
-                }
-            } else if (Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
-                if (mc.player.ticksExisted % 2 == 0) {
-                    speedX = speedX - 0.25;
-                }
-            }
+        if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
+            cx = (int) (cx + 0.3);
+        } else if (Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
+            cx = (int) (cx - 0.3);
+        }
+
+        xCoord.setValue(cx);
+        yCoord.setValue(cy);
+
+        if (coords.isChecked()) {
+            GUIUtils.renderTextBoxForLabel(Math.round(mc.player.lastTickPosX) + " " + Math.round(mc.player.lastTickPosY) + " " + Math.round(mc.player.lastTickPosZ), cx, cy, 150, 25, Color.WHITE.getRGB());
         }
     }
 }
