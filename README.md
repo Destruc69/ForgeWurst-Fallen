@@ -26,4 +26,7 @@ For any questions, issues, or general inquiries, feel free to reach out to the F
 ## License
 Fallen is licensed under the GNU General Public License v3.0. Please review the license file for more information.
 
+## Its True Cores
+Fallens cores derived from ForgeWurst, its important to acknowledge what Fallen is built on and i send my greatest thanks to Alexander for expanding Wurst to the forge community.
+
 Thank you for choosing Fallen as your Minecraft anarchy client. Let chaos reign, and may your adventures be filled with excitement and freedom!
