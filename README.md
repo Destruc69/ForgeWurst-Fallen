@@ -24,6 +24,6 @@ If you would like to contribute to the development of Fallen, you are welcome to
 For any questions, issues, or general inquiries, feel free to reach out to the Fallen community through our official Discord server at https://discord.gg/S8KMuFyd9Y. Our friendly community members and developers will be happy to assist you.
 
 ## License
-Fallen is licensed under the MIT License. Please review the license file for more information.
+Fallen is licensed under the GNU General Public License v3.0. Please review the license file for more information.
 
 Thank you for choosing Fallen as your Minecraft anarchy client. Let chaos reign, and may your adventures be filled with excitement and freedom!
