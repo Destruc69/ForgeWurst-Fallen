@@ -1,45 +1,29 @@
-# ForgeWurst
+## Fallen - Minecraft Anarchy Client
 
-Wurst Client for Minecraft Forge.
+Welcome to the official GitHub repository for Fallen, a powerful Minecraft anarchy client derived from ForgeWurst. This readme file provides an overview of the features and other important details about Fallen.
 
-This repository only contains the source code and is not intended for end users. Go to https://forge.wurstclient.net/ for ready-to-use downloads and installation instructions.
+## Features
 
-## How To Use This Code In Eclipse
+Anarchy-oriented: Fallen is designed specifically for Minecraft anarchy gameplay, where chaos and freedom are paramount. It provides various features to enhance your experience in anarchy servers.
 
-1. Clone this repository.
+Derived from ForgeWurst: Fallen builds upon the foundation of ForgeWurst, a popular Minecraft modding framework, to provide a reliable and extensible client for anarchy gameplay.
 
-2. Go into the `ForgeWurst MC 1.10.2` folder and run `gradlew setupDecompWorkspace.bat`, followed by `gradlew eclipse.bat`.
+Customizable UI: Tailor the client's user interface to suit your preferences. Choose from different themes, layouts, and colors to create a personalized experience.
 
-3. Repeat step 2 for all of the remaining versions (currently just 1.12.2). Please always use the .bat files, as some versions will not work if you run the Gradle commands directly.
+Exploits and Utilities: Fallen offers a range of exploits and utilities to give you an edge in anarchy servers. These include fastbreak, auto-mine, X-ray, Freecam, and more.
 
-3. In Eclipse, go to `Import... > Existing Projects into Workspace`. Select the folder where you saved this repository as the root directory.
+Combat Enhancements: Dominate PvP encounters with features like Kill Aura, Auto Totem, Auto Armor, Criticals, and Reach. Gain the upper hand and assert your dominance in battles.
 
-4. Select all of the projects that Eclipse has found (currently just two), then click <kbd>Finish</kbd>. At this point `ForgeWurst MC 1.12.2` is already working, but `ForgeWurst MC 1.10.2` still shows some errors. That's because we have a shared source folder in the 1.12.2 project that the other versions (currently just 1.10.2) also need access to.
+World Interaction: Interact with the game world in unique ways using features such as Scaffold Walk, NoFall, SafeWalk, and Auto Eat. Traverse landscapes and structures effortlessly.
 
-5. Right-click on the `ForgeWurst MC 1.10.2` project and select `New > Folder`. Click on <kbd>Advanced >></kbd> and select `Link to alternate location (Linked Folder)`.
+## Contributing
 
-6. Click on <kbd>Browse...</kbd> and navigate to `ForgeWurst\ForgeWurst MC 1.12.2\src\shared\java`. Change the "Folder name:" section from "java" to "shared-src", then click <kbd>Finish</kbd>.
+If you would like to contribute to the development of Fallen, you are welcome to submit pull requests, report issues, or suggest new features through the GitHub repository. Please follow the established guidelines and maintain a respectful and collaborative environment.
 
-7. The `shared-src` folder should now show up in Eclipse, under the `ForgeWurst MC 1.10.2` project. Right-click on this folder and select `Build Path > Use as Source Folder`.
+## Support
+For any questions, issues, or general inquiries, feel free to reach out to the Fallen community through our official Discord server at discord.gg/fallen. Our friendly community members and developers will be happy to assist you.
 
-8. Both projects should now be working without any errors. In the future, you will need to repeat steps 5-7 for all projects except the one that hosts the shared source folder.
+License
+Fallen is licensed under the MIT License. Please review the license file for more information.
 
-## How To Compile The Project Into Runnable .JAR Files
-
-After you have set up the code in Eclipse by following the above steps, the `gradlew build` script will only work for ForgeWurst MC 1.12.2. To make it work with the other versions (currently just 1.10.2), you will first need to create a directory junction from `ForgeWurst\ForgeWurst MC 1.10.2\src\shared` to `ForgeWurst\ForgeWurst MC 1.12.2\src\shared`.
-
-1. Navigate to `ForgeWurst\ForgeWurst MC 1.10.2\src` and open the console. If you are using PowerShell, type `cmd` before continuing with step 2.
-
-2. Run the following command: `mklink /J shared "../../ForgeWurst MC 1.12.2/src/shared"`.
-
-## Issues & Pull Requests
-
-Issues are disabled. Please [contact me](https://www.wurstclient.net/contact/) if you need help.
-
-Pull Requests are welcome, but I might not always notice them.
-
-## Licensing & Legal Stuff
-
-This code is licensed under the GNU General Public License v3. **You can only use this code in open-source clients that you release under the same license! Using it in closed-source/proprietary clients is not allowed!**
-
-See [LICENSE.txt](LICENSE.txt) for details, as well as a simplified summary on what you can and cannot do with this code.
+Thank you for choosing Fallen as your Minecraft anarchy client. Let chaos reign, and may your adventures be filled with excitement and freedom!
