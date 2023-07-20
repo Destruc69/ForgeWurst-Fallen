@@ -23,6 +23,9 @@ If you would like to contribute to the development of Fallen, you are welcome to
 ## Support
 For any questions, issues, or general inquiries, feel free to reach out to the Fallen community through our official Discord server at https://discord.gg/S8KMuFyd9Y. Our friendly community members and developers will be happy to assist you.
 
+## Empower the Wurst Fandom: Support and Donate Today!
+Your donations keep the developers engaged, enable client updates, and maintain a thriving community. Contribute now: https://www.paypal.me/WurstImperium.
+
 ## License
 Fallen is licensed under the GNU General Public License v3.0. Please review the license file for more information.
 
