@@ -22,10 +22,11 @@ Support: For any questions, issues, or general inquiries, feel free to reach out
 
 Donate: Your donations keep the developers engaged, enable client updates, and maintain a thriving community. If you want to support Fallen, you can contribute by donating at https://www.paypal.me/WurstImperium. Your contributions are highly appreciated!
 
-## License
-Fallen is licensed under the GNU General Public License v3.0. Please review the license file for more information.
+## Legal and Acknowledgments
+In this section, we cover the licensing information and acknowledge the foundational elements of Fallen's development:
 
-## Its True Cores
-Fallen's cores are derived from ForgeWurst. It is of utmost importance to acknowledge the foundational elements that have contributed to Fallen's development. I extend my sincerest gratitude to Alexander for his invaluable efforts in extending Wurst to the esteemed Forge community
+License: Fallen is licensed under the GNU General Public License v3.0. For more detailed information about the licensing terms, please review the license file provided.
+
+Its True Cores: Fallen's cores are derived from ForgeWurst. It is essential to acknowledge the foundational elements that have contributed to Fallen's development. The creators extend their sincerest gratitude to Alexander for his invaluable efforts in extending Wurst to the esteemed Forge community.
 
 Thank you for choosing Fallen as your Minecraft anarchy client. Let chaos reign, and may your adventures be filled with excitement and freedom!
