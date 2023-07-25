@@ -7,13 +7,17 @@
  */
 package net.wurstclient.forge.hacks.movement;
 
+import com.mojang.authlib.GameProfile;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.other.customs.entities.DummyEntity;
 import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.utils.KeyBindingUtils;
+
+import java.util.UUID;
 
 public final class AutoSprintHack extends Hack {
 

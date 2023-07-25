@@ -8,12 +8,10 @@ import net.wurstclient.forge.compatibility.WHackList;
 import net.wurstclient.forge.hacks.ClickGuiHack;
 import net.wurstclient.forge.hacks.combat.*;
 import net.wurstclient.forge.hacks.movement.*;
-import net.wurstclient.forge.hacks.pathing.AutoPilot;
-import net.wurstclient.forge.hacks.pathing.Tunneler;
+import net.wurstclient.forge.hacks.pathing.*;
 import net.wurstclient.forge.hacks.player.*;
 import net.wurstclient.forge.hacks.render.*;
 import net.wurstclient.forge.hacks.world.*;
-import net.wurstclient.forge.hacks.render.HudModules;
 import net.wurstclient.forge.settings.Setting;
 import net.wurstclient.forge.utils.JsonUtils;
 
@@ -32,6 +30,9 @@ public final class HackList extends WHackList
 	public final NoFall noFall = register(new NoFall());
 	public final Speed speed = register(new Speed());
 	public final Step step = register(new Step());
+	public final AutoPilot autoPilot = register(new AutoPilot());
+	public final DummyPlayer dummyPlayer = register(new DummyPlayer());
+	public final HideMyAss hideMyAss = register(new HideMyAss());
 	public final Trajectory trajectory = register(new Trajectory());
 	public final ServerCrasher serverCrasher = register(new ServerCrasher());
 	public final AutoClicker autoClicker = register(new AutoClicker());
@@ -48,7 +49,7 @@ public final class HackList extends WHackList
 	public final BowAimBot bowAimBot = register(new BowAimBot());
 	public final AutoAttack autoAttack = register(new AutoAttack());
 	public final FOV rotations = register(new FOV());
-	public final AutoPilot autoPilot = register(new AutoPilot());
+	public final PathfinderModule pathfinderModule = register(new PathfinderModule());
 	public final Debuger debuger = register(new Debuger());
 	public final FastFall fastFall = register(new FastFall());
 	public final Hitboxes hitboxes = register(new Hitboxes());
@@ -88,6 +89,7 @@ public final class HackList extends WHackList
 	public final Killaura killaura = register(new Killaura());
 	public final Scaffold scaffold = register(new Scaffold());
 	public final Timerr timerr = register(new Timerr());
+	public final AutoDupe autoDupe = register(new AutoDupe());
 	public final LongJump longJump = register(new LongJump());
 	public final NameTags nameTags = register(new NameTags());
 	public final NoHurtCam noHurtCam = register(new NoHurtCam());
@@ -138,7 +140,6 @@ public final class HackList extends WHackList
 	public final Follow follow = register(new Follow());
 	public final Surround surround = register(new Surround());
 	public final GodMode godMode = register(new GodMode());
-	public final AutoItemFrameDupe autoItemFrameDupe = register(new AutoItemFrameDupe());
 	
 	private final Path enabledHacksFile;
 	private final Path settingsFile;

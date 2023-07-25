@@ -29,25 +29,13 @@ public final class Animations extends Hack {
 	private static final Minecraft mc = Minecraft.getMinecraft();
 
 	private static final SliderSetting xv =
-			new SliderSetting("X", 0, -2, 2, 0.1, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("X", 0, -2, 2, 1, SliderSetting.ValueDisplay.DECIMAL);
 
 	private static final SliderSetting yv =
 			new SliderSetting("Y", 0, -2, 2, 0.1, SliderSetting.ValueDisplay.DECIMAL);
 
 	private static final SliderSetting zv =
-			new SliderSetting("Z", 0, -2, 2, 0.1, SliderSetting.ValueDisplay.DECIMAL);
-
-	private static final SliderSetting angle =
-			new SliderSetting("Angle", 0, -9999, 9999, 0.1, SliderSetting.ValueDisplay.DECIMAL);
-
-	private static final SliderSetting rx =
-			new SliderSetting("Rotate-X", 0, -9999, 9999, 0.1, SliderSetting.ValueDisplay.DECIMAL);
-
-	private static final SliderSetting ry =
-			new SliderSetting("Rotate-Y", 0, -9999, 9999, 0.1, SliderSetting.ValueDisplay.DECIMAL);
-
-	private static final SliderSetting rz =
-			new SliderSetting("Rotate-Z", 0, -9999, 9999, 0.1, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("Z", 0, -2, 2, 1, SliderSetting.ValueDisplay.DECIMAL);
 
 	public Animations() {
 		super("Animations", "Animations, explains its self.");
@@ -55,10 +43,6 @@ public final class Animations extends Hack {
 		addSetting(xv);
 		addSetting(yv);
 		addSetting(zv);
-		addSetting(angle);
-		addSetting(rx);
-		addSetting(ry);
-		addSetting(rz);
 	}
 
 	@Override
@@ -72,19 +56,12 @@ public final class Animations extends Hack {
 		xv.setValue(0);
 		yv.setValue(0);
 		zv.setValue(0);
-
-		angle.setValue(0);
-
-		rx.setValue(0);
-		ry.setValue(0);
-		rz.setValue(0);
 	}
 
 	@SubscribeEvent
 	public void onRenderHand(RenderHandEvent event) {
 		ItemRenderer ir = mc.getItemRenderer();
 		GlStateManager.translate(xv.getValueI(), yv.getValueF(), zv.getValueI());
-		GlStateManager.rotate(angle.getValueF(), rx.getValueI(), ry.getValueF(), rz.getValueI());
 		ir.updateEquippedItem();
 	}
 }

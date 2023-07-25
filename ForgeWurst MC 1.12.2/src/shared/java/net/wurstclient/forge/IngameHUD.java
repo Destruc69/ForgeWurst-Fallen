@@ -40,6 +40,13 @@ public final class IngameHUD {
 		this.clickGui = clickGui;
 	}
 
+	static class NameLengthComparator implements Comparator<Hack> {
+		@Override
+		public int compare(Hack hack1, Hack hack2) {
+			return Integer.compare(hack1.getName().length(), hack2.getName().length());
+		}
+	}
+
 	@SubscribeEvent
 	public void onRenderGUI(RenderGameOverlayEvent.Post event) {
 		if (event.getType() != ElementType.ALL || mc.gameSettings.showDebugInfo)
@@ -51,19 +58,41 @@ public final class IngameHUD {
 		clickGui.updateColors();
 
 		ClickGui gui = ForgeWurst.getForgeWurst().getGui();
-		if (gui.getAcColor()[2] > gui.getAcColor()[1]) {
+		float[] acColor = gui.getAcColor();
+
+		double maxComponent = Math.max(acColor[0], Math.max(acColor[1], acColor[2]));
+
+		if (acColor[2] == maxComponent) {
 			textColor = 0x000AFF;
-
-			clickGui.updateColors();
-		} else if (gui.getAcColor()[1] > gui.getAcColor()[2]) {
+		} else if (acColor[1] == maxComponent) {
 			textColor = 0x11FF00;
-
-			clickGui.updateColors();
-		} else if (gui.getAcColor()[0] > gui.getAcColor()[1] && gui.getAcColor()[0] > gui.getAcColor()[2]) {
-			textColor = 0xFF0000;
-
-			clickGui.updateColors();
+		} else if (acColor[0] == maxComponent) {
+			// Change dark blue to light blue
+			textColor = 0xADD8E6; // Light blue color
+		} else {
+			// Additional conditions and colors based on the range of double values
+			if (acColor[0] > acColor[1] && acColor[0] > acColor[2]) {
+				if (acColor[0] >= 0.5) {
+					textColor = 0xFFFF00; // Yellow for high red values
+				} else {
+					textColor = 0xFFA500; // Orange for moderate red values
+				}
+			} else if (acColor[1] > acColor[2]) {
+				if (acColor[1] >= 0.5) {
+					textColor = 0x00FFFF; // Cyan for high green values
+				} else {
+					textColor = 0x00FF00; // Green for moderate green values
+				}
+			} else {
+				if (acColor[2] >= 0.5) {
+					textColor = 0xFF00FF; // Magenta for high blue values
+				} else {
+					textColor = 0x8A2BE2; // BlueViolet for moderate blue values
+				}
+			}
 		}
+
+		clickGui.updateColors();
 
 
 		if (!ForgeWurst.getForgeWurst().getHax().clickGuiHack.nogui().isChecked()) {
@@ -94,7 +123,8 @@ public final class IngameHUD {
 				// hack list
 				int y = 23;
 				ArrayList<Hack> hacks = new ArrayList<>(hackList.getValues());
-				hacks.sort(Comparator.comparing(Hack::getName));
+				Comparator<Hack> comparator = new NameLengthComparator();
+				hacks.sort(comparator.reversed());
 
 				gui.updateColors();
 
@@ -106,25 +136,25 @@ public final class IngameHUD {
 						return;
 
 					if (hack.getCategory().getName().contains("Combat")) {
-						color = TextUtil.coloredString(hack.getRenderName(), TextUtil.Color.RED);
+						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.RED);
 						theColor = Color.RED.getRGB();
 					} else if (hack.getCategory().getName().contains("Movement")) {
-						color = TextUtil.coloredString(hack.getRenderName(), TextUtil.Color.BLUE);
+						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.BLUE);
 						theColor = Color.BLUE.getRGB();
 					} else if (hack.getCategory().getName().contains("World")) {
-						color = TextUtil.coloredString(hack.getRenderName(), TextUtil.Color.GREEN);
+						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.GREEN);
 						theColor = Color.GREEN.getRGB();
 					} else if (hack.getCategory().getName().contains("Player")) {
-						color = TextUtil.coloredString(hack.getRenderName(), TextUtil.Color.GOLD);
+						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.GOLD);
 						theColor = Color.ORANGE.getRGB();
 					} else if (hack.getCategory().getName().contains("Render")) {
-						color = TextUtil.coloredString(hack.getRenderName(), TextUtil.Color.AQUA);
+						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.AQUA);
 						theColor = Color.CYAN.getRGB();
 					} else if (hack.getCategory().getName().contains("Pathing")) {
-						color = TextUtil.coloredString(hack.getRenderName(), TextUtil.Color.YELLOW);
+						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.YELLOW);
 						theColor = Color.YELLOW.getRGB();
 					} else if (hack.getCategory().getName().contains("Games")) {
-						color = TextUtil.coloredString(hack.getRenderName(), TextUtil.Color.GOLD);
+						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.GOLD);
 						theColor = Color.YELLOW.getRGB();
 					}
 
@@ -136,7 +166,6 @@ public final class IngameHUD {
 
 			} else {
 				// title
-
 				GUIUtils.renderTextBoxForLabel("Fallen", 4, 3, 43, 12, (int) textColor);
 
 				GL11.glShadeModel(GL11.GL_SMOOTH);
@@ -144,7 +173,8 @@ public final class IngameHUD {
 				// hack list
 				int y = 18;
 				ArrayList<Hack> hacks = new ArrayList<>(hackList.getValues());
-				hacks.sort(Comparator.comparing(Hack::getName));
+				Comparator<Hack> comparator = new NameLengthComparator();
+				hacks.sort(comparator.reversed());
 
 				gui.updateColors();
 
@@ -156,25 +186,25 @@ public final class IngameHUD {
 						return;
 
 					if (hack.getCategory().getName().contains("Combat")) {
-						color = TextUtil.coloredString(hack.getRenderName(), TextUtil.Color.RED);
+						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.RED);
 						theColor = Color.RED.getRGB();
 					} else if (hack.getCategory().getName().contains("Movement")) {
-						color = TextUtil.coloredString(hack.getRenderName(), TextUtil.Color.BLUE);
+						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.BLUE);
 						theColor = Color.BLUE.getRGB();
 					} else if (hack.getCategory().getName().contains("World")) {
-						color = TextUtil.coloredString(hack.getRenderName(), TextUtil.Color.GREEN);
+						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.GREEN);
 						theColor = Color.GREEN.getRGB();
 					} else if (hack.getCategory().getName().contains("Player")) {
-						color = TextUtil.coloredString(hack.getRenderName(), TextUtil.Color.GOLD);
+						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.GOLD);
 						theColor = Color.ORANGE.getRGB();
 					} else if (hack.getCategory().getName().contains("Render")) {
-						color = TextUtil.coloredString(hack.getRenderName(), TextUtil.Color.AQUA);
+						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.AQUA);
 						theColor = Color.CYAN.getRGB();
 					} else if (hack.getCategory().getName().contains("Pathing")) {
-						color = TextUtil.coloredString(hack.getRenderName(), TextUtil.Color.YELLOW);
+						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.YELLOW);
 						theColor = Color.YELLOW.getRGB();
 					} else if (hack.getCategory().getName().contains("Games")) {
-						color = TextUtil.coloredString(hack.getRenderName(), TextUtil.Color.GOLD);
+						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.GOLD);
 						theColor = Color.YELLOW.getRGB();
 					}
 

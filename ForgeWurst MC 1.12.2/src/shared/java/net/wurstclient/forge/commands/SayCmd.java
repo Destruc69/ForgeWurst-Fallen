@@ -15,7 +15,7 @@ public final class SayCmd extends Command
 {
 	public SayCmd()
 	{
-		super("say", "Says the message.", "Syntax: .say <message>");
+		super("say", "Says the message in the chat.", "Syntax: .say <message>");
 	}
 	
 	@Override
@@ -23,6 +23,6 @@ public final class SayCmd extends Command
 	{
 		String message = String.join(" ", args);
 
-		TTS.say(message);
+		mc.player.sendChatMessage(message);
 	}
 }

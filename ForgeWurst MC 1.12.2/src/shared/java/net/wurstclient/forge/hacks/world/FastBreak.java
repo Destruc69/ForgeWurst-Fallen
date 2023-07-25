@@ -7,6 +7,9 @@
  */
 package net.wurstclient.forge.hacks.world;
 
+import net.minecraft.block.state.BlockStateContainer;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
@@ -24,7 +27,6 @@ import net.wurstclient.forge.utils.KeyBindingUtils;
 import net.wurstclient.forge.utils.PlayerControllerUtils;
 
 public final class FastBreak extends Hack {
-	public static double attackSpeed;
 	private final CheckboxSetting damage =
 			new CheckboxSetting("Damage", "Damage the block instead",
 					false);
@@ -61,7 +63,7 @@ public final class FastBreak extends Hack {
 			} else {
 				if (mc.playerController.getIsHittingBlock()) {
 					BlockPos blockPos = mc.objectMouseOver.getBlockPos();
-					mc.world.getBlockState(blockPos).getBlock().setHardness(0);
+					mc.world.setBlockState(blockPos, Blocks.DIRT.getDefaultState());
 				}
 			}
 		} catch (RuntimeException ignored) {

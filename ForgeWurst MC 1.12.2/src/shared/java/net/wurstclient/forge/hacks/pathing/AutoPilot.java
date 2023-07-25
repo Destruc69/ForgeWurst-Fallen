@@ -7,11 +7,9 @@
  */
 package net.wurstclient.forge.hacks.pathing;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -19,301 +17,68 @@ import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.pathfinding.LandPathUtils;
-import net.wurstclient.forge.settings.CheckboxSetting;
-import net.wurstclient.forge.settings.EnumSetting;
-import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.ChatUtils;
 import net.wurstclient.forge.utils.KeyBindingUtils;
-import org.lwjgl.opengl.GL11;
+import net.wurstclient.forge.utils.TextUtil;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public final class AutoPilot extends Hack {
-
-	public static ArrayList<BlockPos> blockPosArrayList;
-
-	private static double xTarg;
-	private static double yTarg;
-	private static double zTarg;
-
-	private static double xTargA;
-	private static double yTargA;
-	private static double zTargA;
-
-	private final CheckboxSetting debug =
-			new CheckboxSetting("Debug", "Debug mode.",
-					false);
-
-	private final EnumSetting<Mode> renderMode =
-			new EnumSetting<>("RenderMode", Mode.values(), Mode.BARITONE);
-
-	public static SliderSetting pathRed = new SliderSetting("Path red",
-			"Path red", 0, 0, 1, 0.1, SliderSetting.ValueDisplay.DECIMAL);
-	public static SliderSetting pathGreen = new SliderSetting("Path green",
-			"Path green", 1, 0, 1, 0.1, SliderSetting.ValueDisplay.DECIMAL);
-	public static SliderSetting pathBlue = new SliderSetting("Path blue",
-			"Path blue", 0, 0, 1, 0.1, SliderSetting.ValueDisplay.DECIMAL);
-	public static SliderSetting lineWidth = new SliderSetting("LineWidth",
-			"The width of the lines for the renders", 1, 0.1, 10, 0.1, SliderSetting.ValueDisplay.DECIMAL);
-
-	private final EnumSetting<ModeType> modeType =
-			new EnumSetting<>("ModeType", ModeType.values(), ModeType.AUTO);
-
-	public static SliderSetting smoothingFactor = new SliderSetting("SmoothingFactor",
-			"How smooth is the turning? \n" +
-					"If its not smooth enough it may start spinning in circles.", 0.2, 0, 2, 0.01, SliderSetting.ValueDisplay.DECIMAL);
-
 	public AutoPilot() {
-		super("AutoPilot", "Simple automation for navigation.");
+		super("AutoPilot", "Pathfinds the player towards a coordinate.");
 		setCategory(Category.PATHING);
-		addSetting(debug);
-		addSetting(renderMode);
-		addSetting(pathRed);
-		addSetting(pathGreen);
-		addSetting(pathBlue);
-		addSetting(lineWidth);
-		addSetting(smoothingFactor);
-		addSetting(modeType);
-	}
-
-	private enum Mode {
-		BARITONE("Baritone", true, false),
-		TESLA("Tesla", false, true);
-
-		private final String name;
-		private final boolean baritone;
-		private final boolean tesla;
-
-		Mode(String name, boolean baritone, boolean tesla) {
-			this.name = name;
-			this.tesla = tesla;
-			this.baritone = baritone;
-		}
-
-		public String toString() {
-			return name;
-		}
-	}
-
-	private enum ModeType {
-		AUTO("Auto", true),
-		RENDER("Render", false);
-
-		private final String name;
-		private final boolean auto;
-
-		ModeType(String name, boolean auto) {
-			this.name = name;
-			this.auto = auto;
-		}
-
-		public String toString() {
-			return name;
-		}
 	}
 
 	@Override
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
-
-		blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
 	}
 
 	@Override
 	protected void onDisable() {
 		MinecraftForge.EVENT_BUS.unregister(this);
-
-		KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, false);
-		KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, false);
-		KeyBindingUtils.setPressed(mc.gameSettings.keyBindSprint, false);
 	}
+
+	private ArrayList<BlockPos> blockPosArrayList = new ArrayList<>();
+	private static Vec3d vec3d;
 
 	@SubscribeEvent
-	public void onUpdate(WUpdateEvent event) throws IOException {
-		if (modeType.getSelected().auto) {
-			mc.player.rotationYaw = (float) LandPathUtils.getYawAndPitchForPath(mc.player.getPosition(), blockPosArrayList, smoothingFactor.getValue())[0];
-
-			//Basic stuff for terrain
-
-			//Jumping when collided
-			if (mc.player.onGround && mc.player.collidedHorizontally) {
-				mc.player.jump();
-			}
-
-			//Swimming
-			if (mc.player.isInWater() && !mc.player.collidedHorizontally) {
-				mc.player.motionY = 0.05;
-			}
-
-			//Sprint jumping
-			if (isYawStable(Math.round(mc.player.rotationYaw))) {
-				KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
-				KeyBindingUtils.setPressed(mc.gameSettings.keyBindSprint, true);
-			} else {
-				KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
-				KeyBindingUtils.setPressed(mc.gameSettings.keyBindSprint, false);
-			}
-
-			boolean onPath = false;
-			int range = 2; // Check blocks 2 blocks away from the player in all directions
-
-			for (int x = -range; x <= range; x++) {
-				for (int y = -range; y <= range; y++) {
-					for (int z = -range; z <= range; z++) {
-						BlockPos blockPos = new BlockPos(mc.player.posX + x, mc.player.posY + y, mc.player.posZ + z);
-						if (blockPosArrayList.contains(blockPos)) {
-							onPath = true;
-							break; // Break out of the loops once a block on the path is found
-						}
-					}
-					if (onPath) {
-						break; // Break out of the loops once a block on the path is found
+	public void onUpdate(WUpdateEvent event) {
+		BlockPos targetPos = new BlockPos(vec3d.x, vec3d.y, vec3d.z);
+		if (!LandPathUtils.isOnPath(blockPosArrayList) || blockPosArrayList.isEmpty()) {
+			if (mc.player.ticksExisted % 60 == 0) {
+				blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition().add(0, -1, 0), targetPos, PathfinderModule.debug.isChecked());
+				if (!blockPosArrayList.isEmpty()) {
+					String eta = LandPathUtils.calculateETA(blockPosArrayList);
+					if (eta != null) {
+						ChatUtils.message(TextFormatting.GREEN + "ETA: " + eta);
 					}
 				}
-				if (onPath) {
-					break; // Break out of the loops once a block on the path is found
-				}
-			}
-
-			if (!onPath) {
-				blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
-			}
-
-			// Check if the last block of the first leg has been reached
-			for (int x = -2; x < 2; x ++) {
-				for (int y = -2; y < 2; y++) {
-					for (int z = -2; z < 2; z++) {
-						if (blockPosArrayList.size() > 0 && mc.player.getPosition().add(x, y, z).equals(blockPosArrayList.get(blockPosArrayList.size() - 1))) {
-							blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
-							ChatUtils.message("Starting next section...");
-						}
-					}
-				}
-			}
-		} else {
-			if (mc.player.ticksExisted % 20 == 0) {
-				blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition(), new BlockPos(xTarg, yTarg, zTarg), debug.isChecked());
 			}
 		}
-	}
-
-	private double prevYaw = 0;
-
-	public boolean isYawStable(double yaw) {
-		boolean isStable = Math.round(Math.abs(yaw - prevYaw)) < 0.01; // set a threshold value for stable yaw
-		prevYaw = Math.round(yaw);
-		return isStable;
+		if (PathfinderModule.isAuto()) {
+			if (!blockPosArrayList.isEmpty()) {
+				double[] rots = LandPathUtils.getYawAndPitchForPath(mc.player.getPosition().add(0, -1, 0), blockPosArrayList, PathfinderModule.smoothingFactor.getValue());
+				mc.player.rotationYaw = (float) rots[0];
+				mc.player.rotationPitch = (float) rots[1];
+				LandPathUtils.movementsEngage(PathfinderModule.safetyPlus.isChecked());
+			} else {
+				LandPathUtils.resetMovements();
+			}
+		}
 	}
 
 	@SubscribeEvent
 	public void onRender(RenderWorldLastEvent event) {
-		if (renderMode.getSelected().baritone) {
-			Minecraft mc = Minecraft.getMinecraft();
-			EntityPlayer player = mc.player;
-			ArrayList<BlockPos> path = blockPosArrayList; // Replace getPath() with the method that returns the ArrayList of BlockPos
-
-			GL11.glPushMatrix();
-			GL11.glEnable(GL11.GL_BLEND);
-			GL11.glDisable(GL11.GL_TEXTURE_2D);
-			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			GL11.glLineWidth(lineWidth.getValueF());
-			GL11.glBegin(GL11.GL_LINES);
-			GL11.glColor4f(pathRed.getValueF(), pathGreen.getValueF(), pathBlue.getValueF(), 1.0f);
-
-			for (int i = 0; i < path.size() - 1; i++) {
-				BlockPos start = path.get(i);
-				BlockPos end = path.get(i + 1);
-				double startX = start.getX() + 0.5 - player.posX;
-				double startY = start.getY() + 1.5 - player.posY;
-				double startZ = start.getZ() + 0.5 - player.posZ;
-				double endX = end.getX() + 0.5 - player.posX;
-				double endY = end.getY() + 1.5 - player.posY;
-				double endZ = end.getZ() + 0.5 - player.posZ;
-				GL11.glVertex3d(startX, startY, startZ);
-				GL11.glVertex3d(endX, endY, endZ);
+		try {
+			if (!blockPosArrayList.isEmpty()) {
+				LandPathUtils.render(PathfinderModule.isRenderTesla(), blockPosArrayList, 1, PathfinderModule.pathRed.getValueI(), PathfinderModule.pathGreen.getValueF(), PathfinderModule.pathBlue.getValueF());
 			}
-			GL11.glEnd();
-			GL11.glDisable(GL11.GL_BLEND);
-			GL11.glEnable(GL11.GL_TEXTURE_2D);
-			GL11.glPopMatrix();
-		} else if (renderMode.getSelected().tesla) {
-			Minecraft mc = Minecraft.getMinecraft();
-			EntityPlayer player = mc.player;
-			ArrayList<BlockPos> path = blockPosArrayList; // Replace getPath() with the method that returns the ArrayList of BlockPos
-
-			GL11.glPushMatrix();
-			GL11.glEnable(GL11.GL_BLEND);
-			GL11.glDisable(GL11.GL_TEXTURE_2D);
-			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			GL11.glLineWidth(lineWidth.getValueF());
-
-			// Calculate the player's direction vector
-			Vec3d lookVec = player.getLook(1.0f);
-			double lookX = lookVec.x;
-			double lookZ = lookVec.z;
-
-			// Calculate the offset vector perpendicular to the player's direction vector
-			double offsetX = -lookZ;
-			double offsetY = 0.0;
-			double offsetZ = lookX;
-
-			// Normalize the offset vector
-			double offsetLength = Math.sqrt(offsetX * offsetX + offsetZ * offsetZ);
-			offsetX /= offsetLength;
-			offsetZ /= offsetLength;
-
-			// Draw the two lines
-			GL11.glBegin(GL11.GL_LINES);
-			GL11.glColor4f(pathRed.getValueF(), pathGreen.getValueF(), pathBlue.getValueF(), 1.0f);
-
-			for (int i = 0; i < path.size() - 1; i++) {
-				BlockPos start = path.get(i);
-				BlockPos end = path.get(i + 1);
-				double startX = start.getX() + 0.5 - player.posX;
-				double startY = start.getY() + 1.5 - player.posY;
-				double startZ = start.getZ() + 0.5 - player.posZ;
-				double endX = end.getX() + 0.5 - player.posX;
-				double endY = end.getY() + 1.5 - player.posY;
-				double endZ = end.getZ() + 0.5 - player.posZ;
-
-				// Calculate the start and end points for the left line
-				double leftStartX = startX + offsetX;
-				double leftStartY = startY + offsetY;
-				double leftStartZ = startZ + offsetZ;
-				double leftEndX = endX + offsetX;
-				double leftEndY = endY + offsetY;
-				double leftEndZ = endZ + offsetZ;
-
-				// Calculate the start and end points for the right line
-				double rightStartX = startX - offsetX;
-				double rightStartY = startY - offsetY;
-				double rightStartZ = startZ - offsetZ;
-				double rightEndX = endX - offsetX;
-				double rightEndY = endY - offsetY;
-				double rightEndZ = endZ - offsetZ;
-
-				// Draw the left line
-				GL11.glVertex3d(leftStartX, leftStartY, leftStartZ);
-				GL11.glVertex3d(leftEndX, leftEndY, leftEndZ);
-
-				// Draw the right line
-				GL11.glVertex3d(rightStartX, rightStartY, rightStartZ);
-				GL11.glVertex3d(rightEndX, rightEndY, rightEndZ);
-			}
-
-			GL11.glEnd();
-			GL11.glDisable(GL11.GL_BLEND);
-			GL11.glEnable(GL11.GL_TEXTURE_2D);
-			GL11.glPopMatrix();
+		} catch (Exception ignored) {
 		}
-
-
 	}
 
 	public static void setTarg(double x, double y, double z) {
-		xTarg = x;
-		yTarg = y;
-		zTarg = z;
+		vec3d = new Vec3d(x, y, z);
 	}
 }

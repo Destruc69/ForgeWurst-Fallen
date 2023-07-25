@@ -5,7 +5,6 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -81,6 +80,7 @@ public class GUITweaks {
             unlimitedTextField.drawTextBox();
         }
     }
+
     @SubscribeEvent
     public void onGUI(GuiScreenEvent.InitGuiEvent event) {
         if (event.getGui() instanceof GuiMainMenu) {

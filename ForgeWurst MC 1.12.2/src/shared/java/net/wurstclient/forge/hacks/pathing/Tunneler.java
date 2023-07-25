@@ -75,7 +75,7 @@ public final class Tunneler extends Hack
 	private int length;
 
 	private Task[] tasks;
-	private int[] displayLists = new int[5];
+	private final int[] displayLists = new int[5];
 
 	private BlockPos currentBlock;
 	private float progress;

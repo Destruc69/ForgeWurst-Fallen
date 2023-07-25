@@ -106,15 +106,6 @@ public final class FreeCam extends Hack {
 		event.setCanceled(true);
 	}
 
-	@SubscribeEvent
-	public void onPacket(WPacketInputEvent event) {
-		try {
-			if (event.getPacket() instanceof CPacketPlayer || event.getPacket() instanceof CPacketPlayer.Position || event.getPacket() instanceof CPacketPlayer.Rotation || event.getPacket() instanceof CPacketPlayer.PositionRotation) {
-				event.setCanceled(true);
-			}
-		} catch (Exception ignored) {
-		}
-	}
 
 	@SubscribeEvent
 	public void onPacketOut(WPacketOutputEvent event) {
