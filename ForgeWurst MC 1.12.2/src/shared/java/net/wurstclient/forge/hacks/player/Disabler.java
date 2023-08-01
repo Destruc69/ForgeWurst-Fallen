@@ -7,7 +7,10 @@
  */
 package net.wurstclient.forge.hacks.player;
 
-import net.minecraft.network.play.client.*;
+import net.minecraft.network.play.client.CPacketConfirmTeleport;
+import net.minecraft.network.play.client.CPacketConfirmTransaction;
+import net.minecraft.network.play.client.CPacketCustomPayload;
+import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -15,24 +18,17 @@ import net.wurstclient.fmlevents.WPacketInputEvent;
 import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.settings.CheckboxSetting;
+import net.wurstclient.forge.settings.EnumSetting;
 
 public final class Disabler extends Hack {
 
-	private final CheckboxSetting plusMode =
-			new CheckboxSetting("Plus", "Cancels more packets, these packets deppending on the server if canceled \n" +
-					"may kick you.",
-					false);
-
-	private final CheckboxSetting cancelKeepAlive =
-			new CheckboxSetting("CancelKeepAlive", "Cancels the keep alive packets, risky and servers might kick you",
-					false);
+	private final EnumSetting<Mode> mode =
+			new EnumSetting<>("Mode", Mode.values(), Mode.BASIC);
 
 	public Disabler() {
 		super("Disabler", "Bypass anti cheats.");
 		setCategory(Category.PLAYER);
-		addSetting(plusMode);
-		addSetting(cancelKeepAlive);
+		addSetting(mode);
 	}
 
 	@Override
@@ -48,18 +44,10 @@ public final class Disabler extends Hack {
 	@SubscribeEvent
 	public void onPacket(WPacketOutputEvent event) {
 		try {
-			if (!plusMode.isChecked()) {
-				if (event.getPacket() instanceof CPacketConfirmTransaction || event.getPacket() instanceof CPacketCustomPayload) {
-					event.setCanceled(true);
-				}
-			} else {
-				if (event.getPacket() instanceof CPacketConfirmTransaction || event.getPacket() instanceof CPacketCustomPayload ||
+			if (mode.getSelected().basic || mode.getSelected().extra) {
+				if (event.getPacket() instanceof CPacketConfirmTransaction ||
+						event.getPacket() instanceof CPacketCustomPayload ||
 						event.getPacket() instanceof CPacketEntityAction) {
-					event.setCanceled(true);
-				}
-			}
-			if (cancelKeepAlive.isChecked()) {
-				if (event.getPacket() instanceof CPacketKeepAlive) {
 					event.setCanceled(true);
 				}
 			}
@@ -70,11 +58,32 @@ public final class Disabler extends Hack {
 	@SubscribeEvent
 	public void onPacketIn(WPacketInputEvent event) {
 		try {
-			if (event.getPacket() instanceof SPacketPlayerPosLook) {
-				SPacketPlayerPosLook sPacketPlayerPosLook = (SPacketPlayerPosLook) event.getPacket();
-				mc.player.connection.sendPacket(new CPacketConfirmTeleport(sPacketPlayerPosLook.getTeleportId()));
+			if (mode.getSelected().extra) {
+				if (event.getPacket() instanceof SPacketPlayerPosLook) {
+					SPacketPlayerPosLook sPacketPlayerPosLook = (SPacketPlayerPosLook) event.getPacket();
+					mc.player.connection.sendPacket(new CPacketConfirmTeleport(sPacketPlayerPosLook.getTeleportId()));
+				}
 			}
 		} catch (Exception ignored) {
+		}
+	}
+
+	private enum Mode {
+		BASIC("Basic", true, false),
+		EXTRA("Extra", false, true);
+
+		private final String name;
+		private final boolean basic;
+		private final boolean extra;
+
+		private Mode(String name, boolean basic, boolean extra) {
+			this.name = name;
+			this.basic = basic;
+			this.extra = extra;
+		}
+
+		public String toString() {
+			return name;
 		}
 	}
 }

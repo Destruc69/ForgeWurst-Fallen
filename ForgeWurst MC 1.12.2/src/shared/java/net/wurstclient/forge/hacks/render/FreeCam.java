@@ -106,7 +106,6 @@ public final class FreeCam extends Hack {
 		event.setCanceled(true);
 	}
 
-
 	@SubscribeEvent
 	public void onPacketOut(WPacketOutputEvent event) {
 		try {

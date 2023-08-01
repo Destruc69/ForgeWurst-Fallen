@@ -83,16 +83,16 @@ public final class NoSlowDown extends Hack {
 				event.getMovementInput().moveForward *= 5;
 				event.getMovementInput().moveStrafe *= 5;
 				if (ncp.isChecked()) {
-					ncpPacket();
+					mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.ABORT_DESTROY_BLOCK, new BlockPos(mc.player.posX, mc.player.posY - 1.0, mc.player.posZ), EnumFacing.DOWN));
 				}
 				if (other.isChecked()) {
-					mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.RELEASE_USE_ITEM, new BlockPos(NoSlowDown.mc.player.posX, mc.player.posY - 1.0, NoSlowDown.mc.player.posZ), EnumFacing.DOWN));
+					mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.RELEASE_USE_ITEM, new BlockPos(mc.player.posX, mc.player.posY - 1.0, mc.player.posZ), EnumFacing.DOWN));
 				}
 				if (tbtb.isChecked()) {
 					mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_SNEAKING));
 				}
 				if (other2.isChecked()) {
-					mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.SWAP_HELD_ITEMS, new BlockPos(NoSlowDown.mc.player.posX, mc.player.posY - 1.0, NoSlowDown.mc.player.posZ), EnumFacing.DOWN));
+					mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.SWAP_HELD_ITEMS, new BlockPos(mc.player.posX, mc.player.posY - 1.0, mc.player.posZ), EnumFacing.DOWN));
 				}
 				if (other3.isChecked()) {
 					mc.player.connection.sendPacket(new CPacketHeldItemChange(InventoryUtil.getHandSlot()));
@@ -111,8 +111,5 @@ public final class NoSlowDown extends Hack {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-	public void ncpPacket() {
-		NoSlowDown.mc.player.connection.sendPacket((Packet)new CPacketPlayerDigging(CPacketPlayerDigging.Action.ABORT_DESTROY_BLOCK, new BlockPos(NoSlowDown.mc.player.posX, mc.player.posY - 1.0, NoSlowDown.mc.player.posZ), EnumFacing.DOWN));
 	}
 }

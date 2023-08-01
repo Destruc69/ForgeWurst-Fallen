@@ -30,6 +30,8 @@ public final class HackList extends WHackList
 	public final NoFall noFall = register(new NoFall());
 	public final Speed speed = register(new Speed());
 	public final Step step = register(new Step());
+	public final AutoMine autoMine = register(new AutoMine());
+	public final QueueHelper queueHelper = register(new QueueHelper());
 	public final AutoPilot autoPilot = register(new AutoPilot());
 	public final DummyPlayer dummyPlayer = register(new DummyPlayer());
 	public final HideMyAss hideMyAss = register(new HideMyAss());

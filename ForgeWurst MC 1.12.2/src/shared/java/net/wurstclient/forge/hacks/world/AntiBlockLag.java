@@ -12,6 +12,7 @@ import net.minecraft.network.play.server.SPacketBlockAction;
 import net.minecraft.network.play.server.SPacketBlockBreakAnim;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.wurstclient.fmlevents.WPacketInputEvent;
 import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
@@ -35,7 +36,7 @@ public final class AntiBlockLag extends Hack {
 	}
 
 	@SubscribeEvent
-	public void update(WPacketOutputEvent event) {
+	public void update(WPacketInputEvent event) {
 		if (mc.playerController.getIsHittingBlock()) {
 			if (!(event.getPacket() instanceof SPacketBlockAction || event.getPacket() instanceof SPacketBlockBreakAnim)) {
 				mc.player.swingProgress = 1;

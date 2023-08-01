@@ -21,7 +21,7 @@ import net.wurstclient.forge.Hack;
 public final class AntiCollide extends Hack {
 
 	public AntiCollide() {
-		super("AntiCollide", "Prevent colliding with players");
+		super("AntiCollide", "Prevent colliding.");
 		setCategory(Category.PLAYER);
 	}
 
@@ -37,15 +37,7 @@ public final class AntiCollide extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		for (Entity entity : mc.world.getLoadedEntityList()) {
-			if (entity != mc.player) {
-				if (entity instanceof EntityPlayer) {
-					if (mc.player.getCollisionBox(entity) == mc.player.getCollisionBox(mc.player)) {
-						mc.player.collidedHorizontally = false;
-						mc.player.collidedVertically = false;
-					}
-				}
-			}
-		}
+		mc.player.collidedHorizontally = false;
+		mc.player.collidedVertically = false;
 	}
 }

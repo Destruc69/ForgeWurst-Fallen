@@ -9,12 +9,17 @@ package net.wurstclient.forge.hacks.movement;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MoverType;
 import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.network.play.client.CPacketPlayer;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WPacketOutputEvent;
@@ -82,6 +87,8 @@ public final class ElytraFlight extends Hack {
 				controlEF();
 			} else if (mode.getSelected().rocket) {
 				rocketEF();
+			} else if (mode.getSelected().vanillaplus) {
+				vanillaPlusEF();
 			}
 		} else {
 			if (mc.player.motionY < 0) {
@@ -99,6 +106,49 @@ public final class ElytraFlight extends Hack {
 					}
 				}
 			}
+		}
+	}
+
+	private void vanillaPlusEF() {
+		double[] spd = MathUtils.directionSpeed(baseSpeed.getValueF());
+
+		if (mc.gameSettings.keyBindForward.isKeyDown()) {
+			if (mc.player.motionY > -0.5D) {
+				mc.player.fallDistance = 1.0F;
+			}
+
+			Vec3d vec3d = mc.player.getLookVec();
+			float f = mc.player.rotationPitch * 0.017453292F;
+			double d6 = Math.sqrt(vec3d.x * vec3d.x + vec3d.z * vec3d.z);
+			double d8 = Math.sqrt(mc.player.motionX * mc.player.motionX + mc.player.motionZ * mc.player.motionZ);
+			double d1 = vec3d.lengthVector();
+			float f4 = MathHelper.cos(f);
+			f4 = (float) ((double) f4 * (double) f4 * Math.min(1.0D, d1 / 0.4D));
+			mc.player.motionY += -0.08D + (double) f4 * 0.06D;
+
+			if (mc.player.motionY < 0.0D && d6 > 0.0D) {
+				double d2 = mc.player.motionY * -0.1D * (double) f4;
+				mc.player.motionY += d2;
+				mc.player.motionX += vec3d.x * d2 / d6 + spd[0];
+				mc.player.motionZ += vec3d.z * d2 / d6 + spd[1];
+			}
+
+			if (f < 0.0F) {
+				double d10 = d8 * (double) (-MathHelper.sin(f)) * 0.04D;
+				mc.player.motionY += d10 * 3.2D;
+				mc.player.motionX -= vec3d.x * d10 / d6 + spd[0];
+				mc.player.motionZ -= vec3d.z * d10 / d6 + spd[1];
+			}
+
+			if (d6 > 0.0D) {
+				mc.player.motionX += (vec3d.x / d6 * d8 - mc.player.motionX) * 0.1D + spd[0];
+				mc.player.motionZ += (vec3d.z / d6 * d8 - mc.player.motionZ) * 0.1D + spd[1];
+			}
+
+			mc.player.motionX *= 0.9900000095367432D + spd[0];
+			mc.player.motionY *= 0.9800000190734863D;
+			mc.player.motionZ *= 0.9900000095367432D + spd[1];
+			mc.player.move(MoverType.SELF, mc.player.motionX + spd[0], mc.player.motionY, mc.player.motionZ + spd[1]);
 		}
 	}
 
@@ -182,24 +232,27 @@ public final class ElytraFlight extends Hack {
 	}
 
 	private enum Mode {
-		CONTROL("Control", true, false, false, false),
-		BOOST("Boost", false, true, false, false),
-		FIREWORK("Firework", false, false, true, false),
-		ROCKET("Rocket", false, false, false, true),
-		NONE("None", false, false, false, false);
+		CONTROL("Control", true, false, false, false, false),
+		BOOST("Boost", false, true, false, false, false),
+		FIREWORK("Firework", false, false, true, false, false),
+		ROCKET("Rocket", false, false, false, true, false),
+		NONE("None", false, false, false, false, false),
+		VANILLAPLUS("VanillaPlus", false, false, false, false, true);
 
 		private final String name;
 		private final boolean control;
 		private final boolean boost;
 		private final boolean firework;
 		private final boolean rocket;
+		private final boolean vanillaplus;
 
-		private Mode(String name, boolean control, boolean boost, boolean firework, boolean rocket) {
+		private Mode(String name, boolean control, boolean boost, boolean firework, boolean rocket, boolean vanillaplus) {
 			this.name = name;
 			this.control = control;
 			this.firework = firework;
 			this.boost = boost;
 			this.rocket = rocket;
+			this.vanillaplus = vanillaplus;
 		}
 
 		public String toString() {

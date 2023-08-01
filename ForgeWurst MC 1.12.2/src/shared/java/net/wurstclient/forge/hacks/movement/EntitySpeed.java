@@ -52,49 +52,36 @@ public final class EntitySpeed extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		try {
-			if (mc.player.getRidingEntity() != null) {
-				if (Objects.requireNonNull(mc.player.getRidingEntity()).isEntityAlive()) {
-					if (!bypass.isChecked()) {
-				 		double[] dir = MathUtils.directionSpeed(speed.getValueF());
+		if (mc.player.getRidingEntity() != null) {
+			if (Objects.requireNonNull(mc.player.getRidingEntity()).isEntityAlive()) {
+				if (!bypass.isChecked()) {
+					double[] dir = MathUtils.directionSpeed(speed.getValueF());
+					assert mc.player.getRidingEntity() != null;
+					Objects.requireNonNull(mc.player.getRidingEntity()).motionX = dir[0];
+					mc.player.getRidingEntity().motionZ = dir[1];
+				} else {
+					if (mc.player.ticksExisted % 5 == 0) {
+						double[] dir = MathUtils.directionSpeed(speed.getValueF() - Math.random() * 0.02);
 						assert mc.player.getRidingEntity() != null;
 						Objects.requireNonNull(mc.player.getRidingEntity()).motionX = dir[0];
 						mc.player.getRidingEntity().motionZ = dir[1];
 					} else {
-						if (mc.player.ticksExisted % 5 == 0) {
-							double[] dir = MathUtils.directionSpeed(speed.getValueF() - Math.random() * 0.02);
-							assert mc.player.getRidingEntity() != null;
-							Objects.requireNonNull(mc.player.getRidingEntity()).motionX = dir[0];
-							mc.player.getRidingEntity().motionZ = dir[1];
-						} else {
-							mc.player.getRidingEntity().motionX /= 2;
-							mc.player.getRidingEntity().motionZ /= 2;
-						}
+						mc.player.getRidingEntity().motionX /= 2;
+						mc.player.getRidingEntity().motionZ /= 2;
 					}
-					mc.player.getRidingEntity().rotationYaw = mc.player.rotationYaw;
-
-					((EntityTameable) Objects.requireNonNull(mc.player.getRidingEntity())).setTamed(true);
-					((EntityTameable) Objects.requireNonNull(mc.player.getRidingEntity())).setTamedBy(mc.player);
-					((EntityTameable) Objects.requireNonNull(mc.player.getRidingEntity())).setOwnerId(mc.player.getPersistentID());
-					((EntityTameable) Objects.requireNonNull(mc.player.getRidingEntity())).setSitting(true);
-
-					mc.player.getRidingEntity().setGlowing(true);
-
-					((EntityHorse) mc.player.getRidingEntity()).setHorseSaddled(true);
-					((EntityDonkey) mc.player.getRidingEntity()).setHorseSaddled(true);
-					((EntityPig) mc.player.getRidingEntity()).setSaddled(true);
-
-					if (mc.gameSettings.keyBindJump.isKeyDown() || Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
-						if (mc.player.ticksExisted % 20 == 0) {
-							mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_RIDING_JUMP, 100));
-						}
-					}
-
-					Objects.requireNonNull(mc.player.getRidingEntity()).rotationYaw = mc.player.rotationYaw;
-					Objects.requireNonNull(mc.player.getRidingEntity()).rotationPitch = mc.player.rotationPitch;
 				}
+
+				mc.player.getRidingEntity().setGlowing(true);
+
+				if (mc.gameSettings.keyBindJump.isKeyDown() || Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
+					if (mc.player.ticksExisted % 20 == 0) {
+						mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_RIDING_JUMP, 100));
+					}
+				}
+
+				Objects.requireNonNull(mc.player.getRidingEntity()).rotationYaw = mc.player.rotationYaw;
+				Objects.requireNonNull(mc.player.getRidingEntity()).rotationPitch = mc.player.rotationPitch;
 			}
-		} catch (Exception e) {
 		}
 	}
 }

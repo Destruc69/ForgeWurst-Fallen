@@ -13,13 +13,19 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.utils.EntityFakePlayer;
 
 public final class AntiWeather extends Hack {
 
+	private final CheckboxSetting opposite =
+			new CheckboxSetting("Opposite", "Pro-Weather.",
+					false);
+
 	public AntiWeather() {
 		super("AntiWeather", "Removes rain, ect.");
 		setCategory(Category.WORLD);
+		addSetting(opposite);
 	}
 
 	@Override
@@ -30,11 +36,27 @@ public final class AntiWeather extends Hack {
 	@Override
 	protected void onDisable() {
 		MinecraftForge.EVENT_BUS.unregister(this);
+
+		if (opposite.isChecked()) {
+			mc.world.rainingStrength = 0f;
+			mc.world.prevRainingStrength = 0f;
+			mc.world.thunderingStrength = 0f;
+			mc.world.prevThunderingStrength = 0f;
+		}
 	}
 
 	@SubscribeEvent
 	public void update(WUpdateEvent event) {
-		mc.world.setRainStrength(0);
-		mc.world.thunderingStrength = 0;
+		if (!opposite.isChecked()) {
+			mc.world.rainingStrength = 0f;
+			mc.world.prevRainingStrength = 0f;
+			mc.world.thunderingStrength = 0f;
+			mc.world.prevThunderingStrength = 0f;
+		} else {
+			mc.world.rainingStrength = 2f;
+			mc.world.prevRainingStrength = 2f;
+			mc.world.thunderingStrength = 2f;
+			mc.world.prevThunderingStrength = 2f;
+		}
 	}
 }
