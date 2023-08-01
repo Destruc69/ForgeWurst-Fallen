@@ -86,11 +86,11 @@ public final class Jesus extends Hack
 
 			// update timer
 			tickTimer++;
-		} else {
-			if (mode.getSelected().remove) {
-				for (int x = -mc.gameSettings.renderDistanceChunks * 15; x < mc.gameSettings.renderDistanceChunks * 15; x ++) {
-					for (int y = -50; y < 50; y ++) {
-						for (int z = -mc.gameSettings.renderDistanceChunks * 15; z < mc.gameSettings.renderDistanceChunks * 15; z ++) {
+		} else if (mode.getSelected().remove) {
+			try {
+				for (int x = -8; x < 8; x++) {
+					for (int y = -50; y < 50; y++) {
+						for (int z = -8; z < 8; z++) {
 							BlockPos blockPos = new BlockPos(mc.player.posX + x, mc.player.posY + y, mc.player.posZ + z);
 							if (mc.world.getBlockState(blockPos).getBlock().equals(Blocks.WATER) || mc.world.getBlockState(blockPos).getBlock().equals(Blocks.FLOWING_WATER)) {
 								mc.world.setBlockState(blockPos, Blocks.AIR.getDefaultState());
@@ -98,6 +98,11 @@ public final class Jesus extends Hack
 						}
 					}
 				}
+			} catch (Exception ignored) {
+			}
+		} else if (mode.getSelected().realistic) {
+			if (mc.player.isInWater() && !mc.player.collidedHorizontally) {
+				mc.player.motionY /= 2;
 			}
 		}
 	}
@@ -228,17 +233,20 @@ public final class Jesus extends Hack
 	}
 
 	private enum Mode {
-		NORMAL("Normal", true, false),
-		REMOVE("Remove", false, true);
+		NORMAL("Normal", true, false, false),
+		REMOVE("Remove", false, true, false),
+		REALISTIC("Realistic", false, false, true);
 
 		private final String name;
 		private final boolean normal;
 		private final boolean remove;
+		private final boolean realistic;
 
-		private Mode(String name, boolean normal, boolean remove) {
+		private Mode(String name, boolean normal, boolean remove, boolean realistic) {
 			this.name = name;
 			this.normal = normal;
 			this.remove = remove;
+			this.realistic = realistic;
 		}
 
 		public String toString() {
