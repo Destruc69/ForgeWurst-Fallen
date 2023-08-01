@@ -89,7 +89,7 @@ public final class Jesus extends Hack
 		} else if (mode.getSelected().remove) {
 			try {
 				for (int x = -8; x < 8; x++) {
-					for (int y = -50; y < 50; y++) {
+					for (int y = -8; y < 8; y++) {
 						for (int z = -8; z < 8; z++) {
 							BlockPos blockPos = new BlockPos(mc.player.posX + x, mc.player.posY + y, mc.player.posZ + z);
 							if (mc.world.getBlockState(blockPos).getBlock().equals(Blocks.WATER) || mc.world.getBlockState(blockPos).getBlock().equals(Blocks.FLOWING_WATER)) {
