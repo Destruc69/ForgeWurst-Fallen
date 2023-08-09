@@ -7,6 +7,7 @@
  */
 package net.wurstclient.forge.hacks.movement;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.network.play.client.CPacketConfirmTeleport;
 import net.minecraft.network.play.client.CPacketPlayer;
@@ -27,19 +28,20 @@ import net.wurstclient.forge.utils.MathUtils;
 import net.wurstclient.forge.utils.NotiUtils;
 
 public final class LongJump extends Hack {
-
-	private boolean jump;
-	private double lastHDistance;
-	private double groundTicks;
-	private boolean isSpeeding;
-	private int airTicks;
-
+	private final Minecraft mc = Minecraft.getMinecraft();
+	
 	private final EnumSetting<Mode> mode =
 			new EnumSetting<>("Mode", Mode.values(), Mode.OLDAAC);
 
 	private final CheckboxSetting bypass =
 			new CheckboxSetting("Bypass", "Helps bypass, will be slower.",
 					false);
+	
+	private int groundTick;
+	private boolean jump;
+	private int stage;
+	private float air;
+	private int airTicks;
 
 	private enum Mode {
 		OLDAAC("OldAAC", true, false, false, false, false),
@@ -82,7 +84,7 @@ public final class LongJump extends Hack {
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
 		mc.player.setVelocity(0, mc.player.motionY, 0);
-		groundTicks = 0;
+		groundTick = 0;
 	}
 
 	@Override
@@ -129,48 +131,48 @@ public final class LongJump extends Hack {
 				}
 			}
 		} else if (mode.getSelected().otherncp) {
-			mc.player.lastTickPosY = 0;
-			float x2 = 1f;
+			mc.player.prevPosY = 0;
+			float x2 = (float) (1f + 0.2873D * 0.45f);
 			if ((mc.player.moveForward != 0 || mc.player.moveStrafing != 0) && mc.player.onGround) {
-				if (groundTicks > 0) {
-					groundTicks = 0;
+				if (groundTick > 0) {
+					groundTick = 0;
 					return;
 				}
 				stage = 1;
-				groundTicks++;
+				groundTick++;
 
 				mc.player.jump();
+
 			}
 			if (mc.player.onGround) {
 				air = 0;
 			} else {
 				if (mc.player.collidedVertically)
 					stage = 0;
-				if (stage > 0 && stage <= 3 && glide) {
-					// if (mc.world.getCollisionBoxes(mc.player, mc.player.getEntityBoundingBox().expand(-0.3, -2, -0.3).expand(0.3, 0, 0.3)).isEmpty()) {
+				if (stage > 0 && stage <= 3) {
+					//if(mc.world.getCollisionBoxes(mc.player, mc.player.getEntityBoundingBox().expand(-0.3, -2, -0.3).expand(0.3, 0, 0.3)).isEmpty()){
 					mc.player.onGround = true;
-					// }
-					// mc.player.isCollidedVertically = false;
+					//  }
+
+					//mc.player.isCollidedVertically = false;
 				}
-				double speed = (0.75f - air / 25);
-				if (speed < 0.2) { // + (0.025*MoveUtils.getSpeedEffect())
-					speed = 0.2;
+				double speed = (0.75f + 0.2873D * 0.2f) - air / 25;
+				if (speed < 0.2873D) { // + (0.025*MoveUtils.getSpeedEffect())
+					// speed = 0.2873D;
 				}
-				if (glide) {
-					speed = (0.8f + MoveUtils.getSpeedEffect() * 0.2f) - air / 25;
-					if (speed < MoveUtils.defaultSpeed()) { // + (0.025*MoveUtils.getSpeedEffect())
-						speed = MoveUtils.defaultSpeed();
-					}
+
+				speed = (0.8f + 0.2873D * 0.2f) - air / 25;
+				if (speed < 0.2873D) { // + (0.025*MoveUtils.getSpeedEffect())
+					speed = 0.2873D;
 				}
+
 				mc.player.jumpMovementFactor = 0;
-				if (stage < 4 && glide)
-					speed = MoveUtils.defaultSpeed();
-				MoveUtils.setMotion(speed);
-				if (glide) {
-					mc.player.motionY = getMotion(stage);
-				} else {
-					mc.player.motionY = getOldMotion(stage);
-				}
+				if (stage < 4)
+					speed = 0.2873D;
+				MathUtils.setSpeed(speed);
+
+				mc.player.motionY = getMotion(stage);
+
 				if (stage > 0) {
 					stage++;
 				}
@@ -198,20 +200,20 @@ public final class LongJump extends Hack {
 		}
 	}
 
-	private static void toFwd(double speed) {
+	private void toFwd(double speed) {
 		float yaw = mc.player.rotationYaw * 0.017453292f;
 		mc.player.motionX -= (double) MathHelper.sin(yaw) * speed;
 		mc.player.motionZ += (double)MathHelper.cos(yaw) * speed;
 	}
 
-	public static boolean MovementInput() {
+	public boolean MovementInput() {
 		return mc.gameSettings.keyBindForward.isKeyDown() || mc.gameSettings.keyBindLeft.isKeyDown() || mc.gameSettings.keyBindRight.isKeyDown() || mc.gameSettings.keyBindBack.isKeyDown();
 	}
 
 	@SubscribeEvent
 	public void onPostMotion(WUpdateEvent event) {
 		if (mc.player.onGround) {
-			++this.groundTicks;
+			++this.groundTick;
 			this.airTicks = 0;
 		} else {
 			++this.airTicks;
@@ -222,12 +224,12 @@ public final class LongJump extends Hack {
 		mc.player.connection.sendPacket(new CPacketPlayer.Position(x, y, z, mc.player.onGround));
 	}
 
-	public static void setSpeed(double speed) {
+	public void setSpeed(double speed) {
 		mc.player.motionX = - Math.sin(getDirection()) * speed;
 		mc.player.motionZ = Math.cos(getDirection()) * speed;
 	}
 
-	public static float getDirection() {
+	private float getDirection() {
 		float yaw = mc.player.rotationYaw;
 		if (mc.player.moveForward < 0.0f) {
 			yaw += 180.0f;
@@ -245,5 +247,18 @@ public final class LongJump extends Hack {
 			yaw += 90.0f * forward;
 		}
 		return yaw * 0.017453292f;
+	}
+
+	private double getMotion(int stage){
+		boolean isMoving = (mc.player.moveStrafing != 0 || mc.player.moveForward != 0);
+		double[] mot = {0.396,-0.122,-0.1,0.423, 0.35,0.28,0.217,0.15, 0.025,-0.00625,-0.038,-0.0693,-0.102,-0.13,
+				-0.018,-0.1,-0.117,-0.14532,-0.1334, -0.1581, -0.183141, -0.170695, -0.195653, -0.221, -0.209, -0.233, -0.25767,
+				-0.314917, -0.371019, -0.426};
+		stage --;
+		if(stage >= 0 && stage < mot.length){
+			return mot[stage];
+		}else{
+			return mc.player.motionY;
+		}
 	}
 }
