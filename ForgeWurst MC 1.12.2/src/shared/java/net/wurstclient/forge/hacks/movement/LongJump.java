@@ -129,79 +129,52 @@ public final class LongJump extends Hack {
 				}
 			}
 		} else if (mode.getSelected().otherncp) {
-			EntityPlayerSP player = mc.player;
-			if (!MovementInput()) {
-				return;
+			mc.player.lastTickPosY = 0;
+			float x2 = 1f;
+			if ((mc.player.moveForward != 0 || mc.player.moveStrafing != 0) && mc.player.onGround) {
+				if (groundTicks > 0) {
+					groundTicks = 0;
+					return;
+				}
+				stage = 1;
+				groundTicks++;
+
+				mc.player.jump();
 			}
 			if (mc.player.onGround) {
-				lastHDistance = 0;
-			}
-			float direction = mc.player.rotationYaw + (float) (mc.player.moveForward < 0.0f ? 180 : 0) + (mc.player.moveStrafing > 0.0f ? -90.0f * (mc.player.moveForward > 0.0f ? 0.5f : (mc.player.moveForward < 0.0f ? -0.5f : 1.0f)) : 0.0f) - (mc.player.moveStrafing < 0.0f ? -90.0f * (mc.player.moveForward > 0.0f ? 0.5f : (mc.player.moveForward < 0.0f ? -0.5f : 1.0f)) : 0.0f);
-			float xDir = (float) Math.cos((double) (direction + 90.0f) * 3.141592653589793 / 180.0);
-			float zDir = (float) Math.sin((double) (direction + 90.0f) * 3.141592653589793 / 180.0);
-			if (!mc.player.collidedVertically) {
-				this.isSpeeding = true;
-				this.groundTicks = 0;
-				if (!mc.player.collidedVertically) {
-					if (mc.player.motionY == -0.07190068807140403) {
-						player.motionY *= 0.3499999940395355;
-					} else if (mc.player.motionY == -0.10306193759436909) {
-						player.motionY *= 0.550000011920929;
-					} else if (mc.player.motionY == -0.13395038817442878) {
-						player.motionY *= 0.6700000166893005;
-					} else if (mc.player.motionY == -0.16635183030382) {
-						player.motionY *= 0.6899999976158142;
-					} else if (mc.player.motionY == -0.19088711097794803) {
-						player.motionY *= 0.7099999785423279;
-					} else if (mc.player.motionY == -0.21121925191528862) {
-						player.motionY *= 0.20000000298023224;
-					} else if (mc.player.motionY == -0.11979897632390576) {
-						player.motionY *= 0.9300000071525574;
-					} else if (mc.player.motionY == -0.18758479151225355) {
-						player.motionY *= 0.7200000286102295;
-					} else if (mc.player.motionY == -0.21075983825251726) {
-						player.motionY *= 0.7599999904632568;
-					}
-					if (mc.player.motionY < -0.2 && mc.player.motionY > -0.24) {
-						player.motionY *= 0.7;
-					}
-					if (mc.player.motionY < -0.25 && mc.player.motionY > -0.32) {
-						player.motionY *= 0.8;
-					}
-					if (mc.player.motionY < -0.35 && mc.player.motionY > -0.8) {
-						player.motionY *= 0.98;
-					}
-					if (mc.player.motionY < -0.8 && mc.player.motionY > -1.6) {
-						player.motionY *= 0.99;
-					}
-				}
-				double[] speedVals = new double[]{0.420606, 0.417924, 0.415258, 0.412609, 0.409977, 0.407361, 0.404761, 0.402178, 0.399611, 0.39706, 0.394525, 0.392, 0.3894, 0.38644, 0.383655, 0.381105, 0.37867, 0.37625, 0.37384, 0.37145, 0.369, 0.3666, 0.3642, 0.3618, 0.35945, 0.357, 0.354, 0.351, 0.348, 0.345, 0.342, 0.339, 0.336, 0.333, 0.33, 0.327, 0.324, 0.321, 0.318, 0.315, 0.312, 0.309, 0.307, 0.305, 0.303, 0.3, 0.297, 0.295, 0.293, 0.291, 0.289, 0.287, 0.285, 0.283, 0.281, 0.279, 0.277, 0.275, 0.273, 0.271, 0.269, 0.267, 0.265, 0.263, 0.261, 0.259, 0.257, 0.255, 0.253, 0.251, 0.249, 0.247, 0.245, 0.243, 0.241, 0.239, 0.237};
-				if (mc.gameSettings.keyBindForward.isKeyDown()) {
-					try {
-						mc.player.motionX = (double) xDir * speedVals[airTicks - 1] * 3.0;
-						mc.player.motionZ = (double) zDir * speedVals[airTicks - 1] * 3.0;
-					} catch (ArrayIndexOutOfBoundsException arrayIndexOutOfBoundsException) {
-					}
-				} else {
-					mc.player.motionX = 0.0;
-					mc.player.motionZ = 0.0;
-				}
+				air = 0;
 			} else {
-				airTicks = 0;
-				player.motionX /= 13.0;
-				player.motionZ /= 13.0;
-				if (this.groundTicks == 1) {
-					updatePosition(mc.player.posX, mc.player.posY, mc.player.posZ);
-					updatePosition(mc.player.posX + 0.0624, mc.player.posY, mc.player.posZ);
-					updatePosition(mc.player.posX, mc.player.posY + 0.419, mc.player.posZ);
-					updatePosition(mc.player.posX + 0.0624, mc.player.posY, mc.player.posZ);
-					updatePosition(mc.player.posX, mc.player.posY + 0.419, mc.player.posZ);
-				} else if (this.groundTicks > 2) {
-					this.groundTicks = 0;
-					mc.player.motionX = (double) xDir * 0.3;
-					mc.player.motionZ = (double) zDir * 0.3;
-					mc.player.motionY = 0.42399999499320984;
+				if (mc.player.collidedVertically)
+					stage = 0;
+				if (stage > 0 && stage <= 3 && glide) {
+					// if (mc.world.getCollisionBoxes(mc.player, mc.player.getEntityBoundingBox().expand(-0.3, -2, -0.3).expand(0.3, 0, 0.3)).isEmpty()) {
+					mc.player.onGround = true;
+					// }
+					// mc.player.isCollidedVertically = false;
 				}
+				double speed = (0.75f - air / 25);
+				if (speed < 0.2) { // + (0.025*MoveUtils.getSpeedEffect())
+					speed = 0.2;
+				}
+				if (glide) {
+					speed = (0.8f + MoveUtils.getSpeedEffect() * 0.2f) - air / 25;
+					if (speed < MoveUtils.defaultSpeed()) { // + (0.025*MoveUtils.getSpeedEffect())
+						speed = MoveUtils.defaultSpeed();
+					}
+				}
+				mc.player.jumpMovementFactor = 0;
+				if (stage < 4 && glide)
+					speed = MoveUtils.defaultSpeed();
+				MoveUtils.setMotion(speed);
+				if (glide) {
+					mc.player.motionY = getMotion(stage);
+				} else {
+					mc.player.motionY = getOldMotion(stage);
+				}
+				if (stage > 0) {
+					stage++;
+				}
+				air += x2;
 			}
 		} else if (mode.getSelected().minesecure) {
 			if (mc.player.onGround && MovementInput() && !mc.player.isInWater()) {
