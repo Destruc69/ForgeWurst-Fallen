@@ -9,14 +9,12 @@ package net.wurstclient.forge.hacks.movement;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.network.play.client.CPacketPlayer;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -30,6 +28,7 @@ import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.ChatUtils;
+import net.wurstclient.forge.utils.KeyBindingUtils;
 import net.wurstclient.forge.utils.MathUtils;
 
 public final class ElytraFlight extends Hack {
@@ -54,6 +53,10 @@ public final class ElytraFlight extends Hack {
 			new CheckboxSetting("AntiFireworkLag", "Helps lag with fireworks on servers anti-cheats.",
 					false);
 
+	private final CheckboxSetting autoStart =
+			new CheckboxSetting("AutoStart", "Opens the elytra for you automatically.",
+					false);
+
 	public ElytraFlight()
 	{
 		super("ElytraFlight", "Fly with an elytra.");
@@ -64,6 +67,7 @@ public final class ElytraFlight extends Hack {
 		addSetting(baseSpeed);
 		addSetting(boostNoY);
 		addSetting(antiFireworkLag);
+		addSetting(autoStart);
 	}
 
 	@Override
@@ -91,9 +95,11 @@ public final class ElytraFlight extends Hack {
 				vanillaPlusEF();
 			}
 		} else {
-			if (mc.player.motionY < 0) {
-				if (mc.player.ticksExisted % 10 == 0) {
-					mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_FALL_FLYING));
+			if (autoStart.isChecked()) {
+				if (mc.player.motionY < 0) {
+					if (mc.player.ticksExisted % 10 == 0) {
+						mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_FALL_FLYING));
+					}
 				}
 			}
 		}
@@ -141,8 +147,8 @@ public final class ElytraFlight extends Hack {
 			}
 
 			if (d6 > 0.0D) {
-				mc.player.motionX += (vec3d.x / d6 * d8 - mc.player.motionX) * 0.1D + spd[0];
-				mc.player.motionZ += (vec3d.z / d6 * d8 - mc.player.motionZ) * 0.1D + spd[1];
+				mc.player.motionX += (vec3d.x / d6 * d8 - mc.player.motionX + spd[0]) * 0.1D;
+				mc.player.motionZ += (vec3d.z / d6 * d8 - mc.player.motionZ + spd[1]) * 0.1D;
 			}
 
 			mc.player.motionX *= 0.9900000095367432D + spd[0];
@@ -237,7 +243,8 @@ public final class ElytraFlight extends Hack {
 		FIREWORK("Firework", false, false, true, false, false),
 		ROCKET("Rocket", false, false, false, true, false),
 		NONE("None", false, false, false, false, false),
-		VANILLAPLUS("VanillaPlus", false, false, false, false, true);
+		VANILLAPLUS("VanillaPlus", false, false, false, false, true),
+		Ignore("ignore", false, false, false, false, false);
 
 		private final String name;
 		private final boolean control;
@@ -257,6 +264,23 @@ public final class ElytraFlight extends Hack {
 
 		public String toString() {
 			return name;
+		}
+	}
+
+	public void ignore() {
+		if (mc.player.isElytraFlying()) {
+			mc.player.motionX = 0;
+			mc.player.motionY = 0.05;
+			mc.player.motionZ = 0;
+		} else {
+			if (mc.player.motionY < 0) {
+				if (mc.player.ticksExisted % 10 == 0) {
+					mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_FALL_FLYING));
+				}
+			}
+			if (mc.player.onGround) {
+				mc.player.jump();
+			}
 		}
 	}
 }

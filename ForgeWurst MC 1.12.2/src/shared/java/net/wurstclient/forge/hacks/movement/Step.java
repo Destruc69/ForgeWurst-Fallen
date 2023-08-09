@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public final class Step extends Hack {
+
 	private final EnumSetting<Mode> mode = new EnumSetting<>("Mode",
 			"\u00a7lSimple\u00a7r mode can step up multiple blocks (enables Height slider).\n"
 					+ "\u00a7lLegit\u00a7r mode can bypass NoCheat+.",
@@ -62,6 +63,7 @@ public final class Step extends Hack {
 	//
 	// WURST 7 STEP
 	//
+
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {

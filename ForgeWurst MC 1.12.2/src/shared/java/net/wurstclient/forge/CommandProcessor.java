@@ -7,6 +7,7 @@
  */
 package net.wurstclient.forge;
 
+
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -14,67 +15,83 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WChatOutputEvent;
 import net.wurstclient.forge.Command.CmdException;
+import net.wurstclient.forge.hacks.ClickGuiHack;
 import net.wurstclient.forge.utils.ChatUtils;
 
-public final class CommandProcessor {
+public final class CommandProcessor
+{
 	private final CommandList cmds;
 
-	private boolean isSyntaxMinus;
-
-	public CommandProcessor(CommandList cmds) {
+	public CommandProcessor(CommandList cmds)
+	{
 		this.cmds = cmds;
 	}
 
 	@SubscribeEvent
 	public void onSentMessage(WChatOutputEvent event) {
 		String message = event.getMessage().trim();
-		if (!message.startsWith(".") && !message.startsWith("-")) // Separate the conditions using &&
-			return;
+		if (!ClickGuiHack.isPrefixMinus()) {
+			if (!message.startsWith("."))
+				return;
 
+		} else {
+			if (!message.startsWith("-"))
+				return;
+
+		}
 		event.setCanceled(true);
 		Minecraft.getMinecraft().ingameGUI.getChatGUI()
 				.addToSentMessages(message);
-
-		String commandWithoutPrefix = message.substring(1); // Remove only one character from the beginning
-		if (message.startsWith(".")) {
-			commandWithoutPrefix = message.substring(1); // Remove "." prefix
-			isSyntaxMinus = false;
-		} else if (message.startsWith("-")) {
-			commandWithoutPrefix = message.substring(1); // Remove "-" prefix
-			isSyntaxMinus = true;
-		}
-
-		runCommand(commandWithoutPrefix);
+		runCommand(message.substring(1));
 	}
 
 	public void runCommand(String input) {
 		String[] parts = input.split(" ");
 		Command cmd = cmds.get(parts[0]);
+		if (!ClickGuiHack.isPrefixMinus()) {
 
-		if (cmd == null) {
-			if (!isSyntaxMinus) {
+			if (cmd == null) {
 				ChatUtils.error("Unknown command: ." + parts[0]);
-			} else {
+				if (input.startsWith("/"))
+					ChatUtils.message(
+							"Use \".say " + input + "\" to send it as a chat command.");
+				else
+					ChatUtils
+							.message("Type \".help\" for a list of commands or \".say ."
+									+ input + "\" to send it as a chat message.");
+				return;
+			}
+
+			try {
+				cmd.call(Arrays.copyOfRange(parts, 1, parts.length));
+
+			} catch (CmdException e) {
+				e.printToChat();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else {
+
+			if (cmd == null) {
 				ChatUtils.error("Unknown command: -" + parts[0]);
+				if (input.startsWith("/"))
+					ChatUtils.message(
+							"Use \"-say " + input + "\" to send it as a chat command.");
+				else
+					ChatUtils
+							.message("Type \"-help\" for a list of commands or \"-say -"
+									+ input + "\" to send it as a chat message.");
+				return;
 			}
-			if (!isSyntaxMinus) {
-				ChatUtils.message("Type \".help\" for a list of commands or \".say ."
-						+ input + "\" to send it as a chat message.");
-			} else {
-				ChatUtils.message("Type \"-help\" for a list of commands or \"-say -"
-						+ input + "\" to send it as a chat message.");
+
+			try {
+				cmd.call(Arrays.copyOfRange(parts, 1, parts.length));
+
+			} catch (CmdException e) {
+				e.printToChat();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			return;
-		}
-
-		try {
-			cmd.call(Arrays.copyOfRange(parts, 1, parts.length));
-
-		} catch (CmdException e) {
-			e.printToChat();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 }
-

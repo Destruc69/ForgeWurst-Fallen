@@ -7,6 +7,10 @@
  */
 package net.wurstclient.forge.hacks.movement;
 
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
@@ -24,11 +28,17 @@ public final class Speed extends Hack {
 	private final CheckboxSetting jump =
 			new CheckboxSetting("Jump", "Jump on ground, Strafing.",
 					false);
+
+	private final CheckboxSetting ncpGlide =
+			new CheckboxSetting("NCP-Glide", "I found speed and gliding worked on NCP as long \n." +
+					"as your not falling",
+					false);
 	public Speed() {
 		super("Speed", "I Show Speed");
 		setCategory(Category.MOVEMENT);
 		addSetting(speed);
 		addSetting(jump);
+		addSetting(ncpGlide);
 	}
 
 	@Override
@@ -50,11 +60,12 @@ public final class Speed extends Hack {
 				}
 			}
 		}
-		/*
-		double[] spd = MathUtils.directionSpeed(speed.getValueF() - Math.random() * 0.003);
-		mc.player.motionX = spd[0];
-		mc.player.motionZ = spd[1];
-		 */
+
+		if (ncpGlide.isChecked() ) {
+			if (mc.player.fallDistance > 0) {
+				mc.player.motionY *= 0.8 + Math.random() * 0.1;
+			}
+		}
 
 		MathUtils.setSpeed(speed.getValueF());
 	}

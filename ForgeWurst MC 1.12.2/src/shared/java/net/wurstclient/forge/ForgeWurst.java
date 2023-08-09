@@ -16,6 +16,7 @@ import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRema
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.wurstclient.forge.clickgui.ClickGui;
+import net.wurstclient.forge.other.AutoJoin;
 import net.wurstclient.forge.other.GUITweaks;
 import net.wurstclient.forge.update.WurstUpdater;
 
@@ -43,6 +44,7 @@ public final class ForgeWurst
 	private KeybindList keybinds;
 	private ClickGui gui;
 	private GUITweaks guiTweaks;
+	private AutoJoin autoJoin;
 
 	private IngameHUD hud;
 	private CommandProcessor cmdProcessor;
@@ -95,6 +97,9 @@ public final class ForgeWurst
 
 		guiTweaks = new GUITweaks();
 		MinecraftForge.EVENT_BUS.register(guiTweaks);
+
+		autoJoin = new AutoJoin();
+		MinecraftForge.EVENT_BUS.register(autoJoin);
 	}
 
 	public static ForgeWurst getForgeWurst()

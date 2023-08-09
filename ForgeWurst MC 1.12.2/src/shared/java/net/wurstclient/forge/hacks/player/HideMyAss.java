@@ -26,7 +26,9 @@ public final class HideMyAss extends Hack {
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
 		for (Hack hack : ForgeWurst.getForgeWurst().getHax().getValues()) {
-			hack.setEnabled(false);
+			if (hack.isEnabled()) {
+				hack.setEnabled(false);
+			}
 		}
 		onDisable();
 	}

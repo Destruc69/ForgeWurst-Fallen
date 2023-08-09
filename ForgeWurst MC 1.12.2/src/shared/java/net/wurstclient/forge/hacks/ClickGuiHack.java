@@ -106,6 +106,9 @@ public final class ClickGuiHack extends Hack
                     "A more classy and blocky array list.",
                     false);
 
+    public static final EnumSetting<PrefixEnum> prefixEnumEnumSetting =
+            new EnumSetting<>("Prefix", PrefixEnum.values(), PrefixEnum.DOT);
+
     public ClickGuiHack()
     {
         super("ClickGUI", "");
@@ -131,6 +134,7 @@ public final class ClickGuiHack extends Hack
         addSetting(particleSpawnRate);
         addSetting(particleSpeed);
         addSetting(blockArrayList);
+        addSetting(prefixEnumEnumSetting);
 
         MinecraftForge.EVENT_BUS.register(new InventoryButtonAdder());
     }
@@ -206,6 +210,29 @@ public final class ClickGuiHack extends Hack
                 return;
 
             setEnabled(true);
+        }
+    }
+
+    public static boolean isPrefixMinus() {
+        return prefixEnumEnumSetting.getSelected().minus;
+    }
+
+    private enum PrefixEnum {
+        DOT("Dot", true, false),
+        MINUS("Minus", false, true);
+
+        private final String name;
+        private final boolean dot;
+        private final boolean minus;
+
+        private PrefixEnum(String name, boolean dot, boolean minus) {
+            this.name = name;
+            this.dot = dot;
+            this.minus = minus;
+        }
+
+        public String toString() {
+            return name;
         }
     }
 }

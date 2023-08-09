@@ -12,6 +12,7 @@ import net.wurstclient.forge.hacks.pathing.*;
 import net.wurstclient.forge.hacks.player.*;
 import net.wurstclient.forge.hacks.render.*;
 import net.wurstclient.forge.hacks.world.*;
+import net.wurstclient.forge.other.AutoJoin;
 import net.wurstclient.forge.settings.Setting;
 import net.wurstclient.forge.utils.JsonUtils;
 
@@ -30,6 +31,8 @@ public final class HackList extends WHackList
 	public final NoFall noFall = register(new NoFall());
 	public final Speed speed = register(new Speed());
 	public final Step step = register(new Step());
+	public final PacketLimiter packetLimiter = register(new PacketLimiter());
+	public final AutoJoinModule autoJoinModule = register(new AutoJoinModule());
 	public final AutoMine autoMine = register(new AutoMine());
 	public final QueueHelper queueHelper = register(new QueueHelper());
 	public final AutoPilot autoPilot = register(new AutoPilot());
@@ -129,8 +132,7 @@ public final class HackList extends WHackList
 	public final GlideHack glideHack = register(new GlideHack());
 	public final ItemEspHack itemEspHack = register(new ItemEspHack());
 	public final MobEspHack mobEspHack = register(new MobEspHack());
-	public final MobSpawnEspHack mobSpawnEspHack =
-			register(new MobSpawnEspHack());
+	public final MobSpawnEspHack mobSpawnEspHack = register(new MobSpawnEspHack());
 	public final NoWebHack noWebHack = register(new NoWebHack());
 	public final PlayerEspHack playerEspHack = register(new PlayerEspHack());
 	public final SpiderHack spiderHack = register(new SpiderHack());

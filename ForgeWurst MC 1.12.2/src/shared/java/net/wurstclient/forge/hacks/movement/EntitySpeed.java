@@ -71,8 +71,6 @@ public final class EntitySpeed extends Hack {
 					}
 				}
 
-				mc.player.getRidingEntity().setGlowing(true);
-
 				if (mc.gameSettings.keyBindJump.isKeyDown() || Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
 					if (mc.player.ticksExisted % 20 == 0) {
 						mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_RIDING_JUMP, 100));

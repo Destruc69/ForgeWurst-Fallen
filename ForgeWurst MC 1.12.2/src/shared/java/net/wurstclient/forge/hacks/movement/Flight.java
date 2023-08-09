@@ -63,13 +63,13 @@ public final class Flight extends Hack
 	}
 
 	private final SliderSetting upSpeed =
-			new SliderSetting("Up-Speed", 1, 0.05, 5, 0.05, ValueDisplay.DECIMAL);
+			new SliderSetting("Up-Speed", 1, 0.005, 5, 0.05, ValueDisplay.DECIMAL);
 
 	private final SliderSetting baseSpeed =
-			new SliderSetting("Base-Speed", 1, 0.05, 5, 0.05, ValueDisplay.DECIMAL);
+			new SliderSetting("Base-Speed", 1, 0.005, 5, 0.05, ValueDisplay.DECIMAL);
 
 	private final SliderSetting downSpeed =
-			new SliderSetting("Down-Speed", 1, 0.05, 5, 0.05, ValueDisplay.DECIMAL);
+			new SliderSetting("Down-Speed", 1, 0.005, 5, 0.05, ValueDisplay.DECIMAL);
 
 	private final EnumSetting<Mode> mode =
 			new EnumSetting<>("Mode", Mode.values(), Mode.HYPIXEL);
