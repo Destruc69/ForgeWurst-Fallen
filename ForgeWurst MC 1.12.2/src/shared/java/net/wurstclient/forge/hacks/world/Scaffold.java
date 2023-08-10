@@ -4,10 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.CPacketEntityAction;
-import net.minecraft.network.play.client.CPacketHeldItemChange;
-import net.minecraft.network.play.client.CPacketPlayer;
-import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
+import net.minecraft.network.play.client.*;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.Timer;
@@ -31,56 +28,23 @@ import java.lang.reflect.Field;
 
 public final class Scaffold extends Hack {
 
-	private final EnumSetting<Sneak> sneak =
-			new EnumSetting<>("SneakType", Sneak.values(), Sneak.PACKET);
-
-	private final SliderSetting timerSpeed =
-			new SliderSetting("TimerSpeed", 0.9, 0.1, 1, 0.1, SliderSetting.ValueDisplay.DECIMAL);
-
 	public Scaffold() {
 		super("Scaffold", "Place blocks underneath you automatically.");
 		setCategory(Category.WORLD);
-		addSetting(sneak);
-		addSetting(timerSpeed);
 	}
 
 	@Override
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
-		a = true;
 	}
 
 	@Override
 	protected void onDisable() {
 		MinecraftForge.EVENT_BUS.unregister(this);
-		setTickLength(50);
 	}
-
-	private boolean a;
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		if (mc.player.swingProgress > 0) {
-			if (a) {
-				setTickLength(50 / timerSpeed.getValueF());
-				a = false;
-			}
-			if (sneak.getSelected() == Sneak.PACKET) {
-				mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_SNEAKING));
-			} else if (sneak.getSelected() == Sneak.LEGIT) {
-				KeyBindingUtils.setPressed(mc.gameSettings.keyBindSneak, true);
-			}
-		} else {
-			if (sneak.getSelected() == Sneak.LEGIT) {
-				KeyBindingUtils.setPressed(mc.gameSettings.keyBindSneak, false);
-			} else if (sneak.getSelected() == Sneak.PACKET) {
-				mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
-			}
-			if (!a) {
-				setTickLength(50);
-				a = true;
-			}
-		}
 		Minecraft mc = Minecraft.getMinecraft();
 		BlockPos playerBlock = new BlockPos(mc.player.posX, mc.player.getEntityBoundingBox().minY, mc.player.posZ);
 		if (mc.world.isAirBlock(playerBlock.add(0, -1, 0))) {
@@ -123,9 +87,9 @@ public final class Scaffold extends Hack {
 	}
 
 	private void place(BlockPos pos, EnumFacing face) {
-		double offsetX = 0.25D;
-		double offsetY = 0.25D;
-		double offsetZ = 0.25D;
+		double offsetX = 0.5D;
+		double offsetY = 0.5D;
+		double offsetZ = 0.5D;
 
 		if (face == EnumFacing.UP) {
 			pos = pos.add(0, -1, 0);
@@ -168,50 +132,5 @@ public final class Scaffold extends Hack {
 		double yaw = Math.toDegrees(Math.atan2(deltaZ, deltaX)) - 90.0;
 		double pitch = Math.toDegrees(Math.atan2(-deltaY, horizontalDistance));
 		mc.player.connection.sendPacket(new CPacketPlayer.Rotation((float) yaw, (float) pitch, mc.player.onGround));
-	}
-
-	private enum Sneak {
-		PACKET("Packet"),
-		LEGIT("Legit"),
-		OFF("Off");
-
-		private final String name;
-
-		private Sneak(String name) {
-			this.name = name;
-		}
-
-		public String toString() {
-			return name;
-		}
-	}
-
-	private void setTickLength(float tickLength)
-	{
-		try
-		{
-			Field fTimer = mc.getClass().getDeclaredField(
-					wurst.isObfuscated() ? "field_71428_T" : "timer");
-			fTimer.setAccessible(true);
-
-			if(WMinecraft.VERSION.equals("1.10.2"))
-			{
-				Field fTimerSpeed = Timer.class.getDeclaredField(
-						wurst.isObfuscated() ? "field_74278_d" : "timerSpeed");
-				fTimerSpeed.setAccessible(true);
-				fTimerSpeed.setFloat(fTimer.get(mc), 50 / tickLength);
-
-			}else
-			{
-				Field fTickLength = Timer.class.getDeclaredField(
-						wurst.isObfuscated() ? "field_194149_e" : "tickLength");
-				fTickLength.setAccessible(true);
-				fTickLength.setFloat(fTimer.get(mc), tickLength);
-			}
-
-		}catch(ReflectiveOperationException e)
-		{
-			throw new RuntimeException(e);
-		}
 	}
 }
