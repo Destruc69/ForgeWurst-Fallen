@@ -19,12 +19,17 @@ public final class AutoJoinModule extends Hack {
 					"you have configured, you can now go to the multiplayer list.",
 					false);
 
+	public static CheckboxSetting instant =
+			new CheckboxSetting("Instant", "Dismisses everything and just joins instantly",
+					false);
+
 	public AutoJoinModule() {
 		super("AutoJoin", "Joins servers from the multiplayer server list.");
 		setCategory(Category.PLAYER);
 		addSetting(indexToJoin);
 		addSetting(timeToEngage);
 		addSetting(enable);
+		addSetting(instant);
 	}
 
 	@Override

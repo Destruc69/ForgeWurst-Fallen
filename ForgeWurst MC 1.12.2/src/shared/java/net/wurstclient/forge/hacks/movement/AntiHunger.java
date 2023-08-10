@@ -25,8 +25,11 @@ public final class AntiHunger extends Hack {
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
 
-		if (mc.player.isSprinting()) {
-			mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SPRINTING));
+		try {
+			if (mc.player.isSprinting()) {
+				mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SPRINTING));
+			}
+		} catch (Exception ignored) {
 		}
 	}
 
@@ -37,9 +40,14 @@ public final class AntiHunger extends Hack {
 
 	@SubscribeEvent
 	public void onPacketOut(WPacketOutputEvent event) {
-		CPacketEntityAction cPacketEntityAction = (CPacketEntityAction) event.getPacket();
-		if (cPacketEntityAction.getAction().equals(CPacketEntityAction.Action.START_SPRINTING) || cPacketEntityAction.getAction().equals(CPacketEntityAction.Action.STOP_SPRINTING)) {
-			event.setCanceled(true);
+		try {
+			if (event.getPacket() instanceof CPacketEntityAction) {
+				CPacketEntityAction cPacketEntityAction = (CPacketEntityAction) event.getPacket();
+				if (cPacketEntityAction.getAction().equals(CPacketEntityAction.Action.START_SPRINTING) || cPacketEntityAction.getAction().equals(CPacketEntityAction.Action.STOP_SPRINTING)) {
+					event.setCanceled(true);
+				}
+			}
+		} catch (Exception ignored) {
 		}
 	}
 }

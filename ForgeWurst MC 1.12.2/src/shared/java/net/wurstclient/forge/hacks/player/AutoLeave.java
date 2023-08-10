@@ -7,6 +7,8 @@
  */
 package net.wurstclient.forge.hacks.player;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextComponentString;
@@ -16,6 +18,8 @@ import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.EnumSetting;
+
+import java.util.Objects;
 
 public final class AutoLeave extends Hack {
 
@@ -62,12 +66,12 @@ public final class AutoLeave extends Hack {
 		try {
 			if (mode.getSelected().hurt) {
 				if (mc.player.hurtTime > 0) {
-					mc.player.connection.onDisconnect(new TextComponentString("[AUTOLEAVE] You were hurt, we left."));
+					Objects.requireNonNull(mc.getConnection()).onDisconnect(new TextComponentString("this"));
 				}
 			} else if (mode.getSelected().playerentered) {
 				for (Entity entity : mc.world.loadedEntityList) {
 					if (entity instanceof EntityPlayer && entity != mc.player) {
-						mc.player.connection.onDisconnect(new TextComponentString("[AUTOLEAVE] Player entered your visibility, we left.."));
+						Objects.requireNonNull(mc.getConnection()).onDisconnect(new TextComponentString("this"));
 					}
 				}
 			}

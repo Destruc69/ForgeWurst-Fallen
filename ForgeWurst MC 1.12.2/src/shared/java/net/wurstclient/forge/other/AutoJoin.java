@@ -15,20 +15,34 @@ import java.util.Calendar;
 public class AutoJoin {
 
     private boolean isAutoJoining = false;
+    private boolean isOnMultiplayerMenu;
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && isAutoJoining) {
-            Calendar calendar = Calendar.getInstance();
-            if (calendar.get(Calendar.HOUR_OF_DAY) == AutoJoinModule.timeToEngage.getValueI()) {
-                GuiMultiplayer guiMultiplayer = (GuiMultiplayer) Minecraft.getMinecraft().currentScreen;
-                if (guiMultiplayer != null) {
-                    guiMultiplayer.selectServer(AutoJoinModule.indexToJoin.getValueI());
-                    guiMultiplayer.connectToSelected();
+        try {
+            GuiMultiplayer guiMultiplayer = (GuiMultiplayer) Minecraft.getMinecraft().currentScreen;
+            if (!AutoJoinModule.instant.isChecked()) {
+                if (event.phase == TickEvent.Phase.END && isAutoJoining) {
+                    Calendar calendar = Calendar.getInstance();
+                    if (calendar.get(Calendar.HOUR_OF_DAY) == AutoJoinModule.timeToEngage.getValueI()) {
+                        if (guiMultiplayer != null) {
+                            guiMultiplayer.selectServer(AutoJoinModule.indexToJoin.getValueI());
+                            guiMultiplayer.connectToSelected();
+                        }
+                        // Set auto-joining to false to prevent repeated attempts during the same hour
+                        isAutoJoining = false;
+                    }
                 }
-                // Set auto-joining to false to prevent repeated attempts during the same hour
-                isAutoJoining = false;
+            } else {
+                if (event.phase == TickEvent.Phase.END && isOnMultiplayerMenu && AutoJoinModule.instant.isChecked()) {
+                    if (guiMultiplayer != null) {
+                        guiMultiplayer.selectServer(AutoJoinModule.indexToJoin.getValueI());
+                        guiMultiplayer.connectToSelected();
+                    }
+                    isOnMultiplayerMenu = false;
+                }
             }
+        } catch (Exception ignored) {
         }
     }
 
@@ -36,18 +50,21 @@ public class AutoJoin {
     public void onRender(GuiScreenEvent.InitGuiEvent.Post event) {
         // Set auto-joining to true when entering the multiplayer menu
         isAutoJoining = AutoJoinModule.enable.isChecked() && event.getGui() instanceof GuiMultiplayer;
+        isOnMultiplayerMenu = event.getGui() instanceof GuiMultiplayer;
     }
 
     @SubscribeEvent
     public void onGUI(GuiScreenEvent.DrawScreenEvent.Post event) {
-        Minecraft mc = Minecraft.getMinecraft();
-        if (AutoJoinModule.enable.isChecked()) {
-            String text = "AutoJoin is Engaged! Will join server index " + AutoJoinModule.indexToJoin.getValueString() + " at hour " + AutoJoinModule.timeToEngage.getValueString();
-            int textX = 5;
-            int textY = 5;
+        if (!AutoJoinModule.instant.isChecked()) {
+            Minecraft mc = Minecraft.getMinecraft();
+            if (AutoJoinModule.enable.isChecked()) {
+                String text = "AutoJoin is Engaged! Will join server index " + AutoJoinModule.indexToJoin.getValueString() + " at hour " + AutoJoinModule.timeToEngage.getValueString();
+                int textX = 5;
+                int textY = 5;
 
-            mc.fontRenderer.drawStringWithShadow(text, textX, textY, 0xFFFFFF);
-            mc.fontRenderer.drawStringWithShadow("Countdown: " + getTimeUntilNextTargetHour(AutoJoinModule.timeToEngage.getValueI()), 5, 20, 0xFFFFFF);
+                mc.fontRenderer.drawStringWithShadow(text, textX, textY, 0xFFFFFF);
+                mc.fontRenderer.drawStringWithShadow("Countdown: " + getTimeUntilNextTargetHour(AutoJoinModule.timeToEngage.getValueI()), 5, 20, 0xFFFFFF);
+            }
         }
     }
 

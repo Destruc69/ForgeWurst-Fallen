@@ -52,34 +52,37 @@ public final class EntitySpeed extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		if (mc.player.getRidingEntity() != null) {
-			if (Objects.requireNonNull(mc.player.getRidingEntity()).isEntityAlive()) {
-				if (!bypass.isChecked()) {
-					double[] dir = MathUtils.directionSpeed(speed.getValueF());
-					assert mc.player.getRidingEntity() != null;
-					Objects.requireNonNull(mc.player.getRidingEntity()).motionX = dir[0];
-					mc.player.getRidingEntity().motionZ = dir[1];
-				} else {
-					if (mc.player.ticksExisted % 5 == 0) {
-						double[] dir = MathUtils.directionSpeed(speed.getValueF() - Math.random() * 0.02);
+		try {
+			if (mc.player.getRidingEntity() != null) {
+				if (Objects.requireNonNull(mc.player.getRidingEntity()).isEntityAlive()) {
+					if (!bypass.isChecked()) {
+						double[] dir = MathUtils.directionSpeed(speed.getValueF());
 						assert mc.player.getRidingEntity() != null;
 						Objects.requireNonNull(mc.player.getRidingEntity()).motionX = dir[0];
 						mc.player.getRidingEntity().motionZ = dir[1];
 					} else {
-						mc.player.getRidingEntity().motionX /= 2;
-						mc.player.getRidingEntity().motionZ /= 2;
+						if (mc.player.ticksExisted % 5 == 0) {
+							double[] dir = MathUtils.directionSpeed(speed.getValueF() - Math.random() * 0.02);
+							assert mc.player.getRidingEntity() != null;
+							Objects.requireNonNull(mc.player.getRidingEntity()).motionX = dir[0];
+							mc.player.getRidingEntity().motionZ = dir[1];
+						} else {
+							mc.player.getRidingEntity().motionX /= 2;
+							mc.player.getRidingEntity().motionZ /= 2;
+						}
 					}
-				}
 
-				if (mc.gameSettings.keyBindJump.isKeyDown() || Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
-					if (mc.player.ticksExisted % 20 == 0) {
-						mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_RIDING_JUMP, 100));
+					if (mc.gameSettings.keyBindJump.isKeyDown() || Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
+						if (mc.player.ticksExisted % 20 == 0) {
+							mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_RIDING_JUMP, 100));
+						}
 					}
-				}
 
-				Objects.requireNonNull(mc.player.getRidingEntity()).rotationYaw = mc.player.rotationYaw;
-				Objects.requireNonNull(mc.player.getRidingEntity()).rotationPitch = mc.player.rotationPitch;
+					Objects.requireNonNull(mc.player.getRidingEntity()).rotationYaw = mc.player.rotationYaw;
+					Objects.requireNonNull(mc.player.getRidingEntity()).rotationPitch = mc.player.rotationPitch;
+				}
 			}
+		} catch (Exception ignored) {
 		}
 	}
 }
