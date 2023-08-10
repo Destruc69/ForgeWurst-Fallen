@@ -117,6 +117,7 @@ public final class HackList extends WHackList
 	public final Disabler disabler = register(new Disabler());
 	public final AutoSneak autoSneak = register(new AutoSneak());
 	public final AutoWalk autoWalk = register(new AutoWalk());
+	public final LiquidJump liquidJump = register(new LiquidJump());
 	public final NoSlowDown noSlowDown = register(new NoSlowDown());
 	public final ClickGuiHack clickGuiHack = register(new ClickGuiHack());
 	public final AntiSpamHack antiSpamHack = register(new AntiSpamHack());

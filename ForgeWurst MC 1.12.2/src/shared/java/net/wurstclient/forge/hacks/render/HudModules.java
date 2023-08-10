@@ -66,21 +66,21 @@ public class HudModules extends Hack {
     @SubscribeEvent
     public void onRenderGUI(RenderGameOverlayEvent.Post event) {
         if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
-            cy = (int) (cy + 0.3);
+            cy += 0.3;
         } else if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
-            cy = (int) (cy - 0.3);
+            cy -= 0.3;
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
-            cx = (int) (cx + 0.3);
+            cx += 0.3;
         } else if (Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
-            cx = (int) (cx - 0.3);
+            cx -= 0.3;
         }
 
         xCoord.setValue(cx);
         yCoord.setValue(cy);
 
         if (coords.isChecked()) {
-            GUIUtils.renderTextBoxForLabel(Math.round(mc.player.lastTickPosX) + " " + Math.round(mc.player.lastTickPosY) + " " + Math.round(mc.player.lastTickPosZ), cx, cy, 150, 25, Color.WHITE.getRGB());
+            GUIUtils.renderTextBoxForLabel(Math.round(mc.player.lastTickPosX) + " " + Math.round(mc.player.lastTickPosY) + " " + Math.round(mc.player.lastTickPosZ), cx, cy, 150, 20, Color.WHITE.getRGB());
         }
     }
 }
