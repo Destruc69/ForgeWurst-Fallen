@@ -3,6 +3,8 @@ package net.wurstclient.forge.hacks.world;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.client.CPacketAnimation;
+import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -14,12 +16,18 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.settings.CheckboxSetting;
 
 public final class Scaffold extends Hack {
+
+	private final CheckboxSetting swing =
+			new CheckboxSetting("Swing", "Should we swing the arm when placing?.",
+					false);
 
 	public Scaffold() {
 		super("Scaffold", "Place blocks underneath you automatically.");
 		setCategory(Category.WORLD);
+		addSetting(swing);
 	}
 
 	@Override
@@ -76,10 +84,6 @@ public final class Scaffold extends Hack {
 	}
 
 	private void place(BlockPos pos, EnumFacing face) {
-		double offsetX = 0.5D;
-		double offsetY = 0.5D;
-		double offsetZ = 0.5D;
-
 		if (face == EnumFacing.UP) {
 			pos = pos.add(0, -1, 0);
 		} else if (face == EnumFacing.NORTH) {
@@ -92,35 +96,49 @@ public final class Scaffold extends Hack {
 			pos = pos.add(1, 0, 0);
 		}
 
-		ItemStack heldItem = mc.player.getHeldItem(EnumHand.MAIN_HAND);
-		if (!(heldItem.getItem() instanceof ItemBlock)) {
+		if (!(mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem() instanceof ItemBlock)) {
 			for (int i = 0; i < 9; i++) {
 				ItemStack item = mc.player.inventory.getStackInSlot(i);
 				if (item.getItem() instanceof ItemBlock) {
-					int lastSlot = mc.player.inventory.currentItem;
+					int last = mc.player.inventory.currentItem;
+					mc.player.connection.sendPacket(new CPacketHeldItemChange(i));
 					mc.player.inventory.currentItem = i;
 					mc.playerController.updateController();
-					mc.playerController.processRightClickBlock(mc.player, mc.world, pos, face, new Vec3d(offsetX, offsetY, offsetZ), EnumHand.MAIN_HAND);
-					mc.player.swingArm(EnumHand.MAIN_HAND);
-					mc.player.inventory.currentItem = lastSlot;
+					mc.playerController.processRightClickBlock(mc.player, mc.world, pos, face, new Vec3d(0.5D, 0.5D, 0.5D), EnumHand.MAIN_HAND);
+					if (swing.isChecked()) {
+						mc.player.swingArm(EnumHand.MAIN_HAND);
+					} else {
+						mc.player.connection.sendPacket(new CPacketAnimation(EnumHand.MAIN_HAND));
+					}
+					mc.player.connection.sendPacket(new CPacketHeldItemChange(mc.player.inventory.currentItem));
+					mc.player.inventory.currentItem = last;
 					mc.playerController.updateController();
 				}
 			}
-		} else {
-			mc.playerController.processRightClickBlock(mc.player, mc.world, pos, face, new Vec3d(offsetX, offsetY, offsetZ), EnumHand.MAIN_HAND);
-			mc.player.swingArm(EnumHand.MAIN_HAND);
+
+			double var4 = pos.getX() + 0.25D - mc.player.posX;
+			double var6 = pos.getZ() + 0.25D - mc.player.posZ;
+			double var8 = pos.getY() + 0.25D - (mc.player.posY + mc.player.getEyeHeight());
+			double var14 = MathHelper.sqrt(var4 * var4 + var6 * var6);
+			double yaw = (float) (Math.atan2(var6, var4) * 180.0D / Math.PI) - 90.0F;
+			double pitch = (float) -(Math.atan2(var8, var14) * 180.0D / Math.PI);
+			mc.player.connection.sendPacket(new CPacketPlayer.Rotation((float) yaw, (float) pitch, mc.player.onGround));
 		}
 
-		double playerX = mc.player.posX;
-		double playerY = mc.player.posY + mc.player.getEyeHeight();
-		double playerZ = mc.player.posZ;
-		double deltaX = pos.getX() + offsetX - playerX;
-		double deltaY = pos.getY() + offsetY - playerY;
-		double deltaZ = pos.getZ() + offsetZ - playerZ;
-		double horizontalDistance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
-		double yaw = Math.toDegrees(Math.atan2(deltaZ, deltaX)) - 90.0;
-		double pitch = Math.toDegrees(Math.atan2(-deltaY, horizontalDistance));
-		for (int x = 0; x < 2; x++) {
+		if (mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem() instanceof ItemBlock) {
+			mc.playerController.processRightClickBlock(mc.player, mc.world, pos, face, new Vec3d(0.5D, 0.5D, 0.5D), EnumHand.MAIN_HAND);
+			if (swing.isChecked()) {
+				mc.player.swingArm(EnumHand.MAIN_HAND);
+			} else {
+				mc.player.connection.sendPacket(new CPacketAnimation(EnumHand.MAIN_HAND));
+			}
+
+			double var4 = pos.getX() + 0.25D - mc.player.posX;
+			double var6 = pos.getZ() + 0.25D - mc.player.posZ;
+			double var8 = pos.getY() + 0.25D - (mc.player.posY + mc.player.getEyeHeight());
+			double var14 = MathHelper.sqrt(var4 * var4 + var6 * var6);
+			double yaw = (float) (Math.atan2(var6, var4) * 180.0D / Math.PI) - 90.0F;
+			double pitch = (float) -(Math.atan2(var8, var14) * 180.0D / Math.PI);
 			mc.player.connection.sendPacket(new CPacketPlayer.Rotation((float) yaw, (float) pitch, mc.player.onGround));
 		}
 	}
