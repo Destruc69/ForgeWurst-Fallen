@@ -35,16 +35,20 @@ public final class ElytraFlight extends Hack {
 			new EnumSetting<>("Mode", Mode.values(), Mode.CONTROL);
 
 	private final SliderSetting upSpeed =
-			new SliderSetting("Up-Speed", 1, 0, 5, 0.01, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("Up-Speed", 1, 0, 5, 0.025, SliderSetting.ValueDisplay.DECIMAL);
 
 	private final SliderSetting baseSpeed =
-			new SliderSetting("Base-Speed", 1, 0, 5, 0.01, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("Base-Speed", 1, 0, 5, 0.025, SliderSetting.ValueDisplay.DECIMAL);
 
 	private final SliderSetting downSpeed =
-			new SliderSetting("Down-Speed", 1, 0, 5, 0.01, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("Down-Speed", 1, 0, 5, 0.025, SliderSetting.ValueDisplay.DECIMAL);
 
 	private final CheckboxSetting autoTakeOff =
 			new CheckboxSetting("AutoTakeOff", "Takes off automatically.",
+					false);
+
+	private final CheckboxSetting shouldLockPitch =
+			new CheckboxSetting("ShouldLockPitch", "Should we lock pitch?.",
 					false);
 
 	private final SliderSetting lockPitch =
@@ -59,6 +63,7 @@ public final class ElytraFlight extends Hack {
 		addSetting(baseSpeed);
 		addSetting(downSpeed);
 		addSetting(autoTakeOff);
+		addSetting(shouldLockPitch);
 		addSetting(lockPitch);
 	}
 
@@ -78,13 +83,13 @@ public final class ElytraFlight extends Hack {
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
 		if (mc.player.isElytraFlying()) {
-			mc.player.rotationPitch = lockPitch.getValueF();
+			if (shouldLockPitch.isChecked()) {
+				mc.player.rotationPitch = lockPitch.getValueF();
+			}
 			if (mode.getSelected() == Mode.BOOST) {
 				boostEF();
 			} else if (mode.getSelected() == Mode.CONTROL) {
 				controlEF();
-			} else if (mode.getSelected() == Mode.TBTT) {
-				tbttEF();
 			}
 			if (!a) {
 				setTickLength(50);
@@ -145,15 +150,6 @@ public final class ElytraFlight extends Hack {
 		}
 	}
 
-	private void tbttEF() {
-		if (mc.gameSettings.keyBindForward.isKeyDown()) {
-			double yaw = Math.toRadians(ElytraFlight.mc.player.rotationYaw);
-			mc.player.motionX -= (ElytraFlight.mc.player.movementInput.moveForward * Math.sin(yaw) * 0.04);
-			mc.player.motionZ += (ElytraFlight.mc.player.movementInput.moveForward * Math.cos(yaw) * 0.04);
-			mc.player.motionY = -1.01E-4;
-		}
-	}
-
 	@SubscribeEvent
 	public void onPacket(WPacketOutputEvent event) {
 		if (mode.getSelected() == Mode.CONTROL && !isKeyInputs() && !mc.gameSettings.keyBindJump.isKeyDown() && !mc.gameSettings.keyBindSneak.isKeyDown()) {
@@ -168,8 +164,7 @@ public final class ElytraFlight extends Hack {
 
 	private enum Mode {
 		CONTROL("Control"),
-		BOOST("Boost"),
-		TBTT("2b2t");
+		BOOST("Boost");
 
 		private final String name;
 
@@ -185,59 +180,6 @@ public final class ElytraFlight extends Hack {
 	private void setSpeed(final double speed) {
 		Minecraft.getMinecraft().player.motionX = -MathHelper.sin(getDirection()) * speed;
 		Minecraft.getMinecraft().player.motionZ = MathHelper.cos(getDirection()) * speed;
-	}
-
-	private void setMoveSpeed(double speed) {
-		double forward = mc.player.movementInput.moveForward;
-		double strafe = mc.player.movementInput.moveStrafe;
-		float yaw = mc.player.rotationYaw;
-
-		if (forward == 0.0 && strafe == 0.0) {
-			mc.player.motionX = 0;
-			mc.player.motionZ = 0;
-		} else {
-			if (forward != 0.0) {
-				if (strafe > 0.0) {
-					yaw += (float) (forward > 0.0 ? -45 : 45);
-				} else if (strafe < 0.0) {
-					yaw += (float) (forward > 0.0 ? 45 : -45);
-				}
-				strafe = 0.0;
-				if (forward > 0.0) {
-					forward = 1.0;
-				} else if (forward < 0.0) {
-					forward = -1.0;
-				}
-			}
-
-			double x = forward * speed * -Math.sin(Math.toRadians(yaw)) + strafe * speed * Math.cos(Math.toRadians(yaw));
-			double z = forward * speed * Math.cos(Math.toRadians(yaw)) - strafe * speed * -Math.sin(Math.toRadians(yaw));
-
-			mc.player.motionX = x;
-			mc.player.motionZ = z;
-		}
-	}
-
-	private double[] forwardStrafeYaw(double forward, double strafe, double yaw) {
-		double[] result = new double[]{forward, strafe, yaw};
-
-		if (forward != 0.0) {
-			if (strafe > 0.0) {
-				result[2] = result[2] + (forward > 0.0 ? -45 : 45);
-			} else if (strafe < 0.0) {
-				result[2] = result[2] + (forward > 0.0 ? 45 : -45);
-			}
-
-			result[1] = 0.0;
-
-			if (forward > 0.0) {
-				result[0] = 1.0;
-			} else if (forward < 0.0) {
-				result[0] = -1.0;
-			}
-		}
-
-		return result;
 	}
 
 	private boolean isKeyInputs() {

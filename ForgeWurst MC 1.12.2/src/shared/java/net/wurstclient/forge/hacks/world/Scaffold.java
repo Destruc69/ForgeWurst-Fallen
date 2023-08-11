@@ -1,13 +1,11 @@
 package net.wurstclient.forge.hacks.world;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.*;
+import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.Timer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -16,15 +14,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.compatibility.WMinecraft;
-import net.wurstclient.forge.hacks.movement.AutoSneak;
-import net.wurstclient.forge.settings.CheckboxSetting;
-import net.wurstclient.forge.settings.EnumSetting;
-import net.wurstclient.forge.settings.SliderSetting;
-import net.wurstclient.forge.utils.KeyBindingUtils;
-import net.wurstclient.forge.utils.RotationUtils;
-
-import java.lang.reflect.Field;
 
 public final class Scaffold extends Hack {
 
@@ -131,6 +120,8 @@ public final class Scaffold extends Hack {
 		double horizontalDistance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
 		double yaw = Math.toDegrees(Math.atan2(deltaZ, deltaX)) - 90.0;
 		double pitch = Math.toDegrees(Math.atan2(-deltaY, horizontalDistance));
-		mc.player.connection.sendPacket(new CPacketPlayer.Rotation((float) yaw, (float) pitch, mc.player.onGround));
+		for (int x = 0; x < 2; x++) {
+			mc.player.connection.sendPacket(new CPacketPlayer.Rotation((float) yaw, (float) pitch, mc.player.onGround));
+		}
 	}
 }

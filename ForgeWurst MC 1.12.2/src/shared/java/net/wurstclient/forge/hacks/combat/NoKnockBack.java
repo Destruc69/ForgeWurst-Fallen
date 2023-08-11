@@ -45,19 +45,6 @@ public final class NoKnockBack extends Hack {
 	}
 
 	@SubscribeEvent
-	public void onPacketOut(WPacketOutputEvent event) {
-		try {
-			if (!bypass.isChecked()) {
-				if (event.getPacket() instanceof SPacketEntityVelocity || event.getPacket() instanceof SPacketExplosion) {
-					event.setCanceled(true);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	@SubscribeEvent
 	public void onPacketIn(WPacketInputEvent event) {
 		try {
 			if (!bypass.isChecked()) {

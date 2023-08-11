@@ -6,7 +6,6 @@ import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.wurstclient.forge.hacks.player.AutoJoinModule;
-import org.lwjgl.Sys;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -15,7 +14,6 @@ import java.util.Calendar;
 public class AutoJoin {
 
     private boolean isAutoJoining = false;
-    private boolean isOnMultiplayerMenu;
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
@@ -33,14 +31,6 @@ public class AutoJoin {
                         isAutoJoining = false;
                     }
                 }
-            } else {
-                if (event.phase == TickEvent.Phase.END && isOnMultiplayerMenu && AutoJoinModule.instant.isChecked()) {
-                    if (guiMultiplayer != null) {
-                        guiMultiplayer.selectServer(AutoJoinModule.indexToJoin.getValueI());
-                        guiMultiplayer.connectToSelected();
-                    }
-                    isOnMultiplayerMenu = false;
-                }
             }
         } catch (Exception ignored) {
         }
@@ -50,7 +40,6 @@ public class AutoJoin {
     public void onRender(GuiScreenEvent.InitGuiEvent.Post event) {
         // Set auto-joining to true when entering the multiplayer menu
         isAutoJoining = AutoJoinModule.enable.isChecked() && event.getGui() instanceof GuiMultiplayer;
-        isOnMultiplayerMenu = event.getGui() instanceof GuiMultiplayer;
     }
 
     @SubscribeEvent

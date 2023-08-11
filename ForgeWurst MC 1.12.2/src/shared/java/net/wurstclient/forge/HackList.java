@@ -12,7 +12,6 @@ import net.wurstclient.forge.hacks.pathing.*;
 import net.wurstclient.forge.hacks.player.*;
 import net.wurstclient.forge.hacks.render.*;
 import net.wurstclient.forge.hacks.world.*;
-import net.wurstclient.forge.other.AutoJoin;
 import net.wurstclient.forge.settings.Setting;
 import net.wurstclient.forge.utils.JsonUtils;
 
