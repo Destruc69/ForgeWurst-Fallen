@@ -149,14 +149,13 @@ public final class ElytraFlight extends Hack {
 				Minecraft.getMinecraft().player.motionY -= Math.sin(Math.toRadians(pitch)) * upSpeed.getValueF();
 			}
 		} else if (mode.getSelected() == Mode.BOOSTPLUS) {
-			double y;
+			double y = 0;
 			if (mc.gameSettings.keyBindJump.isKeyDown()) {
 				y = upSpeed.getValueF();
 			} else if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
 				y = -downSpeed.getValueF();
-			} else {
-				y = 0;
 			}
+
 			double[] dir = MathUtils.directionSpeed(baseSpeed.getValueF());
 			Vec3d vec3d = mc.player.getLookVec();
 			float f = mc.player.rotationPitch * 0.017453292F;
@@ -164,33 +163,34 @@ public final class ElytraFlight extends Hack {
 			double d8 = Math.sqrt(mc.player.motionX * mc.player.motionX + mc.player.motionZ * mc.player.motionZ);
 			double d1 = vec3d.lengthVector();
 			float f4 = MathHelper.cos(f);
-			f4 = (float) ((double) f4 * (double) f4 * Math.min(1.0D, d1 / 0.4D));
+			f4 = (float) (f4 * f4 * Math.min(1.0D, d1 / 0.4D));
 
-			mc.player.motionY += -0.08D + (double) f4 * 0.06D + y;
+			mc.player.motionY += -0.08D + f4 * 0.06D + y;
 
 			if (mc.player.motionY < 0.0D && d6 > 0.0D) {
-				double d2 = mc.player.motionY * -0.1D * (double) f4 + y;
+				double d2 = mc.player.motionY * -0.1D * f4 + y;
 				mc.player.motionY += d2;
-				mc.player.motionX += vec3d.x * d2 / d6 + dir[0];
-				mc.player.motionZ += vec3d.z * d2 / d6 + dir[1];
+				mc.player.motionX += (vec3d.x * d2 / d6 + dir[0]) * 0.5D;
+				mc.player.motionZ += (vec3d.z * d2 / d6 + dir[1]) * 0.5D;
 			}
 
 			if (f < 0.0F) {
-				double d10 = d8 * (double) (-MathHelper.sin(f)) * 0.04D;
+				double d10 = d8 * (-MathHelper.sin(f)) * 0.04D;
 				mc.player.motionY += d10 * 3.2D + y;
-				mc.player.motionX -= vec3d.x * d10 / d6 + dir[0];
-				mc.player.motionZ -= vec3d.z * d10 / d6 + dir[1];
+				mc.player.motionX -= (vec3d.x * d10 / d6 + dir[0]) * 0.5D;
+				mc.player.motionZ -= (vec3d.z * d10 / d6 + dir[1]) * 0.5D;
 			}
 
 			if (d6 > 0.0D) {
-				mc.player.motionX += (vec3d.x / d6 * d8 - mc.player.motionX + dir[0]) * 0.1D;
-				mc.player.motionZ += (vec3d.z / d6 * d8 - mc.player.motionZ + dir[1]) * 0.1D;
+				mc.player.motionX += ((vec3d.x / d6 * d8 - mc.player.motionX) + dir[0]) * 0.05D;
+				mc.player.motionZ += ((vec3d.z / d6 * d8 - mc.player.motionZ) + dir[1]) * 0.05D;
 			}
 
 			mc.player.motionX *= 0.9900000095367432D;
 			mc.player.motionY *= 0.9800000190734863D;
 			mc.player.motionZ *= 0.9900000095367432D;
-			//mc.player.move(MoverType.SELF, mc.player.motionX, mc.player.motionY, mc.player.motionZ);
+
+			// mc.player.move(MoverType.SELF, mc.player.motionX, mc.player.motionY, mc.player.motionZ);
 		}
 	}
 
