@@ -16,9 +16,14 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.hacks.player.NoFall;
 import net.wurstclient.forge.settings.CheckboxSetting;
+import net.wurstclient.forge.settings.EnumSetting;
 
 public final class Scaffold extends Hack {
+
+	private final EnumSetting<RotationsMode> rotationMode =
+			new EnumSetting<>("RotationMode", RotationsMode.values(), RotationsMode.A);
 
 	private final CheckboxSetting swing =
 			new CheckboxSetting("Swing", "Should we swing the arm when placing?.",
@@ -27,7 +32,23 @@ public final class Scaffold extends Hack {
 	public Scaffold() {
 		super("Scaffold", "Place blocks underneath you automatically.");
 		setCategory(Category.WORLD);
+		addSetting(rotationMode);
 		addSetting(swing);
+	}
+
+	private enum RotationsMode {
+		A("A"),
+		B("B");
+
+		private final String name;
+
+		private RotationsMode(String name) {
+			this.name = name;
+		}
+
+		public String toString() {
+			return name;
+		}
 	}
 
 	@Override
@@ -116,13 +137,17 @@ public final class Scaffold extends Hack {
 				}
 			}
 
-			double var4 = pos.getX() + 0.25D - mc.player.posX;
-			double var6 = pos.getZ() + 0.25D - mc.player.posZ;
-			double var8 = pos.getY() + 0.25D - (mc.player.posY + mc.player.getEyeHeight());
-			double var14 = MathHelper.sqrt(var4 * var4 + var6 * var6);
-			double yaw = (float) (Math.atan2(var6, var4) * 180.0D / Math.PI) - 90.0F;
-			double pitch = (float) -(Math.atan2(var8, var14) * 180.0D / Math.PI);
-			mc.player.connection.sendPacket(new CPacketPlayer.Rotation((float) yaw, (float) pitch, mc.player.onGround));
+			if (rotationMode.getSelected() == RotationsMode.A) {
+				double var4 = pos.getX() + 0.25D - mc.player.posX;
+				double var6 = pos.getZ() + 0.25D - mc.player.posZ;
+				double var8 = pos.getY() + 0.25D - (mc.player.posY + mc.player.getEyeHeight());
+				double var14 = MathHelper.sqrt(var4 * var4 + var6 * var6);
+				double yaw = (float) (Math.atan2(var6, var4) * 180.0D / Math.PI) - 90.0F;
+				double pitch = (float) -(Math.atan2(var8, var14) * 180.0D / Math.PI);
+				mc.player.connection.sendPacket(new CPacketPlayer.Rotation((float) yaw, (float) pitch, mc.player.onGround));
+			} else if (rotationMode.getSelected() == RotationsMode.B) {
+				mc.player.connection.sendPacket(new CPacketPlayer.Rotation(getRotationsBlock(pos, face)[0], getRotationsBlock(pos, face)[1], mc.player.onGround));
+			}
 		}
 
 		if (mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem() instanceof ItemBlock) {
@@ -133,13 +158,31 @@ public final class Scaffold extends Hack {
 				mc.player.connection.sendPacket(new CPacketAnimation(EnumHand.MAIN_HAND));
 			}
 
-			double var4 = pos.getX() + 0.25D - mc.player.posX;
-			double var6 = pos.getZ() + 0.25D - mc.player.posZ;
-			double var8 = pos.getY() + 0.25D - (mc.player.posY + mc.player.getEyeHeight());
-			double var14 = MathHelper.sqrt(var4 * var4 + var6 * var6);
-			double yaw = (float) (Math.atan2(var6, var4) * 180.0D / Math.PI) - 90.0F;
-			double pitch = (float) -(Math.atan2(var8, var14) * 180.0D / Math.PI);
-			mc.player.connection.sendPacket(new CPacketPlayer.Rotation((float) yaw, (float) pitch, mc.player.onGround));
+			if (rotationMode.getSelected() == RotationsMode.A) {
+				double var4 = pos.getX() + 0.25D - mc.player.posX;
+				double var6 = pos.getZ() + 0.25D - mc.player.posZ;
+				double var8 = pos.getY() + 0.25D - (mc.player.posY + mc.player.getEyeHeight());
+				double var14 = MathHelper.sqrt(var4 * var4 + var6 * var6);
+				double yaw = (float) (Math.atan2(var6, var4) * 180.0D / Math.PI) - 90.0F;
+				double pitch = (float) -(Math.atan2(var8, var14) * 180.0D / Math.PI);
+				mc.player.connection.sendPacket(new CPacketPlayer.Rotation((float) yaw, (float) pitch, mc.player.onGround));
+			} else if (rotationMode.getSelected() == RotationsMode.B) {
+				mc.player.connection.sendPacket(new CPacketPlayer.Rotation(getRotationsBlock(pos, face)[0], getRotationsBlock(pos, face)[1], mc.player.onGround));
+			}
 		}
+	}
+
+	public float[] getRotationsBlock(BlockPos block, EnumFacing face) {
+		double x = (double)block.getX() + 0.5 - mc.player.posX + (double)face.getFrontOffsetX() / 2.0;
+		double z = (double)block.getZ() + 0.5 - mc.player.posZ + (double)face.getFrontOffsetZ() / 2.0;
+		double y = (double)block.getY() + 0.5;
+		double d1 = mc.player.posY + (double)mc.player.getEyeHeight() - y;
+		double d3 = MathHelper.sqrt(x * x + z * z);
+		float yaw = (float)(Math.atan2(z, x) * 180.0 / 3.141592653589793) - 90.0f;
+		float pitch = (float)(Math.atan2(d1, d3) * 180.0 / 3.141592653589793);
+		if (yaw < 0.0f) {
+			yaw += 360.0f;
+		}
+		return new float[]{yaw, pitch};
 	}
 }
