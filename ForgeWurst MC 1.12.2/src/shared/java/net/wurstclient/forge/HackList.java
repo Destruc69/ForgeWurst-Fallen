@@ -8,6 +8,8 @@ import net.wurstclient.forge.compatibility.WHackList;
 import net.wurstclient.forge.hacks.ClickGuiHack;
 import net.wurstclient.forge.hacks.combat.*;
 import net.wurstclient.forge.hacks.hud.CoordinatesModule;
+import net.wurstclient.forge.hacks.hud.DataFuelModule;
+import net.wurstclient.forge.hacks.hud.EntityListModule;
 import net.wurstclient.forge.hacks.movement.*;
 import net.wurstclient.forge.hacks.pathing.*;
 import net.wurstclient.forge.hacks.player.*;
@@ -31,6 +33,7 @@ public final class HackList extends WHackList
 	public final NoFall noFall = register(new NoFall());
 	public final Speed speed = register(new Speed());
 	public final Step step = register(new Step());
+	public final DataFuelModule dataFuelModule = register(new DataFuelModule());
 	public final PacketLimiter packetLimiter = register(new PacketLimiter());
 	public final AutoJoinModule autoJoinModule = register(new AutoJoinModule());
 	public final AutoMine autoMine = register(new AutoMine());
@@ -136,6 +139,7 @@ public final class HackList extends WHackList
 	public final YawLock yawLock = register(new YawLock());
 	public final AntiSwing antiSwing = register(new AntiSwing());
 	public final Follow follow = register(new Follow());
+	public final EntityListModule entityListModule = register(new EntityListModule());
 	public final Surround surround = register(new Surround());
 	public final GodMode godMode = register(new GodMode());
 	

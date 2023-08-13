@@ -25,7 +25,6 @@ public final class CoordinatesModule extends Hack {
 	private final SliderSetting z =
 			new SliderSetting("Z", 0, -32000000, 32000000, 1, SliderSetting.ValueDisplay.DECIMAL);
 
-
 	public CoordinatesModule() {
 		super("Coordinates", "Shows coordinate values.");
 		setCategory(Category.HUD);
