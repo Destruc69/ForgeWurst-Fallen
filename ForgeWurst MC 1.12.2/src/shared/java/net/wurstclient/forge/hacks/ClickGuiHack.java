@@ -15,12 +15,10 @@ import net.wurstclient.fmlevents.WGuiInventoryButtonEvent;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.clickgui.ClickGui;
 import net.wurstclient.forge.clickgui.ClickGuiScreen;
-import net.wurstclient.forge.hacks.movement.AutoSprintHack;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.settings.SliderSetting.ValueDisplay;
-import net.wurstclient.forge.utils.TimerUtils;
 
 @Hack.DontSaveState
 public final class ClickGuiHack extends Hack
@@ -94,11 +92,11 @@ public final class ClickGuiHack extends Hack
             ValueDisplay.DECIMAL);
 
     public static final SliderSetting particleSpawnRate = new SliderSetting("ParticleSpawnRate",
-            "How fast the particles are spawned", 0.05, 0.01, 0.1, 0.01,
+            "How fast the particles are spawned", 0.5, 0.05, 0.1, 0.1,
             ValueDisplay.DECIMAL);
 
     public static final SliderSetting particleSpeed = new SliderSetting("ParticleSpeed",
-            "How fast are the particles?", 1, 0.05, 3, 0.001,
+            "How fast are the particles?", 1, 0.5, 3, 0.5,
             ValueDisplay.DECIMAL);
 
     public static final CheckboxSetting blockArrayList =
@@ -108,6 +106,11 @@ public final class ClickGuiHack extends Hack
 
     public static final EnumSetting<PrefixEnum> prefixEnumEnumSetting =
             new EnumSetting<>("Prefix", PrefixEnum.values(), PrefixEnum.DOT);
+
+    public static final CheckboxSetting customFont =
+            new CheckboxSetting("CustomFont",
+                    "Make everything utilize a custom font.",
+                    false);
 
     public ClickGuiHack()
     {
@@ -135,6 +138,7 @@ public final class ClickGuiHack extends Hack
         addSetting(particleSpeed);
         addSetting(blockArrayList);
         addSetting(prefixEnumEnumSetting);
+        addSetting(customFont);
 
         MinecraftForge.EVENT_BUS.register(new InventoryButtonAdder());
     }

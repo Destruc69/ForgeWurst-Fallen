@@ -7,17 +7,12 @@
  */
 package net.wurstclient.forge.hacks.movement;
 
-import net.minecraft.entity.player.EnumPlayerModelParts;
-import net.minecraft.init.SoundEvents;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.CheckboxSetting;
-import net.wurstclient.forge.settings.SliderSetting;
-import net.wurstclient.forge.utils.KeyBindingUtils;
-import net.wurstclient.forge.utils.TimerUtils;
 
 public final class AntiAFK extends Hack {
 

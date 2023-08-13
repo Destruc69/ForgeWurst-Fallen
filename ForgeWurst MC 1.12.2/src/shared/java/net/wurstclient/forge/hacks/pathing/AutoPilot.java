@@ -18,8 +18,6 @@ import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.pathfinding.LandPathUtils;
 import net.wurstclient.forge.utils.ChatUtils;
-import net.wurstclient.forge.utils.KeyBindingUtils;
-import net.wurstclient.forge.utils.TextUtil;
 
 import java.util.ArrayList;
 

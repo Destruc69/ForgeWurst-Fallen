@@ -11,7 +11,6 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderHandEvent;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.*;
@@ -19,9 +18,6 @@ import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.SliderSetting;
-import net.wurstclient.forge.utils.FallenRenderUtils;
-
-import java.awt.*;
 
 public final class FreeCam extends Hack {
 
@@ -77,13 +73,6 @@ public final class FreeCam extends Hack {
 			player.motionY += speed.getValue();
 		if (mc.gameSettings.keyBindSneak.isKeyDown())
 			player.motionY -= speed.getValue();
-	}
-
-	@SubscribeEvent
-	public void onRender(RenderWorldLastEvent event) {
-		if (!teleport.isChecked()) {
-			FallenRenderUtils.drawLine(new Vec3d(playerPosSave.x, playerPosSave.y, playerPosSave.z), new Vec3d(playerPosSave.x, playerPosSave.y + 1, playerPosSave.z), 12, Color.GREEN);
-		}
 	}
 
 	@SubscribeEvent

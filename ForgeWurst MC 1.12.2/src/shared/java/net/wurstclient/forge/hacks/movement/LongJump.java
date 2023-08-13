@@ -8,24 +8,17 @@
 package net.wurstclient.forge.hacks.movement;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.network.play.client.CPacketConfirmTeleport;
 import net.minecraft.network.play.client.CPacketPlayer;
-import net.minecraft.network.play.server.SPacketPlayerPosLook;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.wurstclient.fmlevents.WPacketInputEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.EnumSetting;
-import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.KeyBindingUtils;
 import net.wurstclient.forge.utils.MathUtils;
-import net.wurstclient.forge.utils.NotiUtils;
 
 public final class LongJump extends Hack {
 	private final Minecraft mc = Minecraft.getMinecraft();

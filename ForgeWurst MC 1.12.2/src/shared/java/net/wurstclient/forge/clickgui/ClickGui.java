@@ -13,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.ResourceLocation;
 import net.wurstclient.forge.Category;
@@ -26,9 +27,12 @@ import net.wurstclient.forge.utils.JsonUtils;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
+import javax.vecmath.Vector4d;
+import javax.vecmath.Vector4f;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -384,7 +388,10 @@ public final class ClickGui
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glShadeModel(GL11.GL_SMOOTH);
+
         GL11.glLineWidth(ClickGuiHack.clickLineSize.getValueF());
+
+        mc.fontRenderer.setUnicodeFlag(ClickGuiHack.customFont.isChecked());
 
         assert mc.currentScreen != null;
         drawRect(0, 0, mc.currentScreen.width, mc.currentScreen.height, ClickGuiHack.backgroundColor.getValueI());
@@ -1109,7 +1116,6 @@ public final class ClickGui
             this.vy = vy;
         }
 
-
         double lastNonZeroSpeed = 0;
         private void update() {
             // Get screen dimensions
@@ -1131,28 +1137,22 @@ public final class ClickGui
                 vy = -vy;
             }
 
-            // Clamp velocity magnitude
+            // Update velocity
             double speed = ClickGuiHack.particleSpeed.getValue();
             double velocityMagnitude = Math.sqrt(vx * vx + vy * vy);
+
             if (velocityMagnitude < 0.0001) { // check for zero magnitude
                 // Randomly assign non-zero velocity
-                if (lastNonZeroSpeed == 0) {
-                    // if there is no last non-zero speed, assign a random velocity
-                    vx = (int) ((Math.random() - 0.5) * speed);
-                    vy = (int) ((Math.random() - 0.5) * speed);
-                } else {
-                    // otherwise, use the last non-zero speed
-                    double scale = lastNonZeroSpeed / velocityMagnitude;
-                    vx *= scale;
-                    vy *= scale;
-                }
+                vx = (int) ((Math.random() - 0.5) * speed);
+                vy = (int) ((Math.random() - 0.5) * speed);
+                lastNonZeroSpeed = speed; // Update lastNonZeroSpeed
             } else if (velocityMagnitude > speed) {
                 double scale = speed / velocityMagnitude;
                 vx *= scale;
                 vy *= scale;
-                lastNonZeroSpeed = speed;
+                lastNonZeroSpeed = velocityMagnitude; // Update lastNonZeroSpeed
             } else {
-                lastNonZeroSpeed = speed;
+                lastNonZeroSpeed = velocityMagnitude; // Update lastNonZeroSpeed
             }
         }
 

@@ -272,9 +272,36 @@ public final class Nuker extends Hack
 			GL11.glDisable(GL11.GL_BLEND);
 			GL11.glDisable(GL11.GL_LINE_SMOOTH);
 		} else {
+
+			// GL settings
+			GL11.glEnable(GL11.GL_BLEND);
+			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+			GL11.glEnable(GL11.GL_LINE_SMOOTH);
+			GL11.glLineWidth(2);
+			GL11.glDisable(GL11.GL_TEXTURE_2D);
+			GL11.glEnable(GL11.GL_CULL_FACE);
+			GL11.glDisable(GL11.GL_DEPTH_TEST);
+
+			GL11.glPushMatrix();
+			GL11.glTranslated(-TileEntityRendererDispatcher.staticPlayerX,
+					-TileEntityRendererDispatcher.staticPlayerY,
+					-TileEntityRendererDispatcher.staticPlayerZ);
+
 			for (BlockPos blockPos : legitTargBlocks) {
-				FallenRenderUtils.renderPosOutline(blockPos, event.getPartialTicks(), 0, 0, 1, 0.5f);
+				GL11.glColor4f(0, 1, 0, 0.25F);
+				GL11.glBegin(GL11.GL_QUADS);
+				RenderUtils.drawOutlinedBox(BlockUtils.getBoundingBox(blockPos));
+				GL11.glEnd();
 			}
+
+			GL11.glPopMatrix();
+
+			// GL resets
+			GL11.glColor4f(1, 1, 1, 1);
+			GL11.glEnable(GL11.GL_DEPTH_TEST);
+			GL11.glEnable(GL11.GL_TEXTURE_2D);
+			GL11.glDisable(GL11.GL_BLEND);
+			GL11.glDisable(GL11.GL_LINE_SMOOTH);
 		}
 	}
 

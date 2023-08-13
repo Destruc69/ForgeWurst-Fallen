@@ -14,22 +14,18 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.utils.ChatUtils;
 import net.wurstclient.forge.utils.RenderUtils;
-import net.wurstclient.forge.utils.TimerUtils;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public final class HackerDedector extends Hack {
 	ArrayList<EntityPlayer> hackers = new ArrayList<>();
@@ -76,7 +72,6 @@ public final class HackerDedector extends Hack {
 	@Override
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
-		TimerUtils.reset();
 		world = mc.world;
 	}
 
@@ -96,7 +91,6 @@ public final class HackerDedector extends Hack {
 			if (limit == 0)
 				return;
 			limit = limit - 1;
-			TimerUtils.reset();
 		}
 		boolean isAtLimit = limit >= maxLimit;
 

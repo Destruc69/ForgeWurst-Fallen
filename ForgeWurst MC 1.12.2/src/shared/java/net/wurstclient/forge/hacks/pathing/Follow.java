@@ -20,7 +20,6 @@ import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.pathfinding.LandPathUtils;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.utils.ChatUtils;
-import net.wurstclient.forge.utils.TextUtil;
 
 import java.util.ArrayList;
 
@@ -76,7 +75,7 @@ public final class Follow extends Hack {
 						blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition().add(0, -1, 0), closestEntity.getPosition().add(0, -1, 0), PathfinderModule.debug.isChecked());
 						if (blockPosArrayList.size() > 0) {
 							if (LandPathUtils.calculateETA(blockPosArrayList) != null) {
-								ChatUtils.message(TextUtil.coloredString("ETA: " + LandPathUtils.calculateETA(blockPosArrayList), TextUtil.Color.GREEN));
+								ChatUtils.message("ETA: " + LandPathUtils.calculateETA(blockPosArrayList));
 							}
 						}
 					}

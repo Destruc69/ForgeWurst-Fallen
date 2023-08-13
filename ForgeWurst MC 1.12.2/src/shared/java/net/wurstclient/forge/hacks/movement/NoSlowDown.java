@@ -8,7 +8,6 @@
 package net.wurstclient.forge.hacks.movement;
 
 import net.minecraft.item.ItemFood;
-import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
@@ -22,7 +21,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.CheckboxSetting;
-import net.wurstclient.forge.utils.InventoryUtil;
 
 public final class NoSlowDown extends Hack {
 
@@ -95,7 +93,7 @@ public final class NoSlowDown extends Hack {
 					mc.player.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.SWAP_HELD_ITEMS, new BlockPos(mc.player.posX, mc.player.posY - 1.0, mc.player.posZ), EnumFacing.DOWN));
 				}
 				if (other3.isChecked()) {
-					mc.player.connection.sendPacket(new CPacketHeldItemChange(InventoryUtil.getHandSlot()));
+					mc.player.connection.sendPacket(new CPacketHeldItemChange(getHandSlot()));
 				}
 				if (hypixel.isChecked()) {
 					mc.player.connection.sendPacket(new CPacketPlayerTryUseItemOnBlock(new BlockPos(mc.player.posX, mc.player.posY - 1, mc.player.posZ), EnumFacing.DOWN, EnumHand.MAIN_HAND, (float) mc.player.getLookVec().x, (float) mc.player.getLookVec().y, (float) mc.player.getLookVec().z));
@@ -110,5 +108,9 @@ public final class NoSlowDown extends Hack {
 			}
 		} catch (Exception ignored) {
 		}
+	}
+
+	private int getHandSlot() {
+		return mc.player.inventory.currentItem;
 	}
 }

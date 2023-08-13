@@ -14,7 +14,8 @@ public enum Category
 	WORLD("World"),
 	PLAYER("Player"),
 	RENDER("Render"),
-	PATHING("Pathing");
+	PATHING("Pathing"),
+	HUD("HUD");
 
 
 	private final String name;

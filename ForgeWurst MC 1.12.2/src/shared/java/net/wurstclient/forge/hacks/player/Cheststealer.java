@@ -15,8 +15,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.utils.InventoryUtil;
-import net.wurstclient.forge.utils.TimerUtils;
 
 public final class Cheststealer extends Hack {
 	double slot;
@@ -28,7 +26,6 @@ public final class Cheststealer extends Hack {
 	@Override
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
-		TimerUtils.reset();
 	}
 
 	@Override
@@ -47,12 +44,21 @@ public final class Cheststealer extends Hack {
 			GuiChest getState = (GuiChest) mc.currentScreen;
 			if (!getState.inventorySlots.getSlot((int) slot).getStack().getItem().equals(Items.AIR)) {
 				mc.playerController.windowClick(getState.inventorySlots.windowId, (int) slot, 0, ClickType.QUICK_MOVE, mc.player);
-				double emptySlot = InventoryUtil.getEmptySlot();
+				double emptySlot = getEmptySlot();
 				mc.playerController.windowClick(getState.inventorySlots.getSlot((int) emptySlot).slotNumber, (int) emptySlot,0, ClickType.QUICK_MOVE, mc.player);
 				mc.playerController.updateController();
 			}
 		} else {
 			slot = 0;
 		}
+	}
+
+	private double getEmptySlot() {
+		for (int x = 0; x < mc.player.inventory.mainInventory.size(); x ++) {
+			if (mc.player.inventory.getStackInSlot(x).getItem().equals(Items.AIR)) {
+				return x;
+			}
+		}
+		return 0;
 	}
 }

@@ -12,9 +12,11 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
+import net.minecraftforge.client.event.RenderSpecificHandEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -28,21 +30,34 @@ public final class Animations extends Hack {
 
 	private static final Minecraft mc = Minecraft.getMinecraft();
 
-	private static final SliderSetting xv =
-			new SliderSetting("X", 0, -2, 2, 1, SliderSetting.ValueDisplay.DECIMAL);
+	private static final SliderSetting rhxv =
+			new SliderSetting("RightHand-X", 0, -2, 2, 1, SliderSetting.ValueDisplay.DECIMAL);
 
-	private static final SliderSetting yv =
-			new SliderSetting("Y", 0, -2, 2, 0.1, SliderSetting.ValueDisplay.DECIMAL);
+	private static final SliderSetting rhyv =
+			new SliderSetting("RightHand-Y", 0, -2, 2, 0.1, SliderSetting.ValueDisplay.DECIMAL);
 
-	private static final SliderSetting zv =
-			new SliderSetting("Z", 0, -2, 2, 1, SliderSetting.ValueDisplay.DECIMAL);
+	private static final SliderSetting rhzv =
+			new SliderSetting("RightHand-Z", 0, -2, 2, 1, SliderSetting.ValueDisplay.DECIMAL);
+
+	private static final SliderSetting lhxv =
+			new SliderSetting("LeftHand-X", 0, -2, 2, 1, SliderSetting.ValueDisplay.DECIMAL);
+
+	private static final SliderSetting lhyv =
+			new SliderSetting("LeftHand-Y", 0, -2, 2, 0.1, SliderSetting.ValueDisplay.DECIMAL);
+
+	private static final SliderSetting lhzv =
+			new SliderSetting("LeftHand-Z", 0, -2, 2, 1, SliderSetting.ValueDisplay.DECIMAL);
+
 
 	public Animations() {
 		super("Animations", "Animations, explains its self.");
 		setCategory(Category.PLAYER);
-		addSetting(xv);
-		addSetting(yv);
-		addSetting(zv);
+		addSetting(rhxv);
+		addSetting(rhyv);
+		addSetting(rhzv);
+		addSetting(lhxv);
+		addSetting(lhyv);
+		addSetting(lhzv);
 	}
 
 	@Override
@@ -53,15 +68,18 @@ public final class Animations extends Hack {
 	@Override
 	protected void onDisable() {
 		MinecraftForge.EVENT_BUS.unregister(this);
-		xv.setValue(0);
-		yv.setValue(0);
-		zv.setValue(0);
 	}
 
 	@SubscribeEvent
-	public void onRenderHand(RenderHandEvent event) {
+	public void onRenderHand(RenderSpecificHandEvent event) {
 		ItemRenderer ir = mc.getItemRenderer();
-		GlStateManager.translate(xv.getValueI(), yv.getValueF(), zv.getValueI());
-		ir.updateEquippedItem();
+		if (event.getHand() == EnumHand.MAIN_HAND) {
+			GlStateManager.translate(rhxv.getValueF(), rhyv.getValueF(), rhzv.getValueF());
+			ir.updateEquippedItem();
+		}
+		if (event.getHand() == EnumHand.OFF_HAND) {
+			GlStateManager.translate(lhxv.getValueF(), lhyv.getValueF(), lhzv.getValueF());
+			ir.updateEquippedItem();
+		}
 	}
 }

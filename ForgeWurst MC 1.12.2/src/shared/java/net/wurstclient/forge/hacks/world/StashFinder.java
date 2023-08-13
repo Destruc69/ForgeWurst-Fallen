@@ -7,23 +7,20 @@
  */
 package net.wurstclient.forge.hacks.world;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockChest;
 import net.minecraft.block.BlockEnderChest;
 import net.minecraft.block.BlockShulkerBox;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.settings.SliderSetting;
-import net.wurstclient.forge.utils.FallenRenderUtils;
-import net.wurstclient.forge.utils.KeyBindingUtils;
+import net.wurstclient.forge.utils.BlockUtils;
+import net.wurstclient.forge.utils.RenderUtils;
 
 import java.util.ArrayList;
 
@@ -82,8 +79,9 @@ public final class StashFinder extends Hack {
 	@SubscribeEvent
 	public void onRender(RenderWorldLastEvent event) {
 		for (BlockPos blockPos : targBlocks) {
-			for (int y = -100; y < 100; y++)
-				FallenRenderUtils.renderPosFilled(blockPos.add(0, y, 0), event.getPartialTicks(), 1, 0, 0, 0.2f);
+			for (int y = -100; y < 100; y++) {
+				RenderUtils.drawSolidBox(BlockUtils.getBoundingBox(blockPos.add(0, y, 0)));
+			}
 		}
 	}
 }

@@ -21,6 +21,7 @@ public class ClickGUIButtonMainMenu extends GuiButton  {
 
         if (mouseX >= regionX && mouseX < regionX + regionWidth &&
                 mouseY >= regionY && mouseY < regionY + regionHeight) {
+            mc.renderGlobal.loadRenderers();
             mc.displayGuiScreen(new ClickGuiScreen(ForgeWurst.getForgeWurst().getGui()));
             return true;
         }

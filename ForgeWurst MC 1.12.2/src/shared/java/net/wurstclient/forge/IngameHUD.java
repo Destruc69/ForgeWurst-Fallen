@@ -15,9 +15,7 @@ import net.wurstclient.forge.clickgui.ClickGui;
 import net.wurstclient.forge.clickgui.ClickGuiScreen;
 import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.hacks.ClickGuiHack;
-import net.wurstclient.forge.hacks.render.HudModules;
-import net.wurstclient.forge.utils.GUIUtils;
-import net.wurstclient.forge.utils.TextUtil;
+import net.wurstclient.forge.utils.TextUtils;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
@@ -96,131 +94,77 @@ public final class IngameHUD {
 
 
 		if (!ForgeWurst.getForgeWurst().getHax().clickGuiHack.nogui().isChecked()) {
-			if (!ClickGuiHack.blockArrayList.isChecked()) {
-				// title
-				GL11.glPushMatrix();
-				GL11.glScaled(1.55555555, 1.55555555, 0.88888888);
-				WMinecraft.getFontRenderer().drawStringWithShadow("  allen", 3, 3, (int) textColor);
-				GL11.glPopMatrix();
+			// title
+			GL11.glPushMatrix();
+			GL11.glScaled(1.55555555, 1.55555555, 0.88888888);
+			WMinecraft.getFontRenderer().drawStringWithShadow("  allen", 3, 3, (int) textColor);
+			GL11.glPopMatrix();
 
-				GL11.glPushMatrix();
-				GL11.glScaled(2, 2, 1);
-				WMinecraft.getFontRenderer().drawStringWithShadow("F", 3, 3, (int) textColor);
-				GL11.glPopMatrix();
+			GL11.glPushMatrix();
+			GL11.glScaled(2, 2, 1);
+			WMinecraft.getFontRenderer().drawStringWithShadow("F", 3, 3, (int) textColor);
+			GL11.glPopMatrix();
 
-				GL11.glPushMatrix();
-				GL11.glScaled(1.55555555, 1.55555555, 0.88888888);
-				WMinecraft.getFontRenderer().drawStringWithShadow(" _____", 3, 4, (int) textColor);
-				GL11.glPopMatrix();
+			GL11.glPushMatrix();
+			GL11.glScaled(1.55555555, 1.55555555, 0.88888888);
+			WMinecraft.getFontRenderer().drawStringWithShadow(" _____", 3, 4, (int) textColor);
+			GL11.glPopMatrix();
 
-				GL11.glPushMatrix();
-				GL11.glScaled(1.55555555, 1.55555555, 0.88888888);
-				WMinecraft.getFontRenderer().drawStringWithShadow(" _____", 4, 4, (int) textColor);
-				GL11.glPopMatrix();
+			GL11.glPushMatrix();
+			GL11.glScaled(1.55555555, 1.55555555, 0.88888888);
+			WMinecraft.getFontRenderer().drawStringWithShadow(" _____", 4, 4, (int) textColor);
+			GL11.glPopMatrix();
 
-				GL11.glShadeModel(GL11.GL_SMOOTH);
+			GL11.glShadeModel(GL11.GL_SMOOTH);
 
-				// hack list
-				int y = 23;
-				ArrayList<Hack> hacks = new ArrayList<>(hackList.getValues());
-				Comparator<Hack> comparator = new NameLengthComparator();
-				hacks.sort(comparator.reversed());
+			// hack list
+			int y = 23;
+			ArrayList<Hack> hacks = new ArrayList<>(hackList.getValues());
+			Comparator<Hack> comparator = new NameLengthComparator();
+			hacks.sort(comparator.reversed());
 
-				gui.updateColors();
+			gui.updateColors();
 
-				for (Hack hack : hacks) {
-					if (!hack.isEnabled())
-						continue;
+			for (Hack hack : hacks) {
+				if (!hack.isEnabled())
+					continue;
 
-					if (hack.getName().equals(""))
-						return;
+				if (hack.getName().equals(""))
+					return;
 
-					if (hack.getCategory().getName().contains("Combat")) {
-						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.RED);
-						theColor = Color.RED.getRGB();
-					} else if (hack.getCategory().getName().contains("Movement")) {
-						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.BLUE);
-						theColor = Color.BLUE.getRGB();
-					} else if (hack.getCategory().getName().contains("World")) {
-						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.GREEN);
-						theColor = Color.GREEN.getRGB();
-					} else if (hack.getCategory().getName().contains("Player")) {
-						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.GOLD);
-						theColor = Color.ORANGE.getRGB();
-					} else if (hack.getCategory().getName().contains("Render")) {
-						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.AQUA);
-						theColor = Color.CYAN.getRGB();
-					} else if (hack.getCategory().getName().contains("Pathing")) {
-						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.YELLOW);
-						theColor = Color.YELLOW.getRGB();
-					} else if (hack.getCategory().getName().contains("Games")) {
-						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.GOLD);
-						theColor = Color.YELLOW.getRGB();
-					}
-
-					WMinecraft.getFontRenderer().drawString(color, 4, y, (int) textColor, false);
-
-					y += 9;
+				if (hack.getCategory().getName().contains("Combat")) {
+					color = TextUtils.coloredString(hack.getName(), TextUtils.Color.RED);
+					theColor = Color.RED.getRGB();
+				} else if (hack.getCategory().getName().contains("Movement")) {
+					color = TextUtils.coloredString(hack.getName(), TextUtils.Color.BLUE);
+					theColor = Color.BLUE.getRGB();
+				} else if (hack.getCategory().getName().contains("World")) {
+					color = TextUtils.coloredString(hack.getName(), TextUtils.Color.GREEN);
+					theColor = Color.GREEN.getRGB();
+				} else if (hack.getCategory().getName().contains("Player")) {
+					color = TextUtils.coloredString(hack.getName(), TextUtils.Color.GOLD);
+					theColor = Color.ORANGE.getRGB();
+				} else if (hack.getCategory().getName().contains("Render")) {
+					color = TextUtils.coloredString(hack.getName(), TextUtils.Color.AQUA);
+					theColor = Color.CYAN.getRGB();
+				} else if (hack.getCategory().getName().contains("Pathing")) {
+					color = TextUtils.coloredString(hack.getName(), TextUtils.Color.YELLOW);
+					theColor = Color.YELLOW.getRGB();
+				} else if (hack.getCategory().getName().contains("Games")) {
+					color = TextUtils.coloredString(hack.getName(), TextUtils.Color.GOLD);
+					theColor = Color.YELLOW.getRGB();
 				}
-				// pinned windows
 
-			} else {
-				// title
-				GUIUtils.renderTextBoxForLabel("Fallen", 4, 3, 43, 12, (int) textColor);
+				WMinecraft.getFontRenderer().drawString(color, 4, y, (int) textColor, false);
 
-				GL11.glShadeModel(GL11.GL_SMOOTH);
-
-				// hack list
-				int y = 18;
-				ArrayList<Hack> hacks = new ArrayList<>(hackList.getValues());
-				Comparator<Hack> comparator = new NameLengthComparator();
-				hacks.sort(comparator.reversed());
-
-				gui.updateColors();
-
-				for (Hack hack : hacks) {
-					if (!hack.isEnabled())
-						continue;
-
-					if (hack.getName().equals(""))
-						return;
-
-					if (hack.getCategory().getName().contains("Combat")) {
-						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.RED);
-						theColor = Color.RED.getRGB();
-					} else if (hack.getCategory().getName().contains("Movement")) {
-						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.BLUE);
-						theColor = Color.BLUE.getRGB();
-					} else if (hack.getCategory().getName().contains("World")) {
-						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.GREEN);
-						theColor = Color.GREEN.getRGB();
-					} else if (hack.getCategory().getName().contains("Player")) {
-						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.GOLD);
-						theColor = Color.ORANGE.getRGB();
-					} else if (hack.getCategory().getName().contains("Render")) {
-						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.AQUA);
-						theColor = Color.CYAN.getRGB();
-					} else if (hack.getCategory().getName().contains("Pathing")) {
-						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.YELLOW);
-						theColor = Color.YELLOW.getRGB();
-					} else if (hack.getCategory().getName().contains("Games")) {
-						color = TextUtil.coloredString(hack.getName(), TextUtil.Color.GOLD);
-						theColor = Color.YELLOW.getRGB();
-					}
-
-					GUIUtils.renderTextBoxForLabel(color, 4, y, color.length() + 70, 9, (int) theColor);
-
-					y += 9;
-				}
-				// pinned windows
-
+				y += 9;
 			}
-			if (!(mc.currentScreen instanceof ClickGuiScreen))
-				clickGui.renderPinnedWindows(event.getPartialTicks());
-			if (blend)
-				GL11.glEnable(GL11.GL_BLEND);
-			else
-				GL11.glDisable(GL11.GL_BLEND);
 		}
+		if (!(mc.currentScreen instanceof ClickGuiScreen))
+			clickGui.renderPinnedWindows(event.getPartialTicks());
+		if (blend)
+			GL11.glEnable(GL11.GL_BLEND);
+		else
+			GL11.glDisable(GL11.GL_BLEND);
 	}
 }

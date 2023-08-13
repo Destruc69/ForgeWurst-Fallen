@@ -3,7 +3,7 @@ package net.wurstclient.forge.utils;
 import java.util.Random;
 import java.util.regex.Pattern;
 
-public class TextUtil {
+public class TextUtils {
     public static final String SECTIONSIGN = "\u00a7";
     private static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + String.valueOf("\u00a7") + "[0-9A-FK-OR]");
     public static final String BLACK = "\u00a70";

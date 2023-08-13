@@ -43,28 +43,17 @@ public final class Disabler extends Hack {
 
 	@SubscribeEvent
 	public void onPacket(WPacketOutputEvent event) {
-		try {
-			if (mode.getSelected().basic || mode.getSelected().extra) {
-				if (event.getPacket() instanceof CPacketConfirmTransaction ||
-						event.getPacket() instanceof CPacketCustomPayload ||
-						event.getPacket() instanceof CPacketEntityAction) {
-					event.setCanceled(true);
-				}
+		if (mode.getSelected().extra) {
+			if (event.getPacket() instanceof CPacketConfirmTransaction ||
+					event.getPacket() instanceof CPacketCustomPayload ||
+					event.getPacket() instanceof CPacketEntityAction) {
+				event.setCanceled(true);
 			}
-		} catch (Exception ignored) {
-		}
-	}
-
-	@SubscribeEvent
-	public void onPacketIn(WPacketInputEvent event) {
-		try {
-			if (mode.getSelected().extra) {
-				if (event.getPacket() instanceof SPacketPlayerPosLook) {
-					SPacketPlayerPosLook sPacketPlayerPosLook = (SPacketPlayerPosLook) event.getPacket();
-					mc.player.connection.sendPacket(new CPacketConfirmTeleport(sPacketPlayerPosLook.getTeleportId()));
-				}
+		} else if (mode.getSelected().basic) {
+			if (event.getPacket() instanceof CPacketConfirmTransaction ||
+					event.getPacket() instanceof CPacketCustomPayload) {
+				event.setCanceled(true);
 			}
-		} catch (Exception ignored) {
 		}
 	}
 

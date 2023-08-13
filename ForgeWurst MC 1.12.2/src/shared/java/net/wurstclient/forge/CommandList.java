@@ -15,14 +15,11 @@ public final class CommandList extends WCommandList
 	public final BindsCmd bindsCmd = register(new BindsCmd());
 	public final ClearCmd clearCmd = register(new ClearCmd());
 	public final GmCmd gmCmd = register(new GmCmd());
-	public final DupeCMD dupeCMD = register(new DupeCMD());
-	public final GiveCMD giveCMD = register(new GiveCMD());
 	public final PearlTPCmd pearlTPCmd = register(new PearlTPCmd());
 	public final SetAP setAP = register(new SetAP());
 	public final OPItemCMD opItemCMD = register(new OPItemCMD());
 	public final AddPoint addPoint = register(new AddPoint());
 	public final FaceCMD faceCMD = register(new FaceCMD());
-	public final Damage damage = register(new Damage());
 	public final HelpCmd helpCmd = register(new HelpCmd());
 	public final SayCmd sayCmd = register(new SayCmd());
 	public final SetCheckboxCmd setCheckboxCmd = register(new SetCheckboxCmd());

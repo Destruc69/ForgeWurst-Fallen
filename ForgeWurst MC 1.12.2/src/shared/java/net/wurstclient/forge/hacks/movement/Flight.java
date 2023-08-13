@@ -222,6 +222,20 @@ public final class Flight extends Hack
 						mc.player.fallDistance = 50000 - Math.round(Math.random() * 50000);
 					}
 
+					if (mc.player.motionX > 0.26 || mc.player.motionX < -0.26 ||
+					mc.player.motionZ > 0.26 || mc.player.motionZ < -0.26) {
+						if (mc.player.motionX > 0) {
+							mc.player.motionX = mc.player.motionX - 0.05;
+						} else if (mc.player.motionX < 0) {
+							mc.player.motionX = mc.player.motionX + 0.05;
+						}
+						if (mc.player.motionZ > 0) {
+							mc.player.motionZ = mc.player.motionZ - 0.05;
+						} else if (mc.player.motionZ < 0) {
+							mc.player.motionZ = mc.player.motionZ + 0.05;
+						}
+					}
+
 					for (int a = 0; a < ncpStength.getValueI(); a++) {
 						mc.player.connection.sendPacket(new CPacketPlayer.PositionRotation(mc.player.posX + mc.player.motionX, mc.player.posY + mc.player.motionY, mc.player.posZ + mc.player.motionZ, mc.player.rotationYaw, mc.player.rotationPitch, false));
 						if (mc.player.ticksExisted % 2 == 0) {

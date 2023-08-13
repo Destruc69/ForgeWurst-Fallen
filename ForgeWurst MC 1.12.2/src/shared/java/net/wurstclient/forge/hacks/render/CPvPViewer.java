@@ -9,19 +9,12 @@ package net.wurstclient.forge.hacks.render;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.settings.EnumSetting;
-import net.wurstclient.forge.utils.ChatUtils;
-import net.wurstclient.forge.utils.KeyBindingUtils;
-import net.wurstclient.forge.utils.MathUtils;
-import net.wurstclient.forge.utils.TimerUtils;
 
 public final class CPvPViewer extends Hack {
 	public CPvPViewer() {

@@ -7,8 +7,13 @@
  */
 package net.wurstclient.forge.hacks.player;
 
+import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
@@ -22,12 +27,13 @@ import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.settings.SliderSetting;
-import net.wurstclient.forge.utils.FallenRenderUtils;
-import net.wurstclient.forge.utils.InventoryUtil;
 import net.wurstclient.forge.utils.KeyBindingUtils;
+import net.wurstclient.forge.utils.RenderUtils;
 import net.wurstclient.forge.utils.RotationUtils;
+import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Objects;
 
 public final class NoFall extends Hack {
@@ -95,7 +101,7 @@ public final class NoFall extends Hack {
 							if (mc.player.onGround) {
 								lastOnGroundY = mc.player.posY;
 								double savedSlot = mc.player.inventory.currentItem;
-								if (mc.player.inventory.currentItem == InventoryUtil.getSlot(Items.WATER_BUCKET)) {
+								if (mc.player.inventory.currentItem == getSlot(Items.WATER_BUCKET)) {
 									mc.player.inventory.currentItem = (int) savedSlot;
 									mc.playerController.updateController();
 									KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, false);
@@ -108,7 +114,7 @@ public final class NoFall extends Hack {
 									mc.player.rotationPitch = 90;
 									KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
 									if (!(mc.world.getBlockState(blockPos).getBlock().equals(Blocks.AIR))) {
-										double newSlot = InventoryUtil.getSlot(Items.WATER_BUCKET);
+										double newSlot = getSlot(Items.WATER_BUCKET);
 										mc.player.inventory.currentItem = (int) newSlot;
 										mc.playerController.updateController();
 
@@ -182,11 +188,31 @@ public final class NoFall extends Hack {
 
 	@SubscribeEvent
 	public void onRender(RenderWorldLastEvent event) {
+
+		// GL settings
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		GL11.glEnable(GL11.GL_LINE_SMOOTH);
+		GL11.glLineWidth(2);
+
+		GL11.glPushMatrix();
+		GL11.glTranslated(-TileEntityRendererDispatcher.staticPlayerX,
+				-TileEntityRendererDispatcher.staticPlayerY,
+				-TileEntityRendererDispatcher.staticPlayerZ);
+
 		if (mode.getSelected().waterbucket) {
 			if (mc.player.getDistance(mc.player.lastTickPosX, lastOnGroundY, mc.player.lastTickPosZ) > 4) {
-				FallenRenderUtils.drawLine(new Vec3d(mc.player.lastTickPosX, mc.player.lastTickPosY, mc.player.lastTickPosZ), new Vec3d(Math.round(mc.player.lastTickPosX) + 0.5, Math.round(mc.player.lastTickPosY - 3), Math.round(mc.player.lastTickPosZ) + 0.5), 2, Color.GREEN);
+				RenderUtils.drawArrow(new Vec3d(mc.player.lastTickPosX, mc.player.lastTickPosY, mc.player.lastTickPosZ), new Vec3d(Math.round(mc.player.lastTickPosX) + 0.5, Math.round(mc.player.lastTickPosY - 3), Math.round(mc.player.lastTickPosZ) + 0.5));
 			}
 		}
+
+		GL11.glPopMatrix();
+
+		// GL resets
+		GL11.glColor4f(1, 1, 1, 1);
+		GL11.glEnable(GL11.GL_DEPTH_TEST);
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		GL11.glDisable(GL11.GL_BLEND);
+		GL11.glDisable(GL11.GL_LINE_SMOOTH);
 	}
 
 	private enum Mode {
@@ -240,5 +266,14 @@ public final class NoFall extends Hack {
 		public String toString() {
 			return name;
 		}
+	}
+
+	private int getSlot(Item item) {
+		for (int x = 0; x < mc.player.inventory.mainInventory.size(); x ++) {
+			if (mc.player.inventory.getStackInSlot(x).getItem().equals(item)) {
+				return x;
+			}
+		}
+		return 0;
 	}
 }

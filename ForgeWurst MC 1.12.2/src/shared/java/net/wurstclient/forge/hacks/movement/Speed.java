@@ -14,14 +14,10 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.EnumSetting;
-import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.MathUtils;
-import net.wurstclient.forge.utils.PlayerUtils;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.List;
 
 public final class Speed extends Hack {
