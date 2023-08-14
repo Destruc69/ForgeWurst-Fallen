@@ -38,6 +38,12 @@ public class TextUtils {
     public static String shrug = "\u00af\\_(\u30c4)_/\u00af";
     private static final Random rand = new Random();
 
+    public static String chatFormatChar;
+
+    static {
+        TextUtils.chatFormatChar = "§";
+    }
+
     public static String stripColor(String input) {
         if (input == null) {
             return null;

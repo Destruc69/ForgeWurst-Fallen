@@ -17,13 +17,13 @@ import net.wurstclient.forge.settings.SliderSetting;
 public final class CoordinatesModule extends Hack {
 
 	private final SliderSetting x =
-			new SliderSetting("X", 0, -32000000, 32000000, 1, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("X", 0, -32000000, 32000000, 1, SliderSetting.ValueDisplay.INTEGER);
 
 	private final SliderSetting y =
-			new SliderSetting("Y", 0, 0, 256, 1, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("Y", 0, 0, 256, 1, SliderSetting.ValueDisplay.INTEGER);
 
 	private final SliderSetting z =
-			new SliderSetting("Z", 0, -32000000, 32000000, 1, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("Z", 0, -32000000, 32000000, 1, SliderSetting.ValueDisplay.INTEGER);
 
 	public CoordinatesModule() {
 		super("Coordinates", "Shows coordinate values.");

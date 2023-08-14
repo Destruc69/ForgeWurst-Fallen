@@ -132,25 +132,25 @@ public final class IngameHUD {
 				if (hack.getName().equals(""))
 					return;
 
-				if (hack.getCategory().getName().contains("Combat")) {
+				if (hack.getCategory() == Category.COMBAT) {
 					color = TextUtils.coloredString(hack.getName(), TextUtils.Color.RED);
 					theColor = Color.RED.getRGB();
-				} else if (hack.getCategory().getName().contains("Movement")) {
+				} else if (hack.getCategory() == Category.MOVEMENT) {
 					color = TextUtils.coloredString(hack.getName(), TextUtils.Color.BLUE);
 					theColor = Color.BLUE.getRGB();
-				} else if (hack.getCategory().getName().contains("World")) {
+				} else if (hack.getCategory() == Category.WORLD) {
 					color = TextUtils.coloredString(hack.getName(), TextUtils.Color.GREEN);
 					theColor = Color.GREEN.getRGB();
-				} else if (hack.getCategory().getName().contains("Player")) {
+				} else if (hack.getCategory() == Category.PLAYER) {
 					color = TextUtils.coloredString(hack.getName(), TextUtils.Color.GOLD);
 					theColor = Color.ORANGE.getRGB();
-				} else if (hack.getCategory().getName().contains("Render")) {
+				} else if (hack.getCategory() == Category.RENDER) {
 					color = TextUtils.coloredString(hack.getName(), TextUtils.Color.AQUA);
 					theColor = Color.CYAN.getRGB();
-				} else if (hack.getCategory().getName().contains("Pathing")) {
+				} else if (hack.getCategory() == Category.PATHING) {
 					color = TextUtils.coloredString(hack.getName(), TextUtils.Color.YELLOW);
 					theColor = Color.YELLOW.getRGB();
-				} else if (hack.getCategory().getName().contains("Games")) {
+				} else if (hack.getCategory() == Category.HUD) {
 					color = TextUtils.coloredString(hack.getName(), TextUtils.Color.GOLD);
 					theColor = Color.YELLOW.getRGB();
 				}

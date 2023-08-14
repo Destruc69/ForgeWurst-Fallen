@@ -100,6 +100,8 @@ public final class HackList extends WHackList
 	public final FastPlace fastPlace = register(new FastPlace());
 	public final Tunneler tunneler = register(new Tunneler());
 	public final Freeze freeze = register(new Freeze());
+	public final MoreInv moreInv = register(new MoreInv());
+	public final AutoEat autoEat = register(new AutoEat());
 	public final CoordinatesModule coordinatesModule = register(new CoordinatesModule());
 	public final HighJump highJump = register(new HighJump());
 	public final AutoLeave autoLeave = register(new AutoLeave());

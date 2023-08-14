@@ -27,13 +27,13 @@ public final class DataFuelModule extends Hack {
 	private int currentTick;
 
 	private final SliderSetting tps =
-			new SliderSetting("TPS", 0, 0, 20, 1, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("TPS", 0, 0, 20, 1, SliderSetting.ValueDisplay.INTEGER);
 
 	private final SliderSetting ping =
-			new SliderSetting("Ping", 0, 0, 2500, 1, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("Ping", 0, 0, 2500, 1, SliderSetting.ValueDisplay.INTEGER);
 
 	private final SliderSetting fps =
-			new SliderSetting("FPS", 0, 0, 2500, 1, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("FPS", 0, 0, 2500, 1, SliderSetting.ValueDisplay.INTEGER);
 
 	public DataFuelModule() {
 		super("DataFuel", "Shows the TPS of the server\n" +
