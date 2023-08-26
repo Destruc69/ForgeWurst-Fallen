@@ -9,6 +9,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.wurstclient.forge.compatibility.WMinecraft;
+import net.wurstclient.forge.hacks.pathing.PathfinderModule;
 import net.wurstclient.forge.pathfinding.LandPathUtils;
 
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class DummyEntity extends EntityOtherPlayerMP {
             if (blockPosArrayList.size() > 0) {
                 moveForward(true);
             }
-            double[] toLook = LandPathUtils.getYawAndPitchForPath(this.getPosition().add(0, -1, 0), blockPosArrayList, 0.2);
+            double[] toLook = LandPathUtils.getYawAndPitchForPath(this.getPosition().add(0, -1, 0), blockPosArrayList, PathfinderModule.smoothingFactor.getValue());
             this.rotationYaw = (float) toLook[0];
             this.rotationYawHead = (float) toLook[0];
             this.rotationPitch = (float) toLook[1];

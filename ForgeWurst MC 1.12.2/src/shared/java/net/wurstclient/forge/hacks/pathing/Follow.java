@@ -83,9 +83,20 @@ public final class Follow extends Hack {
 
 				if (PathfinderModule.isAuto()) {
 					if (blockPosArrayList.size() > 0) {
+						/*
 						mc.player.rotationYaw = (float) rots[0];
 						mc.player.rotationPitch = (float) rots[1];
 						LandPathUtils.movementsEngage(PathfinderModule.safetyPlus.isChecked());
+
+						 */
+
+						double[] toMove = LandPathUtils.calculateMotion(blockPosArrayList, mc.player.rotationYaw, LandPathUtils.isYawStable(mc.player.rotationYaw));
+						mc.player.motionX = toMove[0];
+						mc.player.motionZ = toMove[1];
+
+						if (mc.player.onGround && mc.player.collidedHorizontally || mc.player.isInWater() && !mc.player.collidedHorizontally) {
+							mc.player.jump();
+						}
 					} else {
 						LandPathUtils.resetMovements();
 					}

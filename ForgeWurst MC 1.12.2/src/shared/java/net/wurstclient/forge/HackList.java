@@ -33,11 +33,11 @@ public final class HackList extends WHackList
 	public final NoFall noFall = register(new NoFall());
 	public final Speed speed = register(new Speed());
 	public final Step step = register(new Step());
+	public final AutoMount autoMount = register(new AutoMount());
 	public final DataFuelModule dataFuelModule = register(new DataFuelModule());
 	public final PacketLimiter packetLimiter = register(new PacketLimiter());
 	public final AutoJoinModule autoJoinModule = register(new AutoJoinModule());
 	public final AutoMine autoMine = register(new AutoMine());
-	public final QueueHelper queueHelper = register(new QueueHelper());
 	public final AutoPilot autoPilot = register(new AutoPilot());
 	public final DummyPlayer dummyPlayer = register(new DummyPlayer());
 	public final HideMyAss hideMyAss = register(new HideMyAss());
@@ -114,7 +114,7 @@ public final class HackList extends WHackList
 	public final Animations animations = register(new Animations());
 	public final Disabler disabler = register(new Disabler());
 	public final AutoSneak autoSneak = register(new AutoSneak());
-	public final AutoWalk autoWalk = register(new AutoWalk());
+	public final AutoMove autoWalk = register(new AutoMove());
 	public final LiquidJump liquidJump = register(new LiquidJump());
 	public final NoSlowDown noSlowDown = register(new NoSlowDown());
 	public final ClickGuiHack clickGuiHack = register(new ClickGuiHack());

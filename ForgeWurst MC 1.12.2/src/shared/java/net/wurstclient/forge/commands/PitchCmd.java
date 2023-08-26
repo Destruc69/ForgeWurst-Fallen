@@ -8,22 +8,17 @@
 package net.wurstclient.forge.commands;
 
 import net.wurstclient.forge.Command;
-import net.wurstclient.forge.compatibility.WMinecraft;
 
-public final class GmCmd extends Command
+public final class PitchCmd extends Command
 {
-	public GmCmd()
+	public PitchCmd()
 	{
-		super("gm", "Shortcut for /gamemode.", "Syntax: .gm <gamemode>");
+		super("pitch", "Sets your pitch.", "Syntax: .pitch <value>");
 	}
 	
 	@Override
 	public void call(String[] args) throws CmdException
 	{
-		if(args.length < 1)
-			throw new CmdSyntaxError();
-		
-		String message = "/gamemode " + String.join(" ", args);
-		WMinecraft.getPlayer().sendChatMessage(message);
+		mc.player.rotationPitch = Integer.parseInt(args[0]);
 	}
 }

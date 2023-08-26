@@ -18,6 +18,7 @@ import net.wurstclient.forge.hacks.pathing.PathfinderModule;
 import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.utils.ChatUtils;
 import net.wurstclient.forge.utils.KeyBindingUtils;
+import net.wurstclient.forge.utils.RotationUtils;
 import org.lwjgl.opengl.GL11;
 
 import java.util.*;
@@ -239,15 +240,13 @@ public class LandPathUtils {
             double diffPitch = MathHelper.wrapDegrees(targetPitch - smoothPitch);
 
             // Smooth the values using exponential moving average
-            double SMOOTHING_FACTOR = smoothFactor;
-            smoothYaw += SMOOTHING_FACTOR * diffYaw;
-            smoothPitch += SMOOTHING_FACTOR * diffPitch;
+            smoothYaw += smoothFactor * diffYaw;
+            smoothPitch += smoothFactor * diffPitch;
 
             yawAndPitch[0] = smoothYaw;
             yawAndPitch[1] = smoothPitch;
 
             return yawAndPitch;
-        } else {
         }
         return yawAndPitch;
     }
@@ -465,5 +464,97 @@ public class LandPathUtils {
         } else {
             return String.format("%d minutes, %d seconds", minutes, seconds);
         }
+    }
+
+    // Given a block type, find the nearest reachable block position of that type
+    public static BlockPos findNearestReachableBlock(Block targetBlock) {
+        Minecraft mc = Minecraft.getMinecraft();
+        Vec3d playerPos = mc.player.getPositionVector();
+        double closestDistance = Double.MAX_VALUE;
+        BlockPos closestBlockPos = null;
+
+        for (int x = -100; x <= 100; x++) {
+            for (int y = -100; y <= 100; y++) {
+                for (int z = -100; z <= 100; z++) {
+                    BlockPos currentPos = new BlockPos(playerPos.x + x, playerPos.y + y, playerPos.z + z);
+                    if (mc.world.getBlockState(currentPos).getBlock() == targetBlock) {
+                        double distance = playerPos.distanceTo(new Vec3d(currentPos.getX(), currentPos.getY(), currentPos.getZ()));
+
+                        if (distance < closestDistance && isBlockReachable(currentPos, mc.player)) {
+                            closestDistance = distance;
+                            closestBlockPos = currentPos;
+                        }
+                    }
+                }
+            }
+        }
+
+        return closestBlockPos;
+    }
+
+    // Check if a block is reachable (assuming no block needs to be mined)
+    public static boolean isBlockReachable(BlockPos blockPos, EntityPlayer entityPlayer) {
+        ArrayList<BlockPos> arrayList = LandPathUtils.createPath(entityPlayer.getPosition().add(0, -1, 0), blockPos, false);
+        return !arrayList.isEmpty();
+    }
+
+    public static double[] calculateMotion(ArrayList<BlockPos> path, double rotationYaw, boolean sprint) {
+        // Player's current position (assumed values for demonstration)
+        double playerX = mc.player.lastTickPosX;
+        double playerZ = mc.player.lastTickPosZ;
+
+        rotationYaw = Math.toRadians(rotationYaw);
+
+        int closestBlockIndex = 0;
+        double closestBlockDistance = Double.POSITIVE_INFINITY;
+        for (int i = 0; i < path.size(); i++) {
+            double distance = mc.player.getDistanceSq(path.get(i));
+            if (distance < closestBlockDistance) {
+                closestBlockDistance = distance;
+                closestBlockIndex = i;
+            }
+        }
+
+        BlockPos closestBlock = path.get(closestBlockIndex);
+        BlockPos nextBlock;
+        if (closestBlockIndex == path.size() - 1) {
+            nextBlock = closestBlock;
+        } else {
+            nextBlock = path.get(closestBlockIndex + 1);
+        }
+
+        BlockPos targetPos = nextBlock;
+
+        // Calculate the distance to the target position
+        double deltaX = targetPos.getX() + 0.5 - playerX; // Adding 0.5 to target center of the block
+        double deltaZ = targetPos.getZ() + 0.5 - playerZ; // Adding 0.5 to target center of the block
+
+        // Calculate the angle between the player's rotation and the target position
+        double targetAngle = Math.atan2(deltaZ, deltaX);
+        double playerAngle = Math.toRadians(rotationYaw);
+
+        // Calculate the difference in angles
+        double angleDifference = targetAngle - playerAngle;
+
+        // Calculate the distance to the target position
+        double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
+
+        // Calculate the motion components (motionX and motionZ)
+        double motionX = Math.cos(angleDifference) * distance;
+        double motionZ = Math.sin(angleDifference) * distance;
+
+        // Apply motion limits based on sprinting
+        double maxMotion = sprint ? 0.26 : 0.2;
+        double motionMagnitude = Math.sqrt(motionX * motionX + motionZ * motionZ);
+        if (motionMagnitude > maxMotion) {
+            motionX *= maxMotion / motionMagnitude;
+            motionZ *= maxMotion / motionMagnitude;
+        }
+
+        return new double[]{motionX, motionZ};
+    }
+
+    public static boolean hasReached(BlockPos blockPos) {
+        return mc.player.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) <= 1;
     }
 }

@@ -126,9 +126,15 @@ public final class AutoMine extends Hack {
 							if (mc.player.ticksExisted % 20 == 0) {
 								path = LandPathUtils.createPath(mc.player.getPosition().add(0, -1, 0), targPos, PathfinderModule.debug.isChecked());
 							}
-							double[] rot = LandPathUtils.getYawAndPitchForPath(mc.player.getPosition().add(0, -1, 0), path, PathfinderModule.smoothingFactor.getValue());
-							mc.player.rotationYaw = (float) rot[0];
-							mc.player.rotationPitch = (float) rot[1];
+
+							double[] toMove = LandPathUtils.calculateMotion(blockPosArrayList, mc.player.rotationYaw, LandPathUtils.isYawStable(mc.player.rotationYaw));
+							mc.player.motionX = toMove[0];
+							mc.player.motionZ = toMove[1];
+
+							if (mc.player.onGround && mc.player.collidedHorizontally || mc.player.isInWater() && !mc.player.collidedHorizontally) {
+								mc.player.jump();
+							}
+
 							KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
 							KeyBindingUtils.setPressed(mc.gameSettings.keyBindSneak, false);
 							KeyBindingUtils.setPressed(mc.gameSettings.keyBindSprint, true);
@@ -140,9 +146,13 @@ public final class AutoMine extends Hack {
 						mc.playerController.onPlayerDamageBlock(targPos, EnumFacing.DOWN);
 						mc.player.swingArm(EnumHand.MAIN_HAND);
 
-						float[] rot = RotationUtils.getNeededRotations(new Vec3d(targPos.getX(), targPos.getY(), targPos.getZ()).addVector(0.5, 0.5, 0.5));
-						mc.player.rotationYaw = rot[0];
-						mc.player.rotationPitch = rot[1];
+						double[] toMove = LandPathUtils.calculateMotion(blockPosArrayList, Math.toRadians(mc.player.rotationYaw), LandPathUtils.isYawStable(mc.player.rotationYaw));
+						mc.player.motionX = toMove[0];
+						mc.player.motionZ = toMove[1];
+
+						if (mc.player.onGround && mc.player.collidedHorizontally || mc.player.isInWater() && !mc.player.collidedHorizontally) {
+							mc.player.jump();
+						}
 					}
 				}
 			} catch (Exception ignored) {

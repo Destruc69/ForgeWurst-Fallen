@@ -7,27 +7,32 @@
  */
 package net.wurstclient.forge.hacks.player;
 
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.entity.RenderPlayer;
+import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.settings.SliderSetting;
-import net.wurstclient.forge.utils.KeyBindingUtils;
+import org.lwjgl.opengl.GL11;
 
 public final class Giant extends Hack {
-	private final SliderSetting height =
-			new SliderSetting("Height", 2, 1, 30, 1, SliderSetting.ValueDisplay.DECIMAL);
+	private final SliderSetting x =
+			new SliderSetting("X", 2, 1, 30, 1, SliderSetting.ValueDisplay.DECIMAL);
 
-	private final SliderSetting width =
-			new SliderSetting("Width", 2, 1, 30, 1, SliderSetting.ValueDisplay.DECIMAL);
+	private final SliderSetting y =
+			new SliderSetting("Y", 2, 1, 30, 1, SliderSetting.ValueDisplay.DECIMAL);
+
+	private final SliderSetting z =
+			new SliderSetting("z", 2, 1, 30, 1, SliderSetting.ValueDisplay.DECIMAL);
 
 	public Giant() {
 		super("Giant", "Makes you really big.");
 		setCategory(Category.PLAYER);
-		addSetting(height);
-		addSetting(width);
+		addSetting(x);
+		addSetting(y);
+		addSetting(z);
 	}
 
 	@Override
@@ -41,8 +46,7 @@ public final class Giant extends Hack {
 	}
 
 	@SubscribeEvent
-	public void onUpdate(WUpdateEvent event) {
-		event.getPlayer().height = -height.getValueF();
-		event.getPlayer().width = width.getValueF();
+	public void onRenderPlayer(RenderPlayerEvent event) {
+		GL11.glScalef(x.getValueF(), y.getValueF(), z.getValueF());
 	}
 }

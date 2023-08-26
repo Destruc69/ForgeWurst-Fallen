@@ -26,8 +26,8 @@ import java.util.Objects;
 
 public final class EntitySpeed extends Hack {
 
-	private final SliderSetting speed =
-			new SliderSetting("Speed", 2, 0.5, 5, 0.05, SliderSetting.ValueDisplay.DECIMAL);
+	public static final SliderSetting speed =
+			new SliderSetting("Speed", 2, 0.05, 5, 0.05, SliderSetting.ValueDisplay.DECIMAL);
 
 	private final CheckboxSetting bypass =
 			new CheckboxSetting("Bypass", "Bypass some anti cheats.",

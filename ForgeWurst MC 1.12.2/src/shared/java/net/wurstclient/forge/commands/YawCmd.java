@@ -7,22 +7,20 @@
  */
 package net.wurstclient.forge.commands;
 
+import net.minecraft.network.play.client.CPacketChatMessage;
 import net.wurstclient.forge.Command;
-import net.wurstclient.forge.compatibility.WChat;
+import scala.Int;
 
-public final class ClearCmd extends Command
+public final class YawCmd extends Command
 {
-	public ClearCmd()
+	public YawCmd()
 	{
-		super("clear", "Clears the chat completely.", "Syntax: .clear");
+		super("yaw", "Sets your yaw.", "Syntax: .yaw <value>");
 	}
 	
 	@Override
 	public void call(String[] args) throws CmdException
 	{
-		if(args.length > 0)
-			throw new CmdSyntaxError();
-		
-		WChat.clearMessages();
+		mc.player.rotationYaw = Integer.parseInt(args[0]);
 	}
 }
