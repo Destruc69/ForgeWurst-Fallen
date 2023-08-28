@@ -57,7 +57,6 @@ public final class HackList extends WHackList
 	public final Hitboxes hitboxes = register(new Hitboxes());
 	public final Discord discord = register(new Discord());
 	public final NoKnockBack noKnockBack = register(new NoKnockBack());
-	public final Anchor anchor = register(new Anchor());
 	public final Criticals criticals = register(new Criticals());
 	public final AutoCrystal autoCrystal = register(new AutoCrystal());
 	public final Nuker nuker = register(new Nuker());

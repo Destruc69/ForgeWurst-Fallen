@@ -44,7 +44,7 @@ public final class Aimbot extends Hack {
 				assert entity != null;
 				if (entity != mc.player) {
 					if (mc.player.getDistance(entity) <= 4) {
-						RotationUtils.faceVectorPacket(new Vec3d(entity.lastTickPosX, entity.lastTickPosY + Math.random() * 2 - Math.random() * 1, entity.lastTickPosZ));
+						RotationUtils.faceVectorPacket(new Vec3d(entity.lastTickPosX, entity.lastTickPosY + Math.random() * 0.5 - Math.random() * 0.5, entity.lastTickPosZ));
 					}
 				}
 			}
