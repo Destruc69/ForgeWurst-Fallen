@@ -17,6 +17,7 @@ import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.hacks.player.NoFall;
+import net.wurstclient.forge.pathfinding.LandPathUtils;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.EnumSetting;
 
@@ -29,11 +30,16 @@ public final class Scaffold extends Hack {
 			new CheckboxSetting("Swing", "Should we swing the arm when placing?.",
 					false);
 
+	private final CheckboxSetting tower =
+			new CheckboxSetting("Tower", "Should we tower up fast?.",
+					false);
+
 	public Scaffold() {
 		super("Scaffold", "Place blocks underneath you automatically.");
 		setCategory(Category.WORLD);
 		addSetting(rotationMode);
 		addSetting(swing);
+		addSetting(tower);
 	}
 
 	private enum RotationsMode {
@@ -96,6 +102,16 @@ public final class Scaffold extends Hack {
 					place(playerBlock.add(1, -1, 0), EnumFacing.EAST);
 				}
 				place(playerBlock.add(1, -1, -1), EnumFacing.NORTH);
+			}
+		}
+
+		if (tower.isChecked()) {
+			if (mc.gameSettings.keyBindJump.isKeyDown()) {
+				mc.player.motionX = 0;
+				mc.player.motionZ = 0;
+				if (!mc.player.onGround && mc.player.posY - Math.floor(mc.player.posY) <= 0.1) {
+					mc.player.motionY = 0.41999998688697815;
+				}
 			}
 		}
 	}

@@ -20,6 +20,7 @@ import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.pathfinding.LandPathUtils;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.utils.ChatUtils;
+import net.wurstclient.forge.utils.KeyBindingUtils;
 
 import java.util.ArrayList;
 
@@ -94,9 +95,7 @@ public final class Follow extends Hack {
 						mc.player.motionX = toMove[0];
 						mc.player.motionZ = toMove[1];
 
-						if (mc.player.onGround && mc.player.collidedHorizontally || mc.player.isInWater() && !mc.player.collidedHorizontally) {
-							mc.player.jump();
-						}
+						KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, mc.player.onGround && mc.player.collidedHorizontally || mc.player.isInWater() && !mc.player.collidedHorizontally);
 					} else {
 						LandPathUtils.resetMovements();
 					}
