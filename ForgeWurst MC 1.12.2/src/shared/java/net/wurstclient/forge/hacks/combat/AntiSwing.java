@@ -20,7 +20,7 @@ import net.wurstclient.forge.Hack;
 
 public final class AntiSwing extends Hack {
 	public AntiSwing() {
-		super("AntiSwing", "Cancels animation packets server-side.");
+		super("AntiSwing", "Cancels animation swing.");
 		setCategory(Category.COMBAT);
 	}
 

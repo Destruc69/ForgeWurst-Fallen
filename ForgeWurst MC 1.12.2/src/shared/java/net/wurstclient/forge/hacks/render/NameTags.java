@@ -20,6 +20,7 @@ import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.compatibility.WMinecraft;
+import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.RenderUtils;
 import org.lwjgl.opengl.GL11;
 
@@ -29,9 +30,25 @@ public final class NameTags extends Hack {
 
 	private ArrayList<Entity> entities;
 
+	private final SliderSetting red =
+			new SliderSetting("Red", 1, 0, 1, 0.1, SliderSetting.ValueDisplay.DECIMAL);
+
+	private final SliderSetting green =
+			new SliderSetting("Green", 1, 0, 1, 0.1, SliderSetting.ValueDisplay.DECIMAL);
+
+	private final SliderSetting blue =
+			new SliderSetting("Blue", 1, 0, 1, 0.1, SliderSetting.ValueDisplay.DECIMAL);
+
+	private final SliderSetting alpha =
+			new SliderSetting("Alpha", 1, 0, 1, 0.1, SliderSetting.ValueDisplay.DECIMAL);
+
 	public NameTags() {
 		super("Nametags", "Renders nametags above the players head.");
 		setCategory(Category.RENDER);
+		addSetting(red);
+		addSetting(green);
+		addSetting(blue);
+		addSetting(alpha);
 	}
 
 	@Override
@@ -145,28 +162,26 @@ public final class NameTags extends Hack {
 				GlStateManager.enableBlend();
 				GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 				int i = fontRendererIn.getStringWidth(str) / 2;
+
 				GlStateManager.disableTexture2D();
 				Tessellator tessellator = Tessellator.getInstance();
 				BufferBuilder bufferbuilder = tessellator.getBuffer();
 				bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
-				//bufferbuilder.pos((double) (-i - 1), (double) (-1 + verticalShift), 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
-				//bufferbuilder.pos((double) (-i - 1), (double) (8 + verticalShift), 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
-				//bufferbuilder.pos((double) (i + 1), (double) (8 + verticalShift), 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
-				//bufferbuilder.pos((double) (i + 1), (double) (-1 + verticalShift), 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+				bufferbuilder.pos((double) (-i - 1), (double) (-1 + verticalShift) + 0.5, 0.0D).color(red.getValueF(), green.getValueF(), blue.getValueF(), alpha.getValueF()).endVertex();
+				bufferbuilder.pos((double) (-i - 1), (double) (8 + verticalShift) + 0.5, 0.0D).color(red.getValueF(), green.getValueF(), blue.getValueF(), alpha.getValueF()).endVertex();
+				bufferbuilder.pos((double) (i + 1), (double) (8 + verticalShift) + 0.5, 0.0D).color(red.getValueF(), green.getValueF(), blue.getValueF(), alpha.getValueF()).endVertex();
+				bufferbuilder.pos((double) (i + 1), (double) (-1 + verticalShift) + 0.5, 0.0D).color(red.getValueF(), green.getValueF(), blue.getValueF(), alpha.getValueF()).endVertex();
 
 				tessellator.draw();
 				GlStateManager.enableTexture2D();
 
-				if (!isSneaking) {
-					fontRendererIn.drawString(str, -fontRendererIn.getStringWidth(str) / 2, verticalShift, 553648127);
-					GlStateManager.enableDepth();
-				}
+				fontRendererIn.drawString(str, -fontRendererIn.getStringWidth(str) / 2, verticalShift, 553648127);
+				GlStateManager.enableDepth();
 
 				GlStateManager.depthMask(true);
 				fontRendererIn.drawString(str, -fontRendererIn.getStringWidth(str) / 2, verticalShift, isSneaking ? 553648127 : -1);
 				GlStateManager.enableLighting();
 				GlStateManager.disableBlend();
-				GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 				GlStateManager.popMatrix();
 			}
 		} catch (Exception ignored) {

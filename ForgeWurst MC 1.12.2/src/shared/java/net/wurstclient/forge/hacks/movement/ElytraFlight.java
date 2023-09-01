@@ -91,51 +91,51 @@ public final class ElytraFlight extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		if (!(mode.getSelected() == Mode.IGNORE)) {
-			if (mc.player.isElytraFlying()) {
-				if (shouldLockPitch.isChecked()) {
-					mc.player.rotationPitch = lockPitch.getValueF();
-				}
-				// Allowing down movement
-				mc.player.setSneaking(false);
-				if (mode.getSelected() == Mode.BOOST ||
-						mode.getSelected() == Mode.BOOSTPLUS) {
-					boostEF();
-				} else if (mode.getSelected() == Mode.CONTROL) {
-					controlEF();
-				}
-				if (!a) {
-					setTickLength(50);
-				}
-			} else {
-				if (autoTakeOff.isChecked()) {
-					if (mc.player.onGround) {
-						mc.player.jump();
-						mc.player.motionX = 0;
-						mc.player.motionZ = 0;
-						a = true;
-					} else if (mc.world.getBlockState(new BlockPos(mc.player.posX, mc.player.posY - 0.5, mc.player.posZ)).getBlock().equals(Blocks.AIR)) {
-						if (mc.player.ticksExisted % 2 == 0) {
-							mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_FALL_FLYING));
-						}
-						if (a) {
-							setTickLength(50 / 0.05f);
-							a = false;
-						}
+		if (mc.player.isElytraFlying()) {
+			if (shouldLockPitch.isChecked()) {
+				mc.player.rotationPitch = lockPitch.getValueF();
+			}
+			if (mode.getSelected() == Mode.BOOST ||
+					mode.getSelected() == Mode.BOOSTPLUS) {
+				boostEF();
+			} else if (mode.getSelected() == Mode.CONTROL) {
+				controlEF();
+			} else if (mode.getSelected() == Mode.DEV) {
+				devEF();
+			}
+			if (!a) {
+				setTickLength(50);
+			}
+		} else {
+			if (autoTakeOff.isChecked()) {
+				if (mc.player.onGround) {
+					mc.player.jump();
+					mc.player.motionX = 0;
+					mc.player.motionZ = 0;
+					a = true;
+				} else if (mc.world.getBlockState(new BlockPos(mc.player.posX, mc.player.posY - 0.5, mc.player.posZ)).getBlock().equals(Blocks.AIR)) {
+					if (mc.player.ticksExisted % 2 == 0) {
+						mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_FALL_FLYING));
+					}
+					if (a) {
+						setTickLength(50 / 0.05f);
+						a = false;
 					}
 				}
 			}
-
-			for (Entity entity : mc.world.loadedEntityList) {
-				if (entity instanceof EntityFireworkRocket) {
-					if (entity.ticksExisted > 0) {
-						mc.world.removeEntity(entity);
-					}
-				}
-			}
-		} else if (mode.getSelected() == Mode.IGNORE) {
-			ignore();
 		}
+
+		for (Entity entity : mc.world.loadedEntityList) {
+			if (entity instanceof EntityFireworkRocket) {
+				if (entity.ticksExisted > 0) {
+					mc.world.removeEntity(entity);
+				}
+			}
+		}
+	}
+
+	private void devEF() {
+
 	}
 
 	private void boostEF() {
@@ -230,7 +230,7 @@ public final class ElytraFlight extends Hack {
 		CONTROL("Control"),
 		BOOST("Boost"),
 		BOOSTPLUS("BoostPlus"),
-		IGNORE("Ignore");
+		DEV("DEV"); // dev
 
 		private final String name;
 

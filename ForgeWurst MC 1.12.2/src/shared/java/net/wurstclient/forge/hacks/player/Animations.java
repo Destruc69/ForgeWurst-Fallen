@@ -48,6 +48,18 @@ public final class Animations extends Hack {
 	private static final SliderSetting lhzv =
 			new SliderSetting("LeftHand-Z", 0, -2, 2, 1, SliderSetting.ValueDisplay.DECIMAL);
 
+	private static final SliderSetting rotateAngle =
+			new SliderSetting("RotateAngle", 0, 0, 360, 1, SliderSetting.ValueDisplay.DECIMAL);
+
+	private static final SliderSetting rotateX =
+			new SliderSetting("RotateX", 0, 0, 360, 1, SliderSetting.ValueDisplay.DECIMAL);
+
+	private static final SliderSetting rotateY =
+			new SliderSetting("RotateY", 0, 0, 360, 1, SliderSetting.ValueDisplay.DECIMAL);
+
+	private static final SliderSetting rotateZ =
+			new SliderSetting("RotateZ", 0, 0, 360, 1, SliderSetting.ValueDisplay.DECIMAL);
+
 
 	public Animations() {
 		super("Animations", "Animations, explains its self.");
@@ -58,6 +70,10 @@ public final class Animations extends Hack {
 		addSetting(lhxv);
 		addSetting(lhyv);
 		addSetting(lhzv);
+		addSetting(rotateAngle);
+		addSetting(rotateX);
+		addSetting(rotateY);
+		addSetting(rotateZ);
 	}
 
 	@Override
@@ -75,10 +91,12 @@ public final class Animations extends Hack {
 		ItemRenderer ir = mc.getItemRenderer();
 		if (event.getHand() == EnumHand.MAIN_HAND) {
 			GlStateManager.translate(rhxv.getValueF(), rhyv.getValueF(), rhzv.getValueF());
+			GlStateManager.rotate(rotateAngle.getValueF(), rotateX.getValueF(), rotateY.getValueF(), rotateZ.getValueF());
 			ir.updateEquippedItem();
 		}
 		if (event.getHand() == EnumHand.OFF_HAND) {
 			GlStateManager.translate(lhxv.getValueF(), lhyv.getValueF(), lhzv.getValueF());
+			GlStateManager.rotate(rotateAngle.getValueF(), rotateX.getValueF(), rotateY.getValueF(), rotateZ.getValueF());
 			ir.updateEquippedItem();
 		}
 	}

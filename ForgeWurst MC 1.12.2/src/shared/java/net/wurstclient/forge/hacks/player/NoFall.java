@@ -22,6 +22,7 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
@@ -38,31 +39,19 @@ import java.util.Objects;
 
 public final class NoFall extends Hack {
 
+	private final EnumSetting<Mode> mode =
+			new EnumSetting<>("Mode", Mode.values(), Mode.PACKET);
+
 	private final SliderSetting fallDistance =
 			new SliderSetting("FallDistance [ANTIFALL]", "If we exeed this value we will prevent you from falling [FOR ANTI-FALL]", 4, 1, 50, 1, SliderSetting.ValueDisplay.DECIMAL);
 
-	public static double lastOnGroundX = 0;
-	public static double lastOnGroundY = 0;
-	public static double lastOnGroundZ = 0;
-
-	public static double lastOnGroundXR = 0;
-	public static double lastOnGroundYR = 0;
-	public static double lastOnGroundZR = 0;
-
-	public static Vec3d lastOnGroundLeave = new Vec3d(0, 0, 0);
-
-	private final EnumSetting<ModeRideable> modeRideable =
-			new EnumSetting<>("Rideables", ModeRideable.values(), ModeRideable.DAMAGE);
-
-	private final EnumSetting<Mode> mode =
-			new EnumSetting<>("Mode", Mode.values(), Mode.PACKET);
+	private Vec3d vec3d;
 
 	public NoFall() {
 		super("NoFall", "Prevents falling damage/falling.");
 		setCategory(Category.PLAYER);
 		addSetting(mode);
 		addSetting(fallDistance);
-		addSetting(modeRideable);
 	}
 
 	@Override
@@ -82,52 +71,24 @@ public final class NoFall extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		try {
-			if (mode.getSelected().packet) {
+		if (mc.player.getRidingEntity() == null) {
+			if (mode.getSelected() == Mode.PACKET) {
 				if (mc.player.fallDistance > 4) {
 					mc.player.connection.sendPacket(new CPacketPlayer(true));
 				}
-			}
-			if (mode.getSelected().waterbucket) {
-				if (mc.world != null && mc.player != null) {
-					for (int a = 0; a < 3; a++) {
-						BlockPos blockPos = new BlockPos(mc.player.lastTickPosX, mc.player.posY - a, mc.player.lastTickPosZ);
-						if (!(blockPos == null)) {
-							mc.playerController.updateController();
-							if (mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem().equals(Items.BUCKET)) {
-								mc.playerController.processRightClick(mc.player, mc.world, EnumHand.MAIN_HAND);
-								mc.player.swingArm(EnumHand.MAIN_HAND);
-							}
-							if (mc.player.onGround) {
-								lastOnGroundY = mc.player.posY;
-								double savedSlot = mc.player.inventory.currentItem;
-								if (mc.player.inventory.currentItem == getSlot(Items.WATER_BUCKET)) {
-									mc.player.inventory.currentItem = (int) savedSlot;
-									mc.playerController.updateController();
-									KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, false);
-								}
-							} else {
-								if (mc.player.getDistance(mc.player.lastTickPosX, lastOnGroundY, mc.player.lastTickPosZ) > 4) {
-									Vec3d centerPlayerPos = new Vec3d(Math.round(mc.player.posX) + 0.5, Math.round(mc.player.posY) - 1, Math.round(mc.player.posZ) + 0.5);
-									float[] rot = RotationUtils.getNeededRotations(centerPlayerPos);
-									mc.player.rotationYaw = rot[0];
-									mc.player.rotationPitch = 90;
-									KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
-									if (!(mc.world.getBlockState(blockPos).getBlock().equals(Blocks.AIR))) {
-										double newSlot = getSlot(Items.WATER_BUCKET);
-										mc.player.inventory.currentItem = (int) newSlot;
-										mc.playerController.updateController();
-
-										mc.playerController.processRightClick(mc.player, mc.world, EnumHand.MAIN_HAND);
-										mc.player.swingArm(EnumHand.MAIN_HAND);
-									}
-								}
-							}
-						}
+			} else if (mode.getSelected() == Mode.DAMAGE) {
+				if (mc.player.fallDistance > 4) {
+					mc.player.onGround = true;
+				}
+			} else if (mode.getSelected() == Mode.ANTI) {
+				if (mc.player.onGround) {
+					vec3d = new Vec3d(mc.player.lastTickPosX, mc.player.lastTickPosY, mc.player.lastTickPosZ);
+				} else {
+					if (mc.player.fallDistance > fallDistance.getValueF()) {
+						mc.player.setPosition(vec3d.x, vec3d.y, vec3d.z);
 					}
 				}
-			}
-			if (mode.getSelected().aac) {
+			} else if (mode.getSelected() == Mode.AAC) {
 				if (mc.player.fallDistance > 2) {
 					mc.player.motionZ = 0;
 					mc.player.motionX = mc.player.motionZ;
@@ -135,145 +96,60 @@ public final class NoFall extends Hack {
 					mc.player.connection.sendPacket(new CPacketPlayer(true));
 				}
 			}
-
-			if (mode.getSelected().anti) {
-				if (mc.player.onGround) {
-					lastOnGroundX = mc.player.lastTickPosX;
-					lastOnGroundY = mc.player.lastTickPosY;
-					lastOnGroundZ = mc.player.lastTickPosZ;
+		} else {
+			if (mode.getSelected() == Mode.PACKET) {
+				if (mc.player.getRidingEntity().fallDistance > 4) {
+					mc.player.connection.sendPacket(new CPacketPlayer(true));
 				}
-				if (mc.player.fallDistance > fallDistance.getValueF()) {
-					mc.player.setPosition(lastOnGroundX, lastOnGroundY, lastOnGroundZ);
+			} else if (mode.getSelected() == Mode.DAMAGE) {
+				if (mc.player.getRidingEntity().fallDistance > 4) {
+					mc.player.getRidingEntity().onGround = true;
 				}
-			}
-			if (mode.getSelected().damage) {
-				if (mc.player.fallDistance > 4) {
-					mc.player.onGround = true;
-				}
-			}
-
-			try {
-				if (modeRideable.getSelected().damage) {
-					if (Objects.requireNonNull(mc.player.getRidingEntity()).fallDistance > 4) {
-						Objects.requireNonNull(mc.player.getRidingEntity()).onGround = true;
-					}
-				} else if (modeRideable.getSelected().anti) {
-					if (Objects.requireNonNull(mc.player.getRidingEntity()).onGround) {
-						lastOnGroundXR = mc.player.getRidingEntity().lastTickPosX;
-						lastOnGroundYR = mc.player.getRidingEntity().lastTickPosY;
-						lastOnGroundZR = mc.player.getRidingEntity().lastTickPosZ;
-					}
+			} else if (mode.getSelected() == Mode.ANTI) {
+				if (mc.player.getRidingEntity().onGround) {
+					vec3d = new Vec3d(mc.player.getRidingEntity().lastTickPosX, mc.player.getRidingEntity().lastTickPosY, mc.player.getRidingEntity().lastTickPosZ);
+				} else {
 					if (mc.player.getRidingEntity().fallDistance > fallDistance.getValueF()) {
-						mc.player.getRidingEntity().setPosition(lastOnGroundXR, lastOnGroundYR, lastOnGroundZR);
+						mc.player.getRidingEntity().setPosition(vec3d.x, vec3d.y, vec3d.z);
 					}
 				}
-			} catch (Exception ignored) {
-			}
-
-			try {
-				if (mode.getSelected().leave) {
-					if (mc.player.onGround) {
-						lastOnGroundLeave = new Vec3d(mc.player.posX, mc.player.posY, mc.player.posZ);
-					} else {
-						if (!mc.world.getBlockState(mc.player.getPosition().add(0, -2, 0)).getBlock().equals(Blocks.AIR) && mc.player.getDistance(mc.player.lastTickPosX, lastOnGroundLeave.y, mc.player.lastTickPosZ) > 4) {
-							mc.player.connection.onDisconnect(new TextComponentString("[LEAVE-NOFALL] Rejoin and your fall distance will be dismissed."));
-						}
-					}
+			} else if (mode.getSelected() == Mode.AAC) {
+				if (mc.player.getRidingEntity().fallDistance > 2) {
+					mc.player.getRidingEntity().motionZ = 0;
+					mc.player.getRidingEntity().motionX = mc.player.motionZ;
+					mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY - 10E-4, mc.player.posZ, mc.player.onGround));
+					mc.player.connection.sendPacket(new CPacketPlayer(true));
 				}
-			} catch (Exception ignored) {
 			}
-		} catch (Exception ignored) {
 		}
 	}
 
 	@SubscribeEvent
-	public void onRender(RenderWorldLastEvent event) {
-
-		// GL settings
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glEnable(GL11.GL_LINE_SMOOTH);
-		GL11.glLineWidth(2);
-
-		GL11.glPushMatrix();
-		GL11.glTranslated(-TileEntityRendererDispatcher.staticPlayerX,
-				-TileEntityRendererDispatcher.staticPlayerY,
-				-TileEntityRendererDispatcher.staticPlayerZ);
-
-		if (mode.getSelected().waterbucket) {
-			if (mc.player.getDistance(mc.player.lastTickPosX, lastOnGroundY, mc.player.lastTickPosZ) > 4) {
-				RenderUtils.drawArrow(new Vec3d(mc.player.lastTickPosX, mc.player.lastTickPosY, mc.player.lastTickPosZ), new Vec3d(Math.round(mc.player.lastTickPosX) + 0.5, Math.round(mc.player.lastTickPosY - 3), Math.round(mc.player.lastTickPosZ) + 0.5));
+	public void onPacketOut(WPacketOutputEvent event) {
+		if (mode.getSelected() == Mode.CANCEL) {
+			if (mc.player.fallDistance > 4) {
+				if (event.getPacket() instanceof CPacketPlayer) {
+					event.setCanceled(true);
+				}
 			}
 		}
-
-		GL11.glPopMatrix();
-
-		// GL resets
-		GL11.glColor4f(1, 1, 1, 1);
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		GL11.glDisable(GL11.GL_BLEND);
-		GL11.glDisable(GL11.GL_LINE_SMOOTH);
 	}
 
 	private enum Mode {
-		PACKET("Packet", true, false, false, false, false, false),
-		ANTI("Anti", false, true, false, false, false, false),
-		DAMAGE("Damage", false, false, false, true, false, false),
-		AAC("AAC", false, false, true, false, false, false),
-		LEAVE("Leave", false, false, false, false, true, false),
-		WATERBUCKET("WaterBucket", false, false, false, false, false, true);
+		PACKET("Packet"),
+		ANTI("Anti"),
+		DAMAGE("Damage"),
+		AAC("AAC"),
+		CANCEL("Cancel");
 
 		private final String name;
-		private final boolean packet;
-		private final boolean anti;
-		private final boolean aac;
-		private final boolean damage;
-		private final boolean leave;
-		private final boolean waterbucket;
 
-		private Mode(String name, boolean packet, boolean anti, boolean aac, boolean damage, boolean leave, boolean waterbucket) {
+		private Mode(String name) {
 			this.name = name;
-			this.anti = anti;
-			this.packet = packet;
-			this.aac = aac;
-			this.damage = damage;
-			this.leave = leave;
-			this.waterbucket = waterbucket;
 		}
 
 		public String toString() {
 			return name;
 		}
-	}
-
-	private enum ModeRideable {
-		DAMAGE("Damage", true, false, false),
-		ANTI("Anti", false, true, false),
-		OFF("Off", false, false, true);
-
-		private final String name;
-		private final boolean damage;
-		private final boolean anti;
-		private final boolean off;
-
-		private ModeRideable(String name, boolean damage, boolean anti, boolean off) {
-			this.name = name;
-			this.anti = anti;
-			this.damage = damage;
-			this.off = off;
-		}
-
-		public String toString() {
-			return name;
-		}
-	}
-
-	private int getSlot(Item item) {
-		for (int x = 0; x < mc.player.inventory.mainInventory.size(); x ++) {
-			if (mc.player.inventory.getStackInSlot(x).getItem().equals(item)) {
-				return x;
-			}
-		}
-		return 0;
 	}
 }

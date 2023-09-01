@@ -7,7 +7,9 @@
  */
 package net.wurstclient.forge.hacks.movement;
 
+import net.minecraft.init.Blocks;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -157,6 +159,15 @@ public final class Speed extends Hack {
 				tick = 0;
 				mc.player.motionX = mc.player.motionZ = 0.0;
 			}
+		} else if (mode.getSelected() == Mode.TUNNEL) {
+			BlockPos blockPos = mc.player.getPosition().add(0, 2, 0);
+			if (!mc.world.getBlockState(blockPos).getBlock().equals(Blocks.AIR)) {
+				if (mc.player.motionX > 0 || mc.player.motionX < 0 || mc.player.motionZ > 0 || mc.player.motionZ < 0) {
+					if (mc.player.onGround) {
+						mc.player.jump();
+					}
+				}
+			}
 		}
 	}
 
@@ -170,7 +181,8 @@ public final class Speed extends Hack {
 		BHOP("BHop"),
 		OLDHOP("OldHop"),
 		NCPBASIC("NCPBasic"),
-		AAC("AAC");
+		AAC("AAC"),
+		TUNNEL("Tunnel");
 
 		private final String name;
 

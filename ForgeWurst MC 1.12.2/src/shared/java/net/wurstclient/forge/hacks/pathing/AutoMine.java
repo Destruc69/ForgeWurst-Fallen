@@ -131,9 +131,7 @@ public final class AutoMine extends Hack {
 							mc.player.motionX = toMove[0];
 							mc.player.motionZ = toMove[1];
 
-							if (mc.player.onGround && mc.player.collidedHorizontally || mc.player.isInWater() && !mc.player.collidedHorizontally) {
-								mc.player.jump();
-							}
+							KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, mc.player.onGround && mc.player.collidedHorizontally || mc.player.isInWater() && !mc.player.collidedHorizontally);
 
 							KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
 							KeyBindingUtils.setPressed(mc.gameSettings.keyBindSneak, false);
@@ -223,9 +221,15 @@ public final class AutoMine extends Hack {
 	}
 
 	private ArrayList<BlockPos> sortBlockPosByY(ArrayList<BlockPos> blockPosList) {
+		if (mc.player == null) {
+			// Handle null cases
+			return new ArrayList<>();
+		}
+
 		// Create a copy of the original ArrayList to avoid modifying the original list
 		ArrayList<BlockPos> sortedList = new ArrayList<>(blockPosList);
 
+		// Get the player
 		EntityPlayer player = mc.player;
 
 		// Sort the list using a custom comparator based on Y positions and proximity to the player
@@ -236,21 +240,22 @@ public final class AutoMine extends Hack {
 				Block block1 = pos1.getY() >= 0 ? world.getBlockState(pos1).getBlock() : Blocks.AIR;
 				Block block2 = pos2.getY() >= 0 ? world.getBlockState(pos2).getBlock() : Blocks.AIR;
 
+				// Handle air blocks
 				if (block1 == Blocks.AIR && block2 == Blocks.AIR) {
-					return 0; // Both blocks are air, so they are considered equal
+					return 0;
 				} else if (block1 == Blocks.AIR) {
-					return 1; // block1 is air, so it's considered greater than block2
+					return 1;
 				} else if (block2 == Blocks.AIR) {
-					return -1; // block2 is air, so it's considered greater than block1
+					return -1;
 				}
 
-				// Compare the Y positions for non-air blocks
+				// Compare Y positions
 				int compareByY = Integer.compare(pos2.getY(), pos1.getY());
 				if (compareByY != 0) {
-					return compareByY; // If Y positions are different, return the comparison result
+					return compareByY;
 				}
 
-				// If Y positions are the same, prioritize the closer blocks to the player
+				// Compare by squared distance
 				double distanceToPos1 = pos1.distanceSq(player.posX, player.posY, player.posZ);
 				double distanceToPos2 = pos2.distanceSq(player.posX, player.posY, player.posZ);
 				return Double.compare(distanceToPos1, distanceToPos2);
