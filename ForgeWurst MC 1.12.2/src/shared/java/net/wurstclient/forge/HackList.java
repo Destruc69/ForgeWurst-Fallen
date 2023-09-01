@@ -33,6 +33,8 @@ public final class HackList extends WHackList
 	public final NoFall noFall = register(new NoFall());
 	public final Speed speed = register(new Speed());
 	public final Step step = register(new Step());
+	public final Arson arson = register(new Arson());
+	public final AutoTNT autoTNT = register(new AutoTNT());
 	public final AutoMount autoMount = register(new AutoMount());
 	public final DataFuelModule dataFuelModule = register(new DataFuelModule());
 	public final PacketLimiter packetLimiter = register(new PacketLimiter());
@@ -63,7 +65,7 @@ public final class HackList extends WHackList
 	public final Nuker nuker = register(new Nuker());
 	public final Test test = register(new Test());
 	public final AntiLag antiLag = register(new AntiLag());
-	public final StashFinder stashFinder = register(new StashFinder());
+	public final BaseFinder baseFinder = register(new BaseFinder());
 	public final Cheststealer cheststealer = register(new Cheststealer());
 	public final InvMove invMove = register(new InvMove());
 	public final Phase phase = register(new Phase());

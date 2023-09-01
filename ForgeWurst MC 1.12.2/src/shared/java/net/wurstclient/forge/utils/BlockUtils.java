@@ -8,12 +8,16 @@
 package net.wurstclient.forge.utils;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.network.play.client.CPacketAnimation;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.network.play.client.CPacketPlayerDigging.Action;
@@ -23,6 +27,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.World;
 import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.compatibility.WPlayerController;
@@ -258,5 +263,89 @@ public final class BlockUtils
 				break;
 			}
 		}
+	}
+
+	private static final Block[] NON_NATURAL_BLOCKS = {
+			Blocks.AIR,
+			Blocks.BARRIER,
+			Blocks.BEACON,
+			Blocks.BED,
+			Blocks.BREWING_STAND,
+			Blocks.CHEST,
+			Blocks.COMMAND_BLOCK,
+			Blocks.DISPENSER,
+			Blocks.DROPPER,
+			Blocks.ENCHANTING_TABLE,
+			Blocks.ENDER_CHEST,
+			Blocks.END_PORTAL_FRAME,
+			Blocks.FURNACE,
+			Blocks.HOPPER,
+			Blocks.JUKEBOX,
+			Blocks.LADDER,
+			Blocks.PORTAL,
+			Blocks.NOTEBLOCK,
+			Blocks.OBSERVER,
+			Blocks.PISTON,
+			Blocks.BLACK_SHULKER_BOX,
+			Blocks.BLUE_SHULKER_BOX,
+			Blocks.BROWN_SHULKER_BOX,
+			Blocks.CYAN_SHULKER_BOX,
+			Blocks.GRAY_SHULKER_BOX,
+			Blocks.GREEN_SHULKER_BOX,
+			Blocks.LIME_SHULKER_BOX,
+			Blocks.MAGENTA_SHULKER_BOX,
+			Blocks.ORANGE_SHULKER_BOX,
+			Blocks.PINK_SHULKER_BOX,
+			Blocks.PURPLE_SHULKER_BOX,
+			Blocks.RED_SHULKER_BOX,
+			Blocks.WHITE_SHULKER_BOX,
+			Blocks.YELLOW_SHULKER_BOX,
+			Blocks.STANDING_SIGN,
+			Blocks.WALL_SIGN,
+	};
+
+	public static ArrayList<BlockPos> getManMadeObstructions(ArrayList<BlockPos> blockPosArrayList) {
+		ArrayList<BlockPos> tamperedBlocks = new ArrayList<>();
+
+		for (BlockPos blockPos : blockPosArrayList) {
+			if (isBlockManMade(blockPos)) {
+				tamperedBlocks.add(blockPos);
+			}
+		}
+
+		return tamperedBlocks;
+	}
+
+	private static boolean isBlockManMade(BlockPos blockPos) {
+		for (Block block : NON_NATURAL_BLOCKS) {
+			return mc.world.getBlockState(blockPos).getBlock().equals(block);
+		}
+		return false;
+	}
+
+	public static ArrayList<BlockPos> getBlockPosWithinRenderDistance(EntityPlayer player) {
+		int renderDistance = Minecraft.getMinecraft().gameSettings.renderDistanceChunks * 16; // Convert chunks to blocks
+		BlockPos playerPos = player.getPosition();
+
+		int minX = playerPos.getX() - renderDistance;
+		int minY = playerPos.getY() - renderDistance;
+		int minZ = playerPos.getZ() - renderDistance;
+		int maxX = playerPos.getX() + renderDistance;
+		int maxY = playerPos.getY() + renderDistance;
+		int maxZ = playerPos.getZ() + renderDistance;
+
+		int arraySize = (maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1);
+		BlockPos[] blockPosArray = new BlockPos[arraySize];
+
+		int index = 0;
+		for (int x = minX; x <= maxX; x++) {
+			for (int y = minY; y <= maxY; y++) {
+				for (int z = minZ; z <= maxZ; z++) {
+					blockPosArray[index++] = new BlockPos(x, y, z);
+				}
+			}
+		}
+
+		return new ArrayList<>(Arrays.asList(blockPosArray));
 	}
 }
