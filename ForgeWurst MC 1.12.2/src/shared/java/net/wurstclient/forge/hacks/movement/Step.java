@@ -10,12 +10,15 @@ package net.wurstclient.forge.hacks.movement;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.entity.MoverType;
+import net.minecraft.network.play.client.CPacketConfirmTeleport;
 import net.minecraft.network.play.client.CPacketPlayer;
+import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.util.Timer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.wurstclient.fmlevents.WPacketInputEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
@@ -41,17 +44,11 @@ public final class Step extends Hack {
 			new SliderSetting("Height", "Only works in \u00a7lSimple\u00a7r mode.",
 					1, 1, 10, 1, SliderSetting.ValueDisplay.INTEGER);
 
-	private final CheckboxSetting safeNCP =
-			new CheckboxSetting("SafeNCP", "Only applies to NCP mode, It slows down \n" +
-					"timer which helps bypass.",
-					false);
-
 	public Step() {
 		super("Step", "Allows you to step up blocks instantly.");
 		setCategory(Category.MOVEMENT);
 		addSetting(mode);
 		addSetting(height);
-		addSetting(safeNCP);
 	}
 
 	@Override
@@ -63,7 +60,6 @@ public final class Step extends Hack {
 	protected void onDisable() {
 		MinecraftForge.EVENT_BUS.unregister(this);
 		mc.player.stepHeight = 0.5F;
-		setTickLength(50);
 	}
 
 	//
@@ -75,12 +71,10 @@ public final class Step extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		if (!(mode.getSelected() == Mode.NCP)) {
-			if (mode.getSelected() == Mode.SIMPLE) {
-				// simple mode
-				mc.player.stepHeight = height.getValueF();
-				return;
-			}
+		// simple mode
+		if (mode.getSelected() == Mode.SIMPLE) {
+			mc.player.stepHeight = height.getValueF();
+		} else if (mode.getSelected() == Mode.LEGIT) {
 
 			// legit mode
 			EntityPlayerSP player = mc.player;
@@ -126,8 +120,7 @@ public final class Step extends Hack {
 			netHandler.sendPacket(new CPacketPlayer.Position(player.posX, player.posY + 0.753 * stepHeight, player.posZ, player.onGround));
 
 			player.setPosition(player.posX, player.posY + 1 * stepHeight, player.posZ);
-		} else {
-
+		} else if (mode.getSelected() == Mode.NCP) {
 			EntityPlayerSP player = mc.player;
 
 			if (!player.onGround || player.isInWater() || player.isInLava()) {
@@ -159,20 +152,47 @@ public final class Step extends Hack {
 			if (mc.player.collidedHorizontally && mc.player.onGround && mc.player.fallDistance == 0.0f && !mc.player.isOnLadder() && !mc.player.movementInput.jump) {
 				if (!a) {
 					ncpStep(stepHeight);
-					if (safeNCP.isChecked()) {
-						setTickLength(50 / 0.05f);
-					}
 					a = true;
-					b = true;
 				}
 			} else {
 				a = false;
-				if (b) {
-					if (safeNCP.isChecked()) {
-						setTickLength(50);
-					}
-					b = false;
+			}
+		} else if (mode.getSelected() == Mode.AAC) {
+			EntityPlayerSP player = mc.player;
+
+			if (!player.onGround || player.isInWater() || player.isInLava()) {
+				return;
+			}
+
+			if (player.moveForward == 0 && player.moveStrafing == 0) {
+				return;
+			}
+
+			if (player.movementInput.jump) {
+				return;
+			}
+
+			AxisAlignedBB box = player.getEntityBoundingBox().offset(0, 0.05, 0).grow(0.05);
+
+			double stepHeight = Double.NEGATIVE_INFINITY;
+
+			ArrayList<AxisAlignedBB> blockCollisions = new ArrayList<>(mc.world.getCollisionBoxes(player, box));
+
+			for (AxisAlignedBB bb : blockCollisions) {
+				if (bb.maxY > stepHeight) {
+					stepHeight = bb.maxY;
 				}
+			}
+
+			stepHeight = stepHeight - player.posY;
+
+			if (mc.player.collidedHorizontally && mc.player.onGround && mc.player.fallDistance == 0.0f && !mc.player.isOnLadder() && !mc.player.movementInput.jump) {
+				if (!b) {
+					aacStep(stepHeight);
+					b = true;
+				}
+			} else {
+				b = false;
 			}
 		}
 	}
@@ -180,7 +200,8 @@ public final class Step extends Hack {
 	private enum Mode {
 		SIMPLE("Simple"),
 		LEGIT("Legit"),
-		NCP("NCP");
+		NCP("NCP"),
+		AAC("AAC");
 
 		private final String name;
 
@@ -245,32 +266,62 @@ public final class Step extends Hack {
 		}
 	}
 
-	private void setTickLength(float tickLength)
-	{
-		try
-		{
-			Field fTimer = mc.getClass().getDeclaredField(
-					wurst.isObfuscated() ? "field_71428_T" : "timer");
-			fTimer.setAccessible(true);
-
-			if(WMinecraft.VERSION.equals("1.10.2"))
-			{
-				Field fTimerSpeed = Timer.class.getDeclaredField(
-						wurst.isObfuscated() ? "field_74278_d" : "timerSpeed");
-				fTimerSpeed.setAccessible(true);
-				fTimerSpeed.setFloat(fTimer.get(mc), 50 / tickLength);
-
-			}else
-			{
-				Field fTickLength = Timer.class.getDeclaredField(
-						wurst.isObfuscated() ? "field_194149_e" : "tickLength");
-				fTickLength.setAccessible(true);
-				fTickLength.setFloat(fTimer.get(mc), tickLength);
+	public void aacStep(double height){
+		double posX = mc.player.posX; double posY = mc.player.posY; double posZ = mc.player.posZ;
+		if (height > 0) {
+			mc.player.setPosition(mc.player.posX, mc.player.posY + height - 0.58, mc.player.posZ);
+		}
+		if(height < 1.1){
+			double first = 0.42;
+			double second = 0.75;
+			if(height > 1){
+				first *= height;
+				second *= height;
+				if(first > 0.4349){
+					first = 0.4349;
+				}else if(first < 0.405){
+					first = 0.405;
+				}
 			}
-
-		}catch(ReflectiveOperationException e)
-		{
-			throw new RuntimeException(e);
+			mc.player.connection.sendPacket(new CPacketPlayer.Position(posX, posY + first, posZ, false));
+			if(posY+second < posY + height)
+				mc.player.connection.sendPacket(new CPacketPlayer.Position(posX, posY + second, posZ, false));
+			return;
+		}
+		List<Double> offset = Arrays.asList(0.434999999999998,0.360899999999992,0.290241999999991,0.220997159999987,0.13786084000003104,0.055);
+		double y = mc.player.posY;
+		for(int i = 0; i < offset.size(); i++){
+			double off = offset.get(i);
+			y += off;
+			if(y > mc.player.posY + height){
+				double x = mc.player.posX; double z = mc.player.posZ;
+				double forward = mc.player.movementInput.moveForward;
+				double strafe = mc.player.movementInput.moveStrafe;
+				float YAW = mc.player.rotationYaw;
+				double speed = 0.3;
+				if(forward != 0 && strafe != 0)
+					speed -= 0.09;
+				x += (forward * speed * Math.cos(Math.toRadians(YAW + 90.0f)) + strafe * speed * Math.sin(Math.toRadians(YAW + 90.0f))) *1;
+				z += (forward * speed * Math.sin(Math.toRadians(YAW + 90.0f)) - strafe * speed * Math.cos(Math.toRadians(YAW + 90.0f))) *1;
+				mc.player.connection.sendPacket(new CPacketPlayer.Position(
+						x, y,z, false));
+				break;
+			}
+			if(i== offset.size() - 1){
+				double x = mc.player.posX; double z = mc.player.posZ;
+				double forward = mc.player.movementInput.moveForward;
+				double strafe = mc.player.movementInput.moveStrafe;
+				float YAW = mc.player.rotationYaw;
+				double speed = 0.3;
+				if(forward != 0 && strafe != 0)
+					speed -= 0.09;
+				x += (forward * speed * Math.cos(Math.toRadians(YAW + 90.0f)) + strafe * speed * Math.sin(Math.toRadians(YAW + 90.0f))) *1;
+				z += (forward * speed * Math.sin(Math.toRadians(YAW + 90.0f)) - strafe * speed * Math.cos(Math.toRadians(YAW + 90.0f))) *1;
+				mc.player.connection.sendPacket(new CPacketPlayer.Position(
+						x, y,z, false));
+			}else{
+				mc.player.connection.sendPacket(new CPacketPlayer.Position(posX, y, posZ, false));
+			}
 		}
 	}
 }

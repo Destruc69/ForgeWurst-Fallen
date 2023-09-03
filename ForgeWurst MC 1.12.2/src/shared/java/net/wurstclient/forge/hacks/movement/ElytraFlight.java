@@ -9,22 +9,16 @@ package net.wurstclient.forge.hacks.movement;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.MoverType;
 import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.init.Blocks;
 import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.network.play.client.CPacketPlayer;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.Timer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
@@ -34,7 +28,6 @@ import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.MathUtils;
-import org.lwjgl.input.Keyboard;
 
 import java.lang.reflect.Field;
 
@@ -63,6 +56,10 @@ public final class ElytraFlight extends Hack {
 	private final SliderSetting lockPitch =
 			new SliderSetting("LockPitch", 4, -10, 10, 0.5, SliderSetting.ValueDisplay.DECIMAL);
 
+	private final CheckboxSetting bounce =
+			new CheckboxSetting("Bounce", "Prevents canceling elytra flying when touching the ground.",
+					false);
+
 	public ElytraFlight()
 	{
 		super("ElytraFlight", "Fly with an elytra.");
@@ -74,6 +71,7 @@ public final class ElytraFlight extends Hack {
 		addSetting(autoTakeOff);
 		addSetting(shouldLockPitch);
 		addSetting(lockPitch);
+		addSetting(bounce);
 	}
 
 	@Override
@@ -100,8 +98,6 @@ public final class ElytraFlight extends Hack {
 				boostEF();
 			} else if (mode.getSelected() == Mode.CONTROL) {
 				controlEF();
-			} else if (mode.getSelected() == Mode.DEV) {
-				devEF();
 			}
 			if (!a) {
 				setTickLength(50);
@@ -134,10 +130,6 @@ public final class ElytraFlight extends Hack {
 		}
 	}
 
-	private void devEF() {
-
-	}
-
 	private void boostEF() {
 		if (mode.getSelected() == Mode.BOOST) {
 			float yaw = Minecraft.getMinecraft().player.rotationYaw;
@@ -156,7 +148,7 @@ public final class ElytraFlight extends Hack {
 			double y = 0;
 			if (mc.gameSettings.keyBindJump.isKeyDown()) {
 				y = upSpeed.getValueF();
-			} else if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
+			} else if (mc.gameSettings.keyBindSneak.isKeyDown()) {
 				y = -downSpeed.getValueF();
 			}
 
@@ -216,21 +208,40 @@ public final class ElytraFlight extends Hack {
 
 	@SubscribeEvent
 	public void onPacket(WPacketOutputEvent event) {
-		if (mode.getSelected() == Mode.CONTROL && !isKeyInputs() && !mc.gameSettings.keyBindJump.isKeyDown() && !mc.gameSettings.keyBindSneak.isKeyDown()) {
-			if (event.getPacket() instanceof CPacketPlayer ||
-			event.getPacket() instanceof CPacketPlayer.Rotation ||
-			event.getPacket() instanceof CPacketPlayer.PositionRotation ||
-			event.getPacket() instanceof CPacketPlayer.Position) {
-				event.setCanceled(true);
+		if (mc.player.isElytraFlying()) {
+			if (mode.getSelected() == Mode.CONTROL && !isKeyInputs() && !mc.gameSettings.keyBindJump.isKeyDown() && !mc.gameSettings.keyBindSneak.isKeyDown()) {
+				if (event.getPacket() instanceof CPacketPlayer ||
+						event.getPacket() instanceof CPacketPlayer.Rotation ||
+						event.getPacket() instanceof CPacketPlayer.PositionRotation ||
+						event.getPacket() instanceof CPacketPlayer.Position) {
+					event.setCanceled(true);
+				}
+			}
+
+			if (bounce.isChecked()) {
+				if (event.getPacket() instanceof CPacketPlayer) {
+					CPacketPlayer cPacketPlayer = new CPacketPlayer(false);
+					event.setPacket(cPacketPlayer);
+				}
+				if (event.getPacket() instanceof CPacketPlayer.Position) {
+					CPacketPlayer.Position cPacketPlayer = new CPacketPlayer.Position(mc.player.lastTickPosX, mc.player.lastTickPosY, mc.player.lastTickPosZ, false);
+					event.setPacket(cPacketPlayer);
+				}
+				if (event.getPacket() instanceof CPacketPlayer.Rotation) {
+					CPacketPlayer.Rotation cPacketPlayer = new CPacketPlayer.Rotation(mc.player.rotationYaw, mc.player.rotationPitch, false);
+					event.setPacket(cPacketPlayer);
+				}
+				if (event.getPacket() instanceof CPacketPlayer.PositionRotation) {
+					CPacketPlayer.PositionRotation cPacketPlayer = new CPacketPlayer.PositionRotation(mc.player.lastTickPosX, mc.player.lastTickPosY, mc.player.lastTickPosZ, mc.player.rotationYaw, mc.player.rotationPitch, false);
+					event.setPacket(cPacketPlayer);
+				}
 			}
 		}
 	}
-
 	private enum Mode {
 		CONTROL("Control"),
 		BOOST("Boost"),
-		BOOSTPLUS("BoostPlus"),
-		DEV("DEV"); // dev
+		BOOSTPLUS("BoostPlus");
 
 		private final String name;
 
@@ -296,23 +307,6 @@ public final class ElytraFlight extends Hack {
 		}catch(ReflectiveOperationException e)
 		{
 			throw new RuntimeException(e);
-		}
-	}
-
-	public void ignore() {
-		if (mc.player.isElytraFlying()) {
-			mc.player.motionX = 0;
-			mc.player.motionY = 0.05;
-			mc.player.motionZ = 0;
-		} else {
-			if (mc.player.motionY < 0) {
-				if (mc.player.ticksExisted % 10 == 0) {
-					mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_FALL_FLYING));
-				}
-			}
-			if (mc.player.onGround) {
-				mc.player.jump();
-			}
 		}
 	}
 }
