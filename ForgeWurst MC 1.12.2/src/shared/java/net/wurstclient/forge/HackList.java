@@ -68,6 +68,7 @@ public final class HackList extends WHackList
 	public final Cheststealer cheststealer = register(new Cheststealer());
 	public final InvMove invMove = register(new InvMove());
 	public final Phase phase = register(new Phase());
+	public final TargetStrafe targetStrafe = register(new TargetStrafe());
 	public final Aimbot aimbot = register(new Aimbot());
 	public final AntiCooldown antiCooldown = register(new AntiCooldown());
 	public final AntiBot antiBot = register(new AntiBot());
