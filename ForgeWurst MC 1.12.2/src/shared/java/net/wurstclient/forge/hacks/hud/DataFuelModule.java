@@ -26,9 +26,6 @@ public final class DataFuelModule extends Hack {
 	private final float[] ticks = new float[20];
 	private int currentTick;
 
-	private final SliderSetting tps =
-			new SliderSetting("TPS", 0, 0, 20, 1, SliderSetting.ValueDisplay.INTEGER);
-
 	private final SliderSetting ping =
 			new SliderSetting("Ping", 0, 0, 2500, 1, SliderSetting.ValueDisplay.INTEGER);
 
@@ -47,7 +44,6 @@ public final class DataFuelModule extends Hack {
 		}
 
 		setCategory(Category.HUD);
-		addSetting(tps);
 		addSetting(ping);
 		addSetting(fps);
 	}
@@ -65,11 +61,9 @@ public final class DataFuelModule extends Hack {
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
 		try {
-			tps.setValue(getTickRate());
 			ping.setValue(Objects.requireNonNull(mc.getCurrentServerData()).pingToServer);
 			fps.setValue(Minecraft.getDebugFPS());
 		} catch (Exception ignored) {
-			tps.setValue(0);
 			ping.setValue(0);
 			fps.setValue(Minecraft.getDebugFPS());
 		}
@@ -83,20 +77,5 @@ public final class DataFuelModule extends Hack {
 				this.currentTick++;
 			}
 		}
-	}
-
-	public float getTickRate()
-	{
-		int tickCount = 0;
-		float tickRate = 0.0f;
-
-		for (final float tick : this.ticks) {
-			if (tick > 0.0f) {
-				tickRate += tick;
-				tickCount++;
-			}
-		}
-
-		return MathHelper.clamp((tickRate / tickCount), 0.0f, 20.0f);
 	}
 }

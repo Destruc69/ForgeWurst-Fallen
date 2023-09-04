@@ -18,7 +18,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.wurstclient.forge.clickgui.ClickGui;
 import net.wurstclient.forge.other.AutoJoin;
 import net.wurstclient.forge.other.GUITweaks;
-import net.wurstclient.forge.other.TPSTracker;
 import net.wurstclient.forge.update.WurstUpdater;
 
 import java.io.IOException;
@@ -47,7 +46,6 @@ public final class ForgeWurst
 
 	private GUITweaks guiTweaks;
 	private AutoJoin autoJoin;
-	private TPSTracker tpsTracker;
 
 	private IngameHUD hud;
 	private CommandProcessor cmdProcessor;
@@ -103,9 +101,6 @@ public final class ForgeWurst
 
 		autoJoin = new AutoJoin();
 		MinecraftForge.EVENT_BUS.register(autoJoin);
-
-		tpsTracker = new TPSTracker();
-		MinecraftForge.EVENT_BUS.register(tpsTracker);
 	}
 
 	public static ForgeWurst getForgeWurst()
