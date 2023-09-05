@@ -23,8 +23,10 @@ import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.pathfinding.LandPathUtils;
+import net.wurstclient.forge.pathfinding.TestPathfinderAStar;
 import net.wurstclient.forge.utils.*;
 import org.lwjgl.opengl.GL11;
+import scala.actors.threadpool.Arrays;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -174,13 +176,16 @@ public final class AutoMine extends Hack {
 				-TileEntityRendererDispatcher.staticPlayerY,
 				-TileEntityRendererDispatcher.staticPlayerZ);
 
-		if (isStarted) {
-			for (BlockPos blockPos : blockPosArrayList) {
-				GL11.glColor4f(0, 1, 0, 0.5F);
-				GL11.glBegin(GL11.GL_LINES);
-				RenderUtils.drawOutlinedBox(Objects.requireNonNull(BlockUtils.getBoundingBox(blockPos)));
-				GL11.glEnd();
+		try {
+			if (isStarted) {
+				for (BlockPos blockPos : blockPosArrayList) {
+					GL11.glColor4f(0, 1, 0, 0.5F);
+					GL11.glBegin(GL11.GL_LINES);
+					RenderUtils.drawOutlinedBox(Objects.requireNonNull(BlockUtils.getBoundingBox(blockPos)));
+					GL11.glEnd();
+				}
 			}
+		} catch (Exception ignored) {
 		}
 
 		GL11.glPopMatrix();

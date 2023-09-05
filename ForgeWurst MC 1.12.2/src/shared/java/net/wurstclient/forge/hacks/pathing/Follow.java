@@ -18,6 +18,7 @@ import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.pathfinding.LandPathUtils;
+import net.wurstclient.forge.pathfinding.TestPathfinderAStar;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.utils.ChatUtils;
 import net.wurstclient.forge.utils.KeyBindingUtils;

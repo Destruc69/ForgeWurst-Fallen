@@ -11,6 +11,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemElytra;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.util.Timer;
@@ -60,6 +63,8 @@ public final class ElytraFlight extends Hack {
 			new CheckboxSetting("Bounce", "Prevents canceling elytra flying when touching the ground.",
 					false);
 
+	private int jumpTimer;
+
 	public ElytraFlight()
 	{
 		super("ElytraFlight", "Fly with an elytra.");
@@ -98,11 +103,13 @@ public final class ElytraFlight extends Hack {
 				boostEF();
 			} else if (mode.getSelected() == Mode.CONTROL) {
 				controlEF();
+			} else if (mode.getSelected() == Mode.WUYRST7) {
+				wurst7EF();
 			}
 			if (!a) {
 				setTickLength(50);
 			}
-		} else {
+		} else if (!(mode.getSelected() == Mode.WUYRST7)) {
 			if (autoTakeOff.isChecked()) {
 				if (mc.player.onGround) {
 					mc.player.jump();
@@ -128,6 +135,71 @@ public final class ElytraFlight extends Hack {
 				}
 			}
 		}
+	}
+
+	private void wurst7EF() {
+		if(jumpTimer > 0)
+			jumpTimer--;
+
+		ItemStack chest = mc.player.inventory.armorItemInSlot(2);
+		if(chest.getItem() != Items.ELYTRA)
+			return;
+
+		if(mc.player.isElytraFlying())
+		{
+			controlSpeed();
+			controlHeight();
+			return;
+		}
+
+		if(ItemElytra.isUsable(chest) && mc.gameSettings.keyBindJump.isKeyDown() && autoTakeOff.isChecked())
+			doInstantFly();
+	}
+
+	private void sendStartStopPacket()
+	{
+		CPacketEntityAction packet = new CPacketEntityAction(mc.player,
+				CPacketEntityAction.Action.START_FALL_FLYING);
+		mc.player.connection.sendPacket(packet);
+	}
+
+	private void controlHeight()
+	{
+
+		Vec3d v = new Vec3d(mc.player.motionX, mc.player.motionY, mc.player.motionZ);
+
+		if(mc.gameSettings.keyBindJump.isKeyDown()) {
+			mc.player.setVelocity(v.x, v.y + 0.08, v.z);
+		} else if(mc.gameSettings.keyBindSneak.isKeyDown()) {
+			mc.player.setVelocity(v.x, v.y - 0.04, v.z);
+		}
+	}
+
+	private void controlSpeed()
+	{
+		float yaw = (float)Math.toRadians(mc.player.rotationYaw);
+		Vec3d forward = new Vec3d(-MathHelper.sin(yaw) * 0.05, 0,
+				MathHelper.cos(yaw) * 0.05);
+
+		Vec3d v = new Vec3d(mc.player.motionX, mc.player.motionY, mc.player.motionZ);
+
+		if(mc.gameSettings.keyBindForward.isKeyDown())
+			mc.player.setVelocity(v.add(forward).x, v.add(forward).y, v.add(forward).z);
+		else if(mc.gameSettings.keyBindBack.isKeyDown())
+			mc.player.setVelocity(v.subtract(forward).x, v.subtract(forward).y, v.subtract(forward).z);
+	}
+
+	private void doInstantFly()
+	{
+		if(jumpTimer <= 0)
+		{
+			jumpTimer = 20;
+			mc.player.setJumping(false);
+			mc.player.setSprinting(true);
+			mc.player.jump();
+		}
+
+		sendStartStopPacket();
 	}
 
 	private void boostEF() {
@@ -241,7 +313,8 @@ public final class ElytraFlight extends Hack {
 	private enum Mode {
 		CONTROL("Control"),
 		BOOST("Boost"),
-		BOOSTPLUS("BoostPlus");
+		BOOSTPLUS("BoostPlus"),
+		WUYRST7("Wurst7");
 
 		private final String name;
 
