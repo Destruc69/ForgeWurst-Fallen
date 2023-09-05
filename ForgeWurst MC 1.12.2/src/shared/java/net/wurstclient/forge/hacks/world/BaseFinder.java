@@ -7,6 +7,7 @@
  */
 package net.wurstclient.forge.hacks.world;
 
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -15,16 +16,14 @@ import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.utils.BlockUtils;
+import net.wurstclient.forge.utils.RenderUtils;
+import org.lwjgl.opengl.GL11;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public final class BaseFinder extends Hack {
 
-	private Map<BlockPos, Integer> linkCountMap;
-	private Map<BlockPos, Double> distanceToClosestMap;
+	private ArrayList<BlockPos> blockPosArrayList;
 
 	public BaseFinder() {
 		super("StashFinder", "Logs positions with man-made obstructions.");
@@ -34,9 +33,6 @@ public final class BaseFinder extends Hack {
 	@Override
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
-
-		linkCountMap = new HashMap<>();
-		distanceToClosestMap = new HashMap<>();
 	}
 
 	@Override
@@ -45,31 +41,54 @@ public final class BaseFinder extends Hack {
 	}
 
 	@SubscribeEvent
+	public void onUpdate(WUpdateEvent event) {
+		//if (mc.player.ticksExisted % 20 == 0) {
+		//	blockPosArrayList = BlockUtils.getManMadeObstructions(BlockUtils.getBlockPosWithinRenderDistance(mc.player));
+		//}
+	}
+
+	@SubscribeEvent
 	public void onRender(RenderWorldLastEvent event) {
-		if (mc.player.ticksExisted % 20 == 0) {
-			ArrayList<BlockPos> blockPosArrayList = BlockUtils.getManMadeObstructions(BlockUtils.getBlockPosWithinRenderDistance(mc.player));
+		if (blockPosArrayList != null) {
+			if (blockPosArrayList.size() > 0) {
+				// GL settings
+				GL11.glEnable(GL11.GL_BLEND);
+				GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+				GL11.glEnable(GL11.GL_LINE_SMOOTH);
+				GL11.glLineWidth(1);
+				GL11.glDisable(GL11.GL_TEXTURE_2D);
+				GL11.glEnable(GL11.GL_CULL_FACE);
+				GL11.glDisable(GL11.GL_DEPTH_TEST);
 
-			blockPosArrayList.sort(new Comparator<BlockPos>() {
-				@Override
-				public int compare(BlockPos pos1, BlockPos pos2) {
-					// Compare by distance to closest first
-					double distanceDiff = distanceToClosestMap.get(pos1) - distanceToClosestMap.get(pos2);
-					if (distanceDiff != 0) {
-						return Double.compare(distanceDiff, 0);
+				GL11.glPushMatrix();
+				GL11.glTranslated(-TileEntityRendererDispatcher.staticPlayerX,
+						-TileEntityRendererDispatcher.staticPlayerY,
+						-TileEntityRendererDispatcher.staticPlayerZ);
+
+				for (BlockPos blockPos : blockPosArrayList) {
+					GL11.glColor4f(0, 1, 0, 1F);
+					GL11.glBegin(GL11.GL_QUADS);
+					if (blockPos.getY() < mc.player.lastTickPosY) {
+						for (int y = blockPos.getY(); y < mc.player.lastTickPosY; y++) {
+							RenderUtils.drawSolidBox(Objects.requireNonNull(BlockUtils.getBoundingBox(blockPos.add(0, y, 0))));
+						}
+					} else if (blockPos.getY() > mc.player.lastTickPosY) {
+						for (int y = (int) mc.player.lastTickPosY; y < blockPos.getY(); y++) {
+							RenderUtils.drawSolidBox(Objects.requireNonNull(BlockUtils.getBoundingBox(blockPos.add(0, y, 0))));
+						}
 					}
-
-					// Compare by link count
-					int linkCountDiff = linkCountMap.get(pos1) - linkCountMap.get(pos2);
-					if (linkCountDiff != 0) {
-						return Integer.compare(linkCountDiff, 0);
-					}
-
-					// If distances and link counts are the same, maintain original order
-					return 0;
+					GL11.glEnd();
 				}
-			});
 
+				GL11.glPopMatrix();
 
+				// GL resets
+				GL11.glColor4f(1, 1, 1, 1);
+				GL11.glEnable(GL11.GL_DEPTH_TEST);
+				GL11.glEnable(GL11.GL_TEXTURE_2D);
+				GL11.glDisable(GL11.GL_BLEND);
+				GL11.glDisable(GL11.GL_LINE_SMOOTH);
+			}
 		}
 	}
 }

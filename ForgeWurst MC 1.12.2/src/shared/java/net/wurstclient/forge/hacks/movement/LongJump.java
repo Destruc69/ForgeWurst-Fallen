@@ -25,10 +25,6 @@ public final class LongJump extends Hack {
 	
 	private final EnumSetting<Mode> mode =
 			new EnumSetting<>("Mode", Mode.values(), Mode.OLDAAC);
-
-	private final CheckboxSetting bypass =
-			new CheckboxSetting("Bypass", "Helps bypass, will be slower.",
-					false);
 	
 	private int groundTick;
 	private boolean jump;
@@ -70,7 +66,6 @@ public final class LongJump extends Hack {
 		super("LongJump", "Jump far");
 		setCategory(Category.MOVEMENT);
 		addSetting(mode);
-		addSetting(bypass);
 	}
 
 	@Override
@@ -88,14 +83,6 @@ public final class LongJump extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		if (bypass.isChecked()) {
-			if (mc.player.isAirBorne) {
-				if (mc.player.ticksExisted % 2 == 0) {
-					mc.player.motionX = mc.player.motionX / 1.05;
-					mc.player.motionZ = mc.player.motionZ / 1.05;
-				}
-			}
-		}
 		if (mode.getSelected().oldaac) {
 			KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, false);
 			if (mc.player.onGround) {

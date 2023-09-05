@@ -7,6 +7,7 @@
  */
 package net.wurstclient.forge.hacks.movement;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.network.play.client.CPacketPlayer;

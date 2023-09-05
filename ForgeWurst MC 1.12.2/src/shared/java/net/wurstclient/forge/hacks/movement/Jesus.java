@@ -12,10 +12,13 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.settings.GameSettings;
+import net.minecraft.entity.ai.EntityAIMoveToBlock;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketPlayer;
+import net.minecraft.pathfinding.PathFinder;
+import net.minecraft.pathfinding.WalkNodeProcessor;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -31,12 +34,16 @@ import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.compatibility.WPlayer;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.EnumSetting;
+import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.BlockUtils;
 
 public final class Jesus extends Hack
 {
 	private final EnumSetting<Mode> mode =
 			new EnumSetting<>("Mode", Mode.values(), Mode.NORMAL);
+
+	private final SliderSetting swimSpeed =
+			new SliderSetting("SwimSpeed", "The attribute value for SWIM_SPEED", 1, 0, 20, 0.1, SliderSetting.ValueDisplay.DECIMAL);
 
 	private int tickTimer;
 
@@ -46,6 +53,7 @@ public final class Jesus extends Hack
 				+ "Jesus used this hack ~2000 years ago.");
 		setCategory(Category.MOVEMENT);
 		addSetting(mode);
+		addSetting(swimSpeed);
 	}
 
 	@Override
@@ -63,7 +71,8 @@ public final class Jesus extends Hack
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		if (mode.getSelected().normal) {
+		mc.player.getEntityAttribute(EntityPlayer.SWIM_SPEED).setBaseValue(swimSpeed.getValue());
+		if (mode.getSelected() == Mode.NORMAL) {
 			EntityPlayerSP player = event.getPlayer();
 
 			// check if sneaking
@@ -86,7 +95,7 @@ public final class Jesus extends Hack
 
 			// update timer
 			tickTimer++;
-		} else if (mode.getSelected().remove) {
+		} else if (mode.getSelected() == Mode.REMOVE) {
 			try {
 				for (int x = -8; x < 8; x++) {
 					for (int y = -8; y < 8; y++) {
@@ -100,7 +109,7 @@ public final class Jesus extends Hack
 				}
 			} catch (Exception ignored) {
 			}
-		} else if (mode.getSelected().realistic) {
+		} else if (mode.getSelected() == Mode.REALISTIC) {
 			if (mc.player.isInWater() && !mc.player.collidedHorizontally) {
 				mc.player.motionY /= 2;
 			}
@@ -110,7 +119,7 @@ public final class Jesus extends Hack
 	@SubscribeEvent
 	public void onPacketOutput(WPacketOutputEvent event)
 	{
-		if (mode.getSelected().normal) {
+		if (mode.getSelected() == Mode.NORMAL) {
 			// check packet type
 			if (!(event.getPacket() instanceof CPacketPlayer))
 				return;
@@ -159,7 +168,7 @@ public final class Jesus extends Hack
 	@SubscribeEvent
 	public void onGetLiquidCollisionBox(WGetLiquidCollisionBoxEvent event)
 	{
-		if (mode.getSelected().normal) {
+		if (mode.getSelected() == Mode.NORMAL) {
 			EntityPlayerSP player = WMinecraft.getPlayer();
 
 			if (isLiquidCollisionEnabled(player))
@@ -169,7 +178,7 @@ public final class Jesus extends Hack
 
 	@SubscribeEvent
 	public void onEntityPlayerJump(WEntityPlayerJumpEvent event) {
-		if (mode.getSelected().normal) {
+		if (mode.getSelected() == Mode.NORMAL) {
 			EntityPlayer player = event.getPlayer();
 			if (player != WMinecraft.getPlayer())
 				return;
@@ -233,20 +242,15 @@ public final class Jesus extends Hack
 	}
 
 	private enum Mode {
-		NORMAL("Normal", true, false, false),
-		REMOVE("Remove", false, true, false),
-		REALISTIC("Realistic", false, false, true);
+		NORMAL("Normal"),
+		REMOVE("Remove"),
+		REALISTIC("Realistic"),
+		NONE("NONE");
 
 		private final String name;
-		private final boolean normal;
-		private final boolean remove;
-		private final boolean realistic;
 
-		private Mode(String name, boolean normal, boolean remove, boolean realistic) {
+		private Mode(String name) {
 			this.name = name;
-			this.normal = normal;
-			this.remove = remove;
-			this.realistic = realistic;
 		}
 
 		public String toString() {

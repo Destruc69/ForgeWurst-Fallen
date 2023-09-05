@@ -266,7 +266,6 @@ public final class BlockUtils
 	}
 
 	private static final Block[] NON_NATURAL_BLOCKS = {
-			Blocks.AIR,
 			Blocks.BARRIER,
 			Blocks.BEACON,
 			Blocks.BED,

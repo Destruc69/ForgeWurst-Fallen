@@ -55,7 +55,7 @@ public final class Discord extends Hack {
 	public void onUpdate(WUpdateEvent event) {
 		try {
 			presence.details = mc.player.getName() + " | " + Objects.requireNonNull(mc.getCurrentServerData()).serverIP;
-			presence.state = mc.player.getHealth() + " / " + mc.player.getMaxHealth();
+			presence.state = mc.player.getHealth() + " / "  + mc.player.getMaxHealth();
 		} catch (Exception ignored) {
 		}
 	}
