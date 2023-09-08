@@ -63,6 +63,9 @@ public final class HackList extends WHackList
 	public final AutoCrystal autoCrystal = register(new AutoCrystal());
 	public final Nuker nuker = register(new Nuker());
 	public final Test test = register(new Test());
+	public final NoRender noRender = register(new NoRender());
+	public final NewChunks newChunks = register(new NewChunks());
+	public final Breadcrumbs breadcrumbs = register(new Breadcrumbs());
 	public final AntiLag antiLag = register(new AntiLag());
 	public final BaseFinder baseFinder = register(new BaseFinder());
 	public final Cheststealer cheststealer = register(new Cheststealer());

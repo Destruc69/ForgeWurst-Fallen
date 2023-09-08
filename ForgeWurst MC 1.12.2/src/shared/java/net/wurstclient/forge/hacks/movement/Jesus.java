@@ -36,6 +36,7 @@ import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.BlockUtils;
+import net.wurstclient.forge.utils.ChatUtils;
 
 public final class Jesus extends Hack
 {
@@ -43,9 +44,10 @@ public final class Jesus extends Hack
 			new EnumSetting<>("Mode", Mode.values(), Mode.NORMAL);
 
 	private final SliderSetting swimSpeed =
-			new SliderSetting("SwimSpeed", "The attribute value for SWIM_SPEED", 1, 0, 20, 0.1, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("SwimSpeed", "The attribute value for SWIM_SPEED", 1, 0, 10, 0.5, SliderSetting.ValueDisplay.DECIMAL);
 
 	private int tickTimer;
+	private boolean tbEngage = false;
 
 	public Jesus()
 	{
@@ -112,6 +114,53 @@ public final class Jesus extends Hack
 		} else if (mode.getSelected() == Mode.REALISTIC) {
 			if (mc.player.isInWater() && !mc.player.collidedHorizontally) {
 				mc.player.motionY /= 2;
+			}
+		} else if (mode.getSelected() == Mode.TBTT) {
+			if (!tbEngage) {
+				if (mc.player.onGround && mc.player.isInWater()) {
+					if (!tbEngage) {
+						tbEngage = true;
+						try {
+							ChatUtils.message("[JESUS] Okay, engaging bypass method...");
+						} catch (Exception ignored) {
+						}
+					}
+				} else {
+					tbEngage = false;
+
+					if (mc.player.ticksExisted % 20 == 0) {
+						try {
+							ChatUtils.message("[JESUS] For 2b2t Jesus you need to be in the water and touching the ground.");
+						} catch (Exception ignored) {
+						}
+					}
+				}
+			} else {
+				if (!mc.gameSettings.keyBindJump.isKeyDown()) {
+					for (int x = -2; x < 2; x++) {
+						for (int y = 0; y < 2; y++) {
+							for (int z = -2; z < 2; z++) {
+								BlockPos blockPos = new BlockPos(mc.player.lastTickPosX + x, mc.player.lastTickPosY + y, mc.player.lastTickPosZ + z);
+								if (mc.world.getBlockState(blockPos).getBlock().equals(Blocks.WATER)) {
+									mc.world.setBlockState(blockPos, Blocks.AIR.getDefaultState());
+								}
+							}
+						}
+					}
+				} else {
+					tbEngage = false;
+					try {
+						ChatUtils.message("[JESUS] Disengaging...");
+					} catch (Exception ignored) {
+					}
+					for (int x = -2; x < 2; x++) {
+						for (int y = 0; y < 2; y++) {
+							for (int z = -2; z < 2; z++) {
+								BlockPos blockPos = new BlockPos(mc.player.lastTickPosX + x, mc.player.lastTickPosY + y, mc.player.lastTickPosZ + z);
+							}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -245,6 +294,7 @@ public final class Jesus extends Hack
 		NORMAL("Normal"),
 		REMOVE("Remove"),
 		REALISTIC("Realistic"),
+		TBTT("2b2t"),
 		NONE("NONE");
 
 		private final String name;

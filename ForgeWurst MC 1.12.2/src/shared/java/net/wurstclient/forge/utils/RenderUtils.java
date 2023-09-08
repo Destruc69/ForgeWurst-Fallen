@@ -136,7 +136,7 @@ public final class RenderUtils
 		GL11.glVertex3d(midX, bb.minY, midZ);
 		GL11.glVertex3d(midX, midY, bb.maxZ);
 	}
-	
+
 	public static void drawArrow(Vec3d from, Vec3d to)
 	{
 		double startX = WVec3d.getX(from);
@@ -197,5 +197,31 @@ public final class RenderUtils
 		GL11.glEnd();
 		
 		GL11.glPopMatrix();
+	}
+
+	public static void renderTextAtCoordinates(String text, double x, double y, double z, int scale) {
+		// Save the current OpenGL state
+		GL11.glPushMatrix();
+
+		// Translate to the specified coordinates
+		GL11.glTranslated(x, y, z);
+
+		// Scale the text
+		GL11.glScalef(scale, scale, scale);
+
+		// Set up the rendering color (white in this case)
+		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+
+		// Disable lighting to ensure text is visible
+		GL11.glDisable(GL11.GL_LIGHTING);
+
+		// Render the text
+		Minecraft.getMinecraft().fontRenderer.drawString(text, 0, 0, 0xFFFFFF);
+
+		// Restore the OpenGL state
+		GL11.glPopMatrix();
+
+		// Re-enable lighting (if needed) after rendering
+		GL11.glEnable(GL11.GL_LIGHTING);
 	}
 }

@@ -136,12 +136,10 @@ public final class AutoMine extends Hack {
 							KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, mc.player.onGround && mc.player.collidedHorizontally || mc.player.isInWater() && !mc.player.collidedHorizontally);
 
 							KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
-							KeyBindingUtils.setPressed(mc.gameSettings.keyBindSneak, false);
 							KeyBindingUtils.setPressed(mc.gameSettings.keyBindSprint, true);
 						}
 					} else {
 						KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, false);
-						KeyBindingUtils.setPressed(mc.gameSettings.keyBindSneak, true);
 						KeyBindingUtils.setPressed(mc.gameSettings.keyBindSprint, false);
 						mc.playerController.onPlayerDamageBlock(targPos, EnumFacing.DOWN);
 						mc.player.swingArm(EnumHand.MAIN_HAND);

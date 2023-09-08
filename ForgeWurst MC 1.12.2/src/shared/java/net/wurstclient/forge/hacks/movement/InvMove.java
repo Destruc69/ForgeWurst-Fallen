@@ -8,6 +8,7 @@
 package net.wurstclient.forge.hacks.movement;
 
 import net.minecraft.client.gui.GuiChat;
+import net.minecraft.client.gui.inventory.GuiEditSign;
 import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraftforge.client.event.InputUpdateEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -36,21 +37,18 @@ public final class InvMove extends Hack {
 
 	@SubscribeEvent
 	public void onInput(InputUpdateEvent event) {
-		assert event != null;
-		try {
-			if (mc.currentScreen instanceof GuiChat)
-				return;
-			if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
-				event.getMovementInput().moveForward++;
+		if (!(mc.currentScreen instanceof GuiChat) && !(mc.currentScreen instanceof GuiEditSign)) {
+			if (Keyboard.isKeyDown(mc.gameSettings.keyBindForward.getKeyCode())) {
+				event.getMovementInput().moveForward = 1;
 			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
-				event.getMovementInput().moveForward--;
+			if (Keyboard.isKeyDown(mc.gameSettings.keyBindBack.getKeyCode())) {
+				event.getMovementInput().moveForward = -1;
 			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
-				event.getMovementInput().moveStrafe--;
+			if (Keyboard.isKeyDown(mc.gameSettings.keyBindRight.getKeyCode())) {
+				event.getMovementInput().moveStrafe = -1;
 			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
-				event.getMovementInput().moveStrafe++;
+			if (Keyboard.isKeyDown(mc.gameSettings.keyBindLeft.getKeyCode())) {
+				event.getMovementInput().moveStrafe = 1;
 			}
 			if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
 				mc.player.rotationYaw = mc.player.rotationYaw + 3;
@@ -66,7 +64,6 @@ public final class InvMove extends Hack {
 			}
 			event.getMovementInput().jump = Keyboard.isKeyDown(Keyboard.KEY_SPACE);
 			event.getMovementInput().sneak = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT);
-		} catch (Exception ignored) {
 		}
 	}
 

@@ -57,47 +57,35 @@ public final class AntiHunger extends Hack {
 
 	@SubscribeEvent
 	public void onPacketOut(WPacketOutputEvent event) {
-		try {
-			if (cancelSprintPacket.isChecked()) {
-				if (event.getPacket() instanceof CPacketEntityAction) {
-					CPacketEntityAction cPacketEntityAction = (CPacketEntityAction) event.getPacket();
-					if (cPacketEntityAction.getAction().equals(CPacketEntityAction.Action.START_SPRINTING) || cPacketEntityAction.getAction().equals(CPacketEntityAction.Action.STOP_SPRINTING)) {
-						event.setCanceled(true);
+		if (cancelSprintPacket.isChecked()) {
+			if (event.getPacket() instanceof CPacketEntityAction) {
+				CPacketEntityAction cPacketEntityAction = (CPacketEntityAction) event.getPacket();
+				if (cPacketEntityAction.getAction().equals(CPacketEntityAction.Action.START_SPRINTING) || cPacketEntityAction.getAction().equals(CPacketEntityAction.Action.STOP_SPRINTING)) {
+					event.setCanceled(true);
+				}
+			}
+		}
+
+		if (groundSpoof.isChecked()) {
+			if (mc.player.onGround && !mc.playerController.getIsHittingBlock()) {
+				if (mc.player.motionY > -0.01 && mc.player.motionY < 0.01) {
+					if (event.getPacket() instanceof CPacketPlayer) {
+						event.setPacket(new CPacketPlayer(false));
+					}
+					if (event.getPacket() instanceof CPacketPlayer.Rotation) {
+						CPacketPlayer.Rotation cPacketPlayerRotation = (CPacketPlayer.Rotation) event.getPacket();
+						event.setPacket(new CPacketPlayer.Rotation(cPacketPlayerRotation.getYaw(0), cPacketPlayerRotation.getPitch(0), false));
+					}
+					if (event.getPacket() instanceof CPacketPlayer.Position) {
+						CPacketPlayer.Position cPacketPlayerPosition = (CPacketPlayer.Position) event.getPacket();
+						event.setPacket(new CPacketPlayer.Position(cPacketPlayerPosition.getX(0), cPacketPlayerPosition.getY(1), cPacketPlayerPosition.getZ(0), false));
+					}
+					if (event.getPacket() instanceof CPacketPlayer.PositionRotation) {
+						CPacketPlayer.PositionRotation cPacketPlayerPositionRotation = (CPacketPlayer.PositionRotation) event.getPacket();
+						event.setPacket(new CPacketPlayer.PositionRotation(cPacketPlayerPositionRotation.getX(0), cPacketPlayerPositionRotation.getY(0), cPacketPlayerPositionRotation.getZ(0), cPacketPlayerPositionRotation.getYaw(0), cPacketPlayerPositionRotation.getPitch(0), false));
 					}
 				}
 			}
-
-			if (groundSpoof.isChecked()) {
-				if (event.getPacket() instanceof CPacketPlayer) {
-					if (mc.player.onGround) {
-						if (mc.playerController.getIsHittingBlock())
-							return;
-						CPacketPlayer oldPacket = (CPacketPlayer) event.getPacket();
-						double x = oldPacket.getX(-1);
-						double y = oldPacket.getY(-1);
-						double z = oldPacket.getZ(-1);
-						float yaw = oldPacket.getYaw(-1);
-						float pitch = oldPacket.getPitch(-1);
-
-						Packet<?> newPacket;
-						if (PacketUtils.changesPosition(oldPacket))
-							if (PacketUtils.changesLook(oldPacket))
-								newPacket =
-										new CPacketPlayer.PositionRotation(x, y, z, yaw, pitch, false);
-							else
-								newPacket =
-										new CPacketPlayer.Position(x, y, z, false);
-						else if (PacketUtils.changesLook(oldPacket))
-							newPacket =
-									new CPacketPlayer.Rotation(yaw, pitch, false);
-						else
-							newPacket = new CPacketPlayer(false);
-
-						event.setPacket(newPacket);
-					}
-				}
-			}
-		} catch (Exception ignored) {
 		}
 	}
 }
