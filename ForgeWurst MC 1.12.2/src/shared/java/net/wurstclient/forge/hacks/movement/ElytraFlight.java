@@ -63,6 +63,9 @@ public final class ElytraFlight extends Hack {
 			new CheckboxSetting("Bounce", "Prevents canceling elytra flying when touching the ground.",
 					false);
 
+	private final SliderSetting bounceOffset =
+			new SliderSetting("BounceOffset", 0.15, 0.05, 2, 0.05, SliderSetting.ValueDisplay.DECIMAL);
+
 	private int jumpTimer;
 
 	public ElytraFlight()
@@ -77,6 +80,7 @@ public final class ElytraFlight extends Hack {
 		addSetting(shouldLockPitch);
 		addSetting(lockPitch);
 		addSetting(bounce);
+		addSetting(bounceOffset);
 	}
 
 	@Override
@@ -291,21 +295,13 @@ public final class ElytraFlight extends Hack {
 			}
 
 			if (bounce.isChecked()) {
-				if (event.getPacket() instanceof CPacketPlayer) {
-					CPacketPlayer cPacketPlayer = new CPacketPlayer(false);
-					event.setPacket(cPacketPlayer);
+				if (event.getPacket() instanceof CPacketPlayer.PositionRotation) {
+					CPacketPlayer.PositionRotation cPacketPlayer = (CPacketPlayer.PositionRotation) event.getPacket();
+					event.setPacket(new CPacketPlayer.PositionRotation(cPacketPlayer.getX(0), cPacketPlayer.getY(0) + bounceOffset.getValue(), cPacketPlayer.getZ(0), cPacketPlayer.getYaw(0), cPacketPlayer.getPitch(0), mc.player.onGround));
 				}
 				if (event.getPacket() instanceof CPacketPlayer.Position) {
-					CPacketPlayer.Position cPacketPlayer = new CPacketPlayer.Position(mc.player.lastTickPosX, mc.player.lastTickPosY, mc.player.lastTickPosZ, false);
-					event.setPacket(cPacketPlayer);
-				}
-				if (event.getPacket() instanceof CPacketPlayer.Rotation) {
-					CPacketPlayer.Rotation cPacketPlayer = new CPacketPlayer.Rotation(mc.player.rotationYaw, mc.player.rotationPitch, false);
-					event.setPacket(cPacketPlayer);
-				}
-				if (event.getPacket() instanceof CPacketPlayer.PositionRotation) {
-					CPacketPlayer.PositionRotation cPacketPlayer = new CPacketPlayer.PositionRotation(mc.player.lastTickPosX, mc.player.lastTickPosY, mc.player.lastTickPosZ, mc.player.rotationYaw, mc.player.rotationPitch, false);
-					event.setPacket(cPacketPlayer);
+					CPacketPlayer.Position cPacketPlayer = (CPacketPlayer.Position) event.getPacket();
+					event.setPacket(new CPacketPlayer.Position(cPacketPlayer.getX(0), cPacketPlayer.getY(0) + bounceOffset.getValue(), cPacketPlayer.getZ(0), mc.player.onGround));
 				}
 			}
 		}
