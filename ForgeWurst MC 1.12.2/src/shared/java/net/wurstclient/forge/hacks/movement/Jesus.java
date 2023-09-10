@@ -116,6 +116,10 @@ public final class Jesus extends Hack
 				mc.player.motionY /= 2;
 			}
 		} else if (mode.getSelected() == Mode.TBTT) {
+
+			// So i just learnt that in 1.19.4 if your in shallow water, the water doesnt slow you down. Stupid feauture.
+			// And im to lazy to remove it
+
 			if (!tbEngage) {
 				if (mc.player.onGround && mc.player.isInWater()) {
 					if (!tbEngage) {
@@ -152,13 +156,6 @@ public final class Jesus extends Hack
 					try {
 						ChatUtils.message("[JESUS] Disengaging...");
 					} catch (Exception ignored) {
-					}
-					for (int x = -2; x < 2; x++) {
-						for (int y = 0; y < 2; y++) {
-							for (int z = -2; z < 2; z++) {
-								BlockPos blockPos = new BlockPos(mc.player.lastTickPosX + x, mc.player.lastTickPosY + y, mc.player.lastTickPosZ + z);
-							}
-						}
 					}
 				}
 			}

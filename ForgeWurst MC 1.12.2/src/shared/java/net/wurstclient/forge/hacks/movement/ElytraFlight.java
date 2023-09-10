@@ -292,20 +292,7 @@ public final class ElytraFlight extends Hack {
 
 			if (bounce.isChecked()) {
 				if (event.getPacket() instanceof CPacketPlayer) {
-					CPacketPlayer cPacketPlayer = new CPacketPlayer(false);
-					event.setPacket(cPacketPlayer);
-				}
-				if (event.getPacket() instanceof CPacketPlayer.Position) {
-					CPacketPlayer.Position cPacketPlayer = new CPacketPlayer.Position(mc.player.lastTickPosX, mc.player.lastTickPosY, mc.player.lastTickPosZ, false);
-					event.setPacket(cPacketPlayer);
-				}
-				if (event.getPacket() instanceof CPacketPlayer.Rotation) {
-					CPacketPlayer.Rotation cPacketPlayer = new CPacketPlayer.Rotation(mc.player.rotationYaw, mc.player.rotationPitch, false);
-					event.setPacket(cPacketPlayer);
-				}
-				if (event.getPacket() instanceof CPacketPlayer.PositionRotation) {
-					CPacketPlayer.PositionRotation cPacketPlayer = new CPacketPlayer.PositionRotation(mc.player.lastTickPosX, mc.player.lastTickPosY, mc.player.lastTickPosZ, mc.player.rotationYaw, mc.player.rotationPitch, false);
-					event.setPacket(cPacketPlayer);
+					event.setPacket(new CPacketPlayer(false));
 				}
 			}
 		}
