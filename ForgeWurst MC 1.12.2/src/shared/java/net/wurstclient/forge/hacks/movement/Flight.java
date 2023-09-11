@@ -146,6 +146,8 @@ public final class Flight extends Hack
 				player.motionY = +upSpeed.getValue();
 			if (mc.gameSettings.keyBindSneak.isKeyDown())
 				player.motionY = -downSpeed.getValue();
+		} else if (mode.getSelected() == Mode.WATERFLY) {
+			mc.world.setBlockState(mc.player.getPosition().add(0.5, 0.5, 0.5), Blocks.WATER.getDefaultState());
 		}
 	}
 
@@ -171,7 +173,8 @@ public final class Flight extends Hack
 	private enum Mode {
 		GHOSTLY("Ghostly"),
 		NCP("NCP"),
-		VANILLA("Vanilla");
+		VANILLA("Vanilla"),
+		WATERFLY("WaterFly");
 
 		private final String name;
 

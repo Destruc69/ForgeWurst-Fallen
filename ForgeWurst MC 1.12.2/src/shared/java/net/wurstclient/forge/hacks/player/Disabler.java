@@ -9,23 +9,18 @@ package net.wurstclient.forge.hacks.player;
 
 import net.minecraft.network.play.client.CPacketConfirmTransaction;
 import net.minecraft.network.play.client.CPacketCustomPayload;
-import net.minecraft.network.play.client.CPacketEntityAction;
+import net.minecraft.network.play.client.CPacketKeepAlive;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.settings.EnumSetting;
 
 public final class Disabler extends Hack {
-
-	private final EnumSetting<Mode> mode =
-			new EnumSetting<>("Mode", Mode.values(), Mode.BASIC);
 
 	public Disabler() {
 		super("Disabler", "Bypass anti cheats.");
 		setCategory(Category.PLAYER);
-		addSetting(mode);
 	}
 
 	@Override
@@ -39,38 +34,9 @@ public final class Disabler extends Hack {
 	}
 
 	@SubscribeEvent
-	public void onPacket(WPacketOutputEvent event) {
-		if (mode.getSelected().extra) {
-			if (event.getPacket() instanceof CPacketConfirmTransaction ||
-					event.getPacket() instanceof CPacketCustomPayload ||
-					event.getPacket() instanceof CPacketEntityAction) {
-				event.setCanceled(true);
-			}
-		} else if (mode.getSelected().basic) {
-			if (event.getPacket() instanceof CPacketConfirmTransaction ||
-					event.getPacket() instanceof CPacketCustomPayload) {
-				event.setCanceled(true);
-			}
-		}
-	}
-
-	private enum Mode {
-		BASIC("Basic", true, false),
-		EXTRA("Extra", false, true),
-		NONE("None", false, false);
-
-		private final String name;
-		private final boolean basic;
-		private final boolean extra;
-
-		private Mode(String name, boolean basic, boolean extra) {
-			this.name = name;
-			this.basic = basic;
-			this.extra = extra;
-		}
-
-		public String toString() {
-			return name;
+	public void onPacketOut(WPacketOutputEvent event) {
+		if (event.getPacket() instanceof CPacketCustomPayload || event.getPacket() instanceof CPacketKeepAlive || event.getPacket() instanceof CPacketConfirmTransaction) {
+			event.setCanceled(true);
 		}
 	}
 }
