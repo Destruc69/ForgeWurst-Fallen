@@ -8,15 +8,15 @@
 package net.wurstclient.forge.hacks.render;
 
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.SliderSetting;
-import net.wurstclient.forge.utils.BlockUtils;
 import net.wurstclient.forge.utils.RenderUtils;
 import org.lwjgl.opengl.GL11;
 
@@ -28,11 +28,16 @@ public final class Pointer extends Hack {
     private final SliderSetting z =
             new SliderSetting("Z", 0, -32000000, 32000000, 1, SliderSetting.ValueDisplay.INTEGER);
 
+    private final CheckboxSetting setToCurrentPos =
+            new CheckboxSetting("SetToCurrentPos", "Sets the X and Z slider to the players current coordinate.",
+                    false);
+
     public Pointer() {
         super("Pointer", "Lets you save temporary points.");
         setCategory(Category.RENDER);
         addSetting(x);
         addSetting(z);
+        addSetting(setToCurrentPos);
     }
 
     @Override
@@ -43,6 +48,15 @@ public final class Pointer extends Hack {
     @Override
     protected void onDisable() {
         MinecraftForge.EVENT_BUS.unregister(this);
+    }
+
+    @SubscribeEvent
+    public void onUpdate(WUpdateEvent event) {
+        if (setToCurrentPos.isChecked()) {
+            x.setValue(mc.player.lastTickPosX);
+            z.setValue(mc.player.lastTickPosZ);
+            setToCurrentPos.setChecked(false);
+        }
     }
 
     @SubscribeEvent

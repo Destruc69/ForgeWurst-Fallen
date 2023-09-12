@@ -67,7 +67,7 @@ public final class ElytraFlight extends Hack {
 					false);
 
 	private final SliderSetting bounceOffset =
-			new SliderSetting("BounceOffset", 0.15, 0.05, 2, 0.05, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("BounceOffset", 0.15, 0.05, 10, 0.01, SliderSetting.ValueDisplay.DECIMAL);
 
 	private int jumpTimer;
 
