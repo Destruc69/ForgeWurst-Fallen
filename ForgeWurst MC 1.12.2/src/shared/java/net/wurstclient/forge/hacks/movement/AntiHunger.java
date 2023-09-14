@@ -7,8 +7,6 @@
  */
 package net.wurstclient.forge.hacks.movement;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraftforge.common.MinecraftForge;
@@ -17,7 +15,6 @@ import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.CheckboxSetting;
-import net.wurstclient.forge.utils.PacketUtils;
 
 public final class AntiHunger extends Hack {
 

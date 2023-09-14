@@ -7,25 +7,13 @@
  */
 package net.wurstclient.forge.hacks.world;
 
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.util.EnumParticleTypes;
-import net.minecraftforge.client.event.EntityViewRenderEvent;
-import net.minecraftforge.client.event.RenderHandEvent;
-import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.client.event.RenderSpecificHandEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.settings.CheckboxSetting;
 
 public final class AntiFog extends Hack {
-
-	private final CheckboxSetting opposite =
-			new CheckboxSetting("Opposite", "Pro-Fog.",
-					false);
 
 	public AntiFog() {
 		super("AntiFog", "Removes fog.");
@@ -44,10 +32,6 @@ public final class AntiFog extends Hack {
 
 	@SubscribeEvent
 	public void update(WUpdateEvent event) {
-		if (!opposite.isChecked()) {
-			mc.entityRenderer.setupFogColor(false);
-		} else {
-
-		}
+		mc.entityRenderer.setupFogColor(false);
 	}
 }
