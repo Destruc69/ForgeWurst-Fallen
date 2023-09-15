@@ -15,9 +15,28 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.utils.RotationUtils;
 
 public final class Arson extends Hack {
+
+	private static final EnumSetting<Mode> mode =
+			new EnumSetting<>("Mode", Mode.values(), Mode.LEGIT);
+
+	private enum Mode {
+		PACKET("Packet"),
+		LEGIT("Legit");
+
+		private final String name;
+
+		private Mode(String name) {
+			this.name = name;
+		}
+
+		public String toString() {
+			return name;
+		}
+	}
 
 	public Arson() {
 		super("Arson", "Lights players on fire with a flint n' steel.");

@@ -1,20 +1,13 @@
 package net.wurstclient.forge.hacks.movement;
 
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.init.Blocks;
 import net.minecraft.network.play.client.CPacketConfirmTeleport;
-import net.minecraft.network.play.client.CPacketInput;
 import net.minecraft.network.play.client.CPacketPlayer;
-import net.minecraft.network.play.client.CPacketSpectate;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.wurstclient.fmlevents.*;
+import net.wurstclient.fmlevents.WPacketInputEvent;
+import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.EnumSetting;
@@ -146,8 +139,6 @@ public final class Flight extends Hack
 				player.motionY = +upSpeed.getValue();
 			if (mc.gameSettings.keyBindSneak.isKeyDown())
 				player.motionY = -downSpeed.getValue();
-		} else if (mode.getSelected() == Mode.WATERFLY) {
-			mc.world.setBlockState(mc.player.getPosition().add(0.5, 0.5, 0.5), Blocks.WATER.getDefaultState());
 		}
 	}
 
@@ -173,8 +164,7 @@ public final class Flight extends Hack
 	private enum Mode {
 		GHOSTLY("Ghostly"),
 		NCP("NCP"),
-		VANILLA("Vanilla"),
-		WATERFLY("WaterFly");
+		VANILLA("Vanilla");
 
 		private final String name;
 

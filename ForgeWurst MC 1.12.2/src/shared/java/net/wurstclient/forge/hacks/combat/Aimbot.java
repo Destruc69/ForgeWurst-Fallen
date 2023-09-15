@@ -8,23 +8,18 @@
 package net.wurstclient.forge.hacks.combat;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.wurstclient.fmlevents.WPacketInputEvent;
-import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.settings.EnumSetting;
-import net.wurstclient.forge.utils.KeyBindingUtils;
 import net.wurstclient.forge.utils.RotationUtils;
 
 public final class Aimbot extends Hack {
 
 	public Aimbot() {
-		super("Aimbot", "Sends packets to look at entitys..");
+		super("Aimbot", "Sends packets to look at entitys.");
 		setCategory(Category.COMBAT);
 	}
 	@Override

@@ -22,9 +22,28 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.utils.RotationUtils;
 
 public final class AutoTNT extends Hack {
+
+	private static final EnumSetting<Mode> mode =
+			new EnumSetting<>("Mode", Mode.values(), Mode.LEGIT);
+
+	private enum Mode {
+		PACKET("Packet"),
+		LEGIT("Legit");
+
+		private final String name;
+
+		private Mode(String name) {
+			this.name = name;
+		}
+
+		public String toString() {
+			return name;
+		}
+	}
 
 	public AutoTNT() {
 		super("AutoTNT", "Places TNT near entity's and ignites the TNT.");

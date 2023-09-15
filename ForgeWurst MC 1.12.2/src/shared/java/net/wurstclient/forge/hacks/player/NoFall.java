@@ -11,7 +11,6 @@ import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
@@ -58,21 +57,24 @@ public final class NoFall extends Hack {
 			} else {
 				mc.player.setPosition(vec3d.x, vec3d.y, vec3d.z);
 			}
-		}
-	}
-
-	@SubscribeEvent
-	public void onPacketOut(WPacketOutputEvent event) {
-		if (mode.getSelected() == Mode.PACKET) {
-			if (event.getPacket() instanceof CPacketPlayer && mc.player.fallDistance > 3) {
-				event.setPacket(new CPacketPlayer(true));
+		} else if (mode.getSelected() == Mode.PACKET) {
+			if (mc.player.fallDistance > 3) {
+				mc.player.connection.sendPacket(new CPacketPlayer(true));
+			}
+		} else if (mode.getSelected() == Mode.DAMAGE) {
+			if (mc.player.fallDistance > 3) {
+				mc.player.onGround = true;
+				mc.player.isAirBorne = false;
+				mc.player.collidedHorizontally = false;
+				mc.player.collidedVertically = true;
 			}
 		}
 	}
 
 	private enum Mode {
 		PACKET("Packet"),
-		ANTI("Anti");
+		ANTI("Anti"),
+		DAMAGE("Damage");
 
 		private final String name;
 

@@ -52,8 +52,12 @@ public final class ElytraFlight extends Hack {
 			new CheckboxSetting("AutoTakeOff", "Takes off automatically.",
 					false);
 
+	private final CheckboxSetting shouldGlide =
+			new CheckboxSetting("ShouldGlide", "Should we glide?.",
+					false);
+
 	private final SliderSetting glide =
-			new SliderSetting("Glide", "2 == half normal glide speed", 1, 0.1, 20, 0.1, SliderSetting.ValueDisplay.DECIMAL);
+			new SliderSetting("Glide", "2 == half normal glide speed", 1, 0.1, 50, 0.1, SliderSetting.ValueDisplay.DECIMAL);
 
 	private final CheckboxSetting shouldLockPitch =
 			new CheckboxSetting("ShouldLockPitch", "Should we lock pitch?.",
@@ -80,6 +84,7 @@ public final class ElytraFlight extends Hack {
 		addSetting(baseSpeed);
 		addSetting(downSpeed);
 		addSetting(autoTakeOff);
+		addSetting(shouldGlide);
 		addSetting(glide);
 		addSetting(shouldLockPitch);
 		addSetting(lockPitch);
@@ -106,8 +111,10 @@ public final class ElytraFlight extends Hack {
 			if (shouldLockPitch.isChecked()) {
 				mc.player.rotationPitch = lockPitch.getValueF();
 			}
-			if (mc.player.motionY < 0) {
-				mc.player.motionY = -mc.player.motionY / -glide.getValueF();
+			if (shouldGlide.isChecked()) {
+				if (mc.player.motionY < 0) {
+					mc.player.motionY = -mc.player.motionY / -glide.getValueF();
+				}
 			}
 			if (mode.getSelected() == Mode.BOOST ||
 					mode.getSelected() == Mode.BOOSTPLUS) {
