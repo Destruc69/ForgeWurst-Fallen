@@ -7,10 +7,6 @@
  */
 package net.wurstclient.forge.utils;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -27,11 +23,14 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
 import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.compatibility.WPlayerController;
 import net.wurstclient.forge.compatibility.WVec3d;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public final class BlockUtils
 {
@@ -265,7 +264,7 @@ public final class BlockUtils
 		}
 	}
 
-	private static final Block[] NON_NATURAL_BLOCKS = {
+	public static final Block[] NON_NATURAL_BLOCKS = {
 			Blocks.BARRIER,
 			Blocks.BEACON,
 			Blocks.BED,

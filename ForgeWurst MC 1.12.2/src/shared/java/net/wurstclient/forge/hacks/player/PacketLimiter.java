@@ -1,27 +1,25 @@
 package net.wurstclient.forge.hacks.player;
 
-import net.minecraft.network.play.client.CPacketKeepAlive;
-import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.hacks.movement.AutoSprintHack;
-import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.settings.SliderSetting;
+import net.wurstclient.forge.utils.ChatUtils;
 
 public final class PacketLimiter extends Hack {
 
 	private int packetCounter;
+	private boolean shouldCancelPackets;
 
 	private final EnumSetting<Mode> mode =
 			new EnumSetting<>("Mode", Mode.values(), Mode.WARN);
 
 	public static SliderSetting maxPacketsPS =
-			new SliderSetting("MaxPacketsPS", "Whats the max amount of packets per second?", 300, 100, 5000, 1, SliderSetting.ValueDisplay.INTEGER);
+			new SliderSetting("MaxPacketsPS", "Whats the max amount of packets per second?", 300, 50, 5000, 1, SliderSetting.ValueDisplay.INTEGER);
 
 	public PacketLimiter() {
 		super("PacketLimiter", "Limits packets.");
@@ -46,23 +44,24 @@ public final class PacketLimiter extends Hack {
 		if (mc.player.ticksExisted % 20 == 0) {
 			packetCounter = 0;
 		}
+
+		if (packetCounter > maxPacketsPS.getValue()) {
+			if (mode.getSelected() == Mode.WARN) {
+				if (mc.player.ticksExisted % 20 == 0) {
+					ChatUtils.message("[PacketLimiter] You are exceeding the set packet limit!");
+				}
+			} else if (mode.getSelected() == Mode.CANCEL) {
+				shouldCancelPackets = true;
+			}
+		} else {
+			shouldCancelPackets = false;
+		}
 	}
 
 	@SubscribeEvent
 	private void onPacketOut(WPacketOutputEvent event) {
-		if (!(event.getPacket() instanceof CPacketPlayer)) {
-			if (packetCounter < maxPacketsPS.getValue()) {
-				packetCounter = packetCounter + 1;
-			} else {
-				if (mode.getSelected().warn) {
-					 mc.ingameGUI.setOverlayMessage("You are exceeding the packet limit. [" + packetCounter + "]", true);
-				} else if (mode.getSelected().cancel) {
-					if (!(event.getPacket() instanceof CPacketKeepAlive)) {
-						event.setCanceled(true);
-					}
-				}
-			}
-		}
+		packetCounter = packetCounter + 1;
+		event.setCanceled(shouldCancelPackets);
 	}
 
 	private enum Mode {
