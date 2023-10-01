@@ -1,10 +1,3 @@
-/*
- * Copyright (C) 2017 - 2019 | Wurst-Imperium | All rights reserved.
- *
- * This source code is subject to the terms of the GNU General Public
- * License, version 3. If a copy of the GPL was not distributed with this
- * file, You can obtain one at: https://www.gnu.org/licenses/gpl-3.0.txt
- */
 package net.wurstclient.forge.hacks.movement;
 
 import net.minecraft.client.Minecraft;
@@ -124,6 +117,7 @@ public final class ElytraFlight extends Hack {
 			} else if (mode.getSelected() == Mode.WUYRST7) {
 				wurst7EF();
 			}
+
 			if (!a) {
 				setTickLength(50);
 			}
@@ -153,6 +147,30 @@ public final class ElytraFlight extends Hack {
 				}
 			}
 		}
+
+		if (mode.getSelected() == Mode.PACKET) {
+			packetEF();
+		}
+	}
+
+	private void packetEF() {
+		if (mc.gameSettings.keyBindJump.isKeyDown()) {
+			mc.player.motionY = upSpeed.getValueF();
+		} else if (mc.gameSettings.keyBindSneak.isKeyDown()) {
+			mc.player.motionY = -downSpeed.getValue();
+		} else {
+			mc.player.motionY = 0;
+		}
+
+		if (isKeyInputs()) {
+			MathUtils.setSpeed(baseSpeed.getValueF());
+		} else {
+			mc.player.motionX = 0;
+			mc.player.motionZ = 0;
+		}
+
+		mc.player.connection.sendPacket(new CPacketPlayer(true));
+		mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_FALL_FLYING));
 	}
 
 	private void wurst7EF() {
@@ -324,7 +342,8 @@ public final class ElytraFlight extends Hack {
 		CONTROL("Control"),
 		BOOST("Boost"),
 		BOOSTPLUS("BoostPlus"),
-		WUYRST7("Wurst7");
+		WUYRST7("Wurst7"),
+		PACKET("Packet");
 
 		private final String name;
 
