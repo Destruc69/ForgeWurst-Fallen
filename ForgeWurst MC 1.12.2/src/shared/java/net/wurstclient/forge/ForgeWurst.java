@@ -18,11 +18,13 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.wurstclient.forge.clickgui.ClickGui;
 import net.wurstclient.forge.other.AutoJoin;
 import net.wurstclient.forge.other.GUITweaks;
+import net.wurstclient.forge.other.customs.notifications.NotificationManager;
 import net.wurstclient.forge.update.WurstUpdater;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 
 @Mod(modid = ForgeWurst.MODID,
 		version = ForgeWurst.VERSION,
@@ -46,6 +48,8 @@ public final class ForgeWurst
 
 	private GUITweaks guiTweaks;
 	private AutoJoin autoJoin;
+
+	private NotificationManager notificationManager;
 
 	private IngameHUD hud;
 	private CommandProcessor cmdProcessor;
@@ -101,6 +105,10 @@ public final class ForgeWurst
 
 		autoJoin = new AutoJoin();
 		MinecraftForge.EVENT_BUS.register(autoJoin);
+
+		notificationManager = new NotificationManager();
+		NotificationManager.notificationArrayList = new ArrayList<>();
+		MinecraftForge.EVENT_BUS.register(notificationManager);
 	}
 
 	public static ForgeWurst getForgeWurst()

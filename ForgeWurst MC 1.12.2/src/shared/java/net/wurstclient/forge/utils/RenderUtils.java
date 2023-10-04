@@ -7,18 +7,10 @@
  */
 package net.wurstclient.forge.utils;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.util.ResourceLocation;
-import org.lwjgl.opengl.GL11;
-
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.wurstclient.forge.compatibility.WVec3d;
-
-import java.awt.*;
+import org.lwjgl.opengl.GL11;
 
 public final class RenderUtils
 {
@@ -197,31 +189,5 @@ public final class RenderUtils
 		GL11.glEnd();
 		
 		GL11.glPopMatrix();
-	}
-
-	public static void renderTextAtCoordinates(String text, double x, double y, double z, int scale) {
-		// Save the current OpenGL state
-		GL11.glPushMatrix();
-
-		// Translate to the specified coordinates
-		GL11.glTranslated(x, y, z);
-
-		// Scale the text
-		GL11.glScalef(scale, scale, scale);
-
-		// Set up the rendering color (white in this case)
-		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-
-		// Disable lighting to ensure text is visible
-		GL11.glDisable(GL11.GL_LIGHTING);
-
-		// Render the text
-		Minecraft.getMinecraft().fontRenderer.drawString(text, 0, 0, 0xFFFFFF);
-
-		// Restore the OpenGL state
-		GL11.glPopMatrix();
-
-		// Re-enable lighting (if needed) after rendering
-		GL11.glEnable(GL11.GL_LIGHTING);
 	}
 }

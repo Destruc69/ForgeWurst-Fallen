@@ -112,6 +112,35 @@ public final class ClickGuiHack extends Hack
                     "Make everything utilize a custom font.",
                     false);
 
+    public static final SliderSetting arrayListX = new SliderSetting("ArrayListX",
+            "The X coordinate for the arraylist", 4, 0, mc.displayWidth * 1.2, 1,
+            ValueDisplay.DECIMAL);
+
+    public static final SliderSetting arrayListY = new SliderSetting("ArrayListY",
+            "The Y coordinate for the arraylist", 23, 0, mc.displayHeight * 1.2, 1,
+            ValueDisplay.DECIMAL);
+
+    public static final SliderSetting titleX = new SliderSetting("TitleX",
+            "The X coordinate for the title", 4, 0, mc.displayWidth * 1.2, 1,
+            ValueDisplay.DECIMAL);
+
+    public static final SliderSetting titleY = new SliderSetting("TitleY",
+            "The Y coordinate for the title", 23, 0, mc.displayHeight * 1.2, 1,
+            ValueDisplay.DECIMAL);
+
+    public static final SliderSetting notificationX = new SliderSetting("NotificationX",
+            "The X coordinate for the notifications", 50, 0, mc.displayWidth * 1.2, 1,
+            ValueDisplay.DECIMAL);
+
+    public static final SliderSetting notificationY = new SliderSetting("NotificationY",
+            "The Y coordinate for the notifications", 3, 0, mc.displayHeight * 1.2, 1,
+            ValueDisplay.DECIMAL);
+
+    public static final CheckboxSetting addDummyNotification =
+            new CheckboxSetting("AddDummyNotification",
+                    "Adds a dummy notifications so you can position.",
+                    false);
+
     public ClickGuiHack()
     {
         super("ClickGUI", "");
@@ -139,6 +168,13 @@ public final class ClickGuiHack extends Hack
         addSetting(blockArrayList);
         addSetting(prefixEnumEnumSetting);
         addSetting(customFont);
+        addSetting(arrayListX);
+        addSetting(arrayListY);
+        addSetting(titleX);
+        addSetting(titleY);
+        addSetting(notificationX);
+        addSetting(notificationY);
+        addSetting(addDummyNotification);
 
         MinecraftForge.EVENT_BUS.register(new InventoryButtonAdder());
     }

@@ -8,6 +8,8 @@
 package net.wurstclient.forge.utils;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.init.Blocks;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
 public final class MathUtils
@@ -138,5 +140,15 @@ public final class MathUtils
 			yaw -= i;
 		}
 		return yaw * 0.017453292f;
+	}
+
+	public static double calculateFallDistance(double x, double y, double z) {
+		double dist = 0;
+
+		while (Minecraft.getMinecraft().world.getBlockState(new BlockPos(x, y - dist, z)).getBlock().equals(Blocks.AIR)) {
+			dist += 0.01;
+		}
+
+		return dist;
 	}
 }

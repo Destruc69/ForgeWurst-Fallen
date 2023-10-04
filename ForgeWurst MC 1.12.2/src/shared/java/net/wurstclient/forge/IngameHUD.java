@@ -8,6 +8,7 @@
 package net.wurstclient.forge;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -94,34 +95,28 @@ public final class IngameHUD {
 
 
 		if (!ForgeWurst.getForgeWurst().getHax().clickGuiHack.nogui().isChecked()) {
-			// title
-			GL11.glPushMatrix();
-			GL11.glScaled(1.55555555, 1.55555555, 0.88888888);
-			WMinecraft.getFontRenderer().drawStringWithShadow("  allen", 3, 3, (int) textColor);
-			GL11.glPopMatrix();
-
 			GL11.glPushMatrix();
 			GL11.glScaled(2, 2, 1);
-			WMinecraft.getFontRenderer().drawStringWithShadow("F", 3, 3, (int) textColor);
-			GL11.glPopMatrix();
-
-			GL11.glPushMatrix();
-			GL11.glScaled(1.55555555, 1.55555555, 0.88888888);
-			WMinecraft.getFontRenderer().drawStringWithShadow(" _____", 3, 4, (int) textColor);
-			GL11.glPopMatrix();
-
-			GL11.glPushMatrix();
-			GL11.glScaled(1.55555555, 1.55555555, 0.88888888);
-			WMinecraft.getFontRenderer().drawStringWithShadow(" _____", 4, 4, (int) textColor);
+			WMinecraft.getFontRenderer().drawStringWithShadow("Fallen", ClickGuiHack.titleX.getValueI(), ClickGuiHack.titleY.getValueI(), (int) textColor);
 			GL11.glPopMatrix();
 
 			GL11.glShadeModel(GL11.GL_SMOOTH);
 
 			// hack list
-			int y = 23;
+			int y = ClickGuiHack.arrayListY.getValueI();
 			ArrayList<Hack> hacks = new ArrayList<>(hackList.getValues());
 			Comparator<Hack> comparator = new NameLengthComparator();
-			hacks.sort(comparator.reversed());
+
+			ScaledResolution scaledResolution = new ScaledResolution(mc);
+
+			// Calculate the center of the screen
+			int centerX = scaledResolution.getScaledWidth() / 2;
+
+			if (centerX < ClickGuiHack.arrayListX.getValueI()) {
+				hacks.sort(comparator);
+			} else {
+				hacks.sort(comparator.reversed());
+			}
 
 			gui.updateColors();
 
@@ -155,7 +150,7 @@ public final class IngameHUD {
 					theColor = Color.YELLOW.getRGB();
 				}
 
-				WMinecraft.getFontRenderer().drawString(color, 4, y, (int) textColor, false);
+				WMinecraft.getFontRenderer().drawString(color, ClickGuiHack.arrayListX.getValueI(), y, (int) textColor, false);
 
 				y += 9;
 			}

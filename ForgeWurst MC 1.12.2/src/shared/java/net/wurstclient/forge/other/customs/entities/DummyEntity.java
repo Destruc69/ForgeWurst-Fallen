@@ -11,6 +11,7 @@ import net.minecraft.util.math.BlockPos;
 import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.hacks.pathing.PathfinderModule;
 import net.wurstclient.forge.pathfinding.LandPathUtils;
+import net.wurstclient.forge.pathfinding.TestPathfinderAStar;
 
 import java.util.ArrayList;
 
@@ -32,9 +33,12 @@ public class DummyEntity extends EntityOtherPlayerMP {
     }
 
     public void moveTowards(BlockPos blockPos) {
+        TestPathfinderAStar testPathfinderAStar = new TestPathfinderAStar(this.getPosition(), blockPos);
         try {
             if (Minecraft.getMinecraft().player.ticksExisted % 20 == 0) {
-                blockPosArrayList = LandPathUtils.createPath(this.getPosition().add(0, -1, 0), blockPos, false);
+                //blockPosArrayList = LandPathUtils.createPath(this.getPosition().add(0, -1, 0), blockPos, false);
+                testPathfinderAStar.compute();
+                blockPosArrayList = testPathfinderAStar.getPath();
             }
             if (blockPosArrayList.size() > 0) {
                 moveForward(true);

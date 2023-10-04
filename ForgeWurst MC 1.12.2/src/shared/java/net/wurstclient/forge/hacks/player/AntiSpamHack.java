@@ -7,27 +7,23 @@
  */
 package net.wurstclient.forge.hacks.player;
 
-import java.util.List;
-
 import net.minecraft.client.gui.ChatLine;
 import net.minecraft.client.gui.GuiNewChat;
 import net.minecraft.client.gui.GuiUtilRenderComponents;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WChatInputEvent;
-import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.utils.MathUtils;
 
+import java.util.List;
+
 public final class AntiSpamHack extends Hack
 {
-	//not yet done
 	private final CheckboxSetting antiSlur =
 			new CheckboxSetting("AntiSlur", "Removes chat messages with slurs.",
 					false);
@@ -37,28 +33,23 @@ public final class AntiSpamHack extends Hack
 		super("AntiSpam",
 			"Blocks chat spam by adding a\n" + "counter to repeated messages.");
 		setCategory(Category.PLAYER);
+		addSetting(antiSlur);
 	}
-	
+
 	@Override
 	protected void onEnable()
 	{
 		MinecraftForge.EVENT_BUS.register(this);
 	}
-	
+
 	@Override
 	protected void onDisable()
 	{
 		MinecraftForge.EVENT_BUS.unregister(this);
 	}
 
-	private final CharSequence[] slurs = new CharSequence[]{"fuck", "bitch", "nigger", "asshole", "die", "dick", "vagina", "cunt", "retard"};
-
-	@SubscribeEvent
-	public void onUpdate(WUpdateEvent event) {
-		if (antiSlur.isChecked()) {
-
-		}
-	}
+	// To block slurs, it needs to know the slurs.
+	private final CharSequence[] slurs = new CharSequence[]{"fuck", "shit", "bitch", "nigger", "ass", "die", "dick", "penis", "vagina", "cunt", "retard"};
 
 	@SubscribeEvent
 	public void onChatInput(WChatInputEvent event)

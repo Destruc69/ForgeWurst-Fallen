@@ -124,9 +124,9 @@ public final class ElytraFlight extends Hack {
 		} else if (!(mode.getSelected() == Mode.WUYRST7)) {
 			if (autoTakeOff.isChecked()) {
 				if (mc.player.onGround) {
-					mc.player.jump();
-					mc.player.motionX = 0;
-					mc.player.motionZ = 0;
+					//mc.player.jump();
+					//mc.player.motionX = 0;
+					//mc.player.motionZ = 0;
 					a = true;
 				} else if (mc.world.getBlockState(new BlockPos(mc.player.posX, mc.player.posY - 0.5, mc.player.posZ)).getBlock().equals(Blocks.AIR)) {
 					if (mc.player.ticksExisted % 2 == 0) {
@@ -327,16 +327,26 @@ public final class ElytraFlight extends Hack {
 			}
 
 			if (bounce.isChecked()) {
-				if (event.getPacket() instanceof CPacketPlayer.PositionRotation) {
-					CPacketPlayer.PositionRotation cPacketPlayer = (CPacketPlayer.PositionRotation) event.getPacket();
-					event.setPacket(new CPacketPlayer.PositionRotation(cPacketPlayer.getX(0), cPacketPlayer.getY(0) + bounceOffset.getValue(), cPacketPlayer.getZ(0), cPacketPlayer.getYaw(0), cPacketPlayer.getPitch(0), mc.player.onGround));
-				}
-				if (event.getPacket() instanceof CPacketPlayer.Position) {
-					CPacketPlayer.Position cPacketPlayer = (CPacketPlayer.Position) event.getPacket();
-					event.setPacket(new CPacketPlayer.Position(cPacketPlayer.getX(0), cPacketPlayer.getY(0) + bounceOffset.getValue(), cPacketPlayer.getZ(0), mc.player.onGround));
+					if (event.getPacket() instanceof CPacketPlayer.PositionRotation) {
+						CPacketPlayer.PositionRotation cPacketPlayer = (CPacketPlayer.PositionRotation) event.getPacket();
+
+						double y = cPacketPlayer.getY(mc.player.lastTickPosY) - MathUtils.calculateFallDistance(cPacketPlayer.getX(mc.player.lastTickPosX), cPacketPlayer.getY(mc.player.lastTickPosY), cPacketPlayer.getZ(mc.player.lastTickPosZ)) + bounceOffset.getValue();
+
+						if (MathUtils.calculateFallDistance(cPacketPlayer.getX(mc.player.lastTickPosX), cPacketPlayer.getY(mc.player.lastTickPosY), cPacketPlayer.getZ(mc.player.lastTickPosZ)) < bounceOffset.getValue()) {
+							event.setPacket(new CPacketPlayer.PositionRotation(cPacketPlayer.getX(mc.player.lastTickPosX), y, cPacketPlayer.getZ(mc.player.lastTickPosZ), cPacketPlayer.getYaw(mc.player.rotationYaw), cPacketPlayer.getPitch(mc.player.rotationPitch), mc.player.onGround));
+						}
+					}
+					if (event.getPacket() instanceof CPacketPlayer.Position) {
+						CPacketPlayer.Position cPacketPlayer = (CPacketPlayer.Position) event.getPacket();
+
+						double y = cPacketPlayer.getY(mc.player.lastTickPosY) - MathUtils.calculateFallDistance(cPacketPlayer.getX(mc.player.lastTickPosX), cPacketPlayer.getY(mc.player.lastTickPosY), cPacketPlayer.getZ(mc.player.lastTickPosZ)) + bounceOffset.getValue();
+
+						if (MathUtils.calculateFallDistance(cPacketPlayer.getX(mc.player.lastTickPosX), cPacketPlayer.getY(mc.player.lastTickPosY), cPacketPlayer.getZ(mc.player.lastTickPosZ)) < bounceOffset.getValue()) {
+							event.setPacket(new CPacketPlayer.Position(cPacketPlayer.getX(mc.player.lastTickPosX), y, cPacketPlayer.getZ(mc.player.lastTickPosZ), mc.player.onGround));
+						}
+					}
 				}
 			}
-		}
 	}
 	private enum Mode {
 		CONTROL("Control"),
