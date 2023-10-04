@@ -8,7 +8,6 @@ import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.hacks.ClickGuiHack;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Iterator;
 
 public class NotificationManager {
@@ -16,13 +15,6 @@ public class NotificationManager {
     private final Minecraft mc = Minecraft.getMinecraft();
 
     public static ArrayList<Notification> notificationArrayList;
-
-    static class LengthComparator implements Comparator<Notification> {
-        @Override
-        public int compare(Notification o1, Notification o2) {
-            return Integer.compare(o1.getTicksExisted(), o2.getTicksExisted());
-        }
-    }
 
     @SubscribeEvent
     public void onRenderGUI(RenderGameOverlayEvent.Post event) {
@@ -37,18 +29,15 @@ public class NotificationManager {
                 return;
 
             int y = ClickGuiHack.notificationY.getValueI();
-
-            ArrayList<Notification> notificationArrayList = new ArrayList<Notification>(NotificationManager.getNotificationArrayList());
-            Comparator<Notification> notificationComparator = new LengthComparator();
-            notificationArrayList.sort(notificationComparator);
-
             Iterator<Notification> iterator = notificationArrayList.iterator();
+
             while (iterator.hasNext()) {
                 Notification notification = iterator.next();
-                if (notification.getTicksExisted() < 300) {
+
+                if (notification.getTicksExisted() < 2200) {
                     notification.tick();
                 } else {
-                    iterator.remove(); // Remove the element using the iterator
+                    iterator.remove(); // Safely remove the element from the list.
                 }
 
                 WMinecraft.getFontRenderer().drawString(notification.getContent(), ClickGuiHack.notificationX.getValueI(), y, (int) IngameHUD.textColor, false);
