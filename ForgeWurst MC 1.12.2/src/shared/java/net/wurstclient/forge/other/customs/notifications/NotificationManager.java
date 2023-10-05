@@ -34,13 +34,13 @@ public class NotificationManager {
             while (iterator.hasNext()) {
                 Notification notification = iterator.next();
 
-                if (notification.getTicksExisted() < 2200) {
+                if (notification.getTicksExisted() < 555) {
                     notification.tick();
                 } else {
                     iterator.remove(); // Safely remove the element from the list.
                 }
 
-                WMinecraft.getFontRenderer().drawString(notification.getContent(), ClickGuiHack.notificationX.getValueI(), y, (int) IngameHUD.textColor, false);
+                WMinecraft.getFontRenderer().drawString(notification.getContent() + "   [" + notification.getTicksExisted() + "]", ClickGuiHack.notificationX.getValueI(), y, (int) IngameHUD.textColor, false);
 
                 y += 9;
             }

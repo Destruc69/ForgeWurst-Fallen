@@ -8,6 +8,7 @@
 package net.wurstclient.forge;
 
 import net.wurstclient.forge.commands.*;
+import net.wurstclient.forge.commands.fbot.FBotCMD;
 import net.wurstclient.forge.compatibility.WCommandList;
 
 public final class CommandList extends WCommandList
@@ -15,6 +16,7 @@ public final class CommandList extends WCommandList
 	public final BindsCmd bindsCmd = register(new BindsCmd());
 	public final ClearCmd clearCmd = register(new ClearCmd());
 	public final GmCmd gmCmd = register(new GmCmd());
+	public final FBotCMD fBotCMD = register(new FBotCMD());
 	public final HelpCmd helpCmd = register(new HelpCmd());
 	public final SayCmd sayCmd = register(new SayCmd());
 	public final SetCheckboxCmd setCheckboxCmd = register(new SetCheckboxCmd());

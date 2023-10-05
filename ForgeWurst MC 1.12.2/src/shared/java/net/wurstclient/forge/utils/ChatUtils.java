@@ -10,6 +10,8 @@ package net.wurstclient.forge.utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
+import net.wurstclient.forge.other.customs.notifications.Notification;
+import net.wurstclient.forge.other.customs.notifications.NotificationManager;
 
 public final class ChatUtils
 {
@@ -31,15 +33,24 @@ public final class ChatUtils
 	public static void message(String message)
 	{
 		component(new TextComponentString(message));
+
+		// Temporary Maybe
+		NotificationManager.addNotification(new Notification("[MESSAGE] " + message));
 	}
 	
 	public static void warning(String message)
 	{
 		message("\u00a7c[\u00a76\u00a7lWARNING\u00a7c]\u00a7r " + message);
+
+		// Temporary Maybe
+		NotificationManager.addNotification(new Notification("[WARNING] " + message));
 	}
 	
 	public static void error(String message)
 	{
 		message("\u00a7c[\u00a74\u00a7lERROR\u00a7c]\u00a7r " + message);
+
+		// Temporary Maybe
+		NotificationManager.addNotification(new Notification("[ERROR] " + message));
 	}
 }
