@@ -59,13 +59,6 @@ public final class ElytraFlight extends Hack {
 	private final SliderSetting lockPitch =
 			new SliderSetting("LockPitch", 4, -10, 10, 0.5, SliderSetting.ValueDisplay.DECIMAL);
 
-	private final CheckboxSetting bounce =
-			new CheckboxSetting("Bounce", "Prevents canceling elytra flying when touching the ground.",
-					false);
-
-	private final SliderSetting bounceOffset =
-			new SliderSetting("BounceOffset", 0.15, 0.05, 10, 0.01, SliderSetting.ValueDisplay.DECIMAL);
-
 	private int jumpTimer;
 
 	public ElytraFlight()
@@ -81,8 +74,6 @@ public final class ElytraFlight extends Hack {
 		addSetting(glide);
 		addSetting(shouldLockPitch);
 		addSetting(lockPitch);
-		addSetting(bounce);
-		addSetting(bounceOffset);
 	}
 
 	@Override
@@ -105,8 +96,10 @@ public final class ElytraFlight extends Hack {
 				mc.player.rotationPitch = lockPitch.getValueF();
 			}
 			if (shouldGlide.isChecked()) {
-				if (mc.player.motionY < 0) {
-					mc.player.motionY = -mc.player.motionY / -glide.getValueF();
+				if (glide.getValue() > 0) {
+					if (mc.player.motionY < 0) {
+						mc.player.motionY = -mc.player.motionY / -glide.getValueF();
+					}
 				}
 			}
 			if (mode.getSelected() == Mode.BOOST ||
@@ -159,6 +152,7 @@ public final class ElytraFlight extends Hack {
 		} else if (mc.gameSettings.keyBindSneak.isKeyDown()) {
 			mc.player.motionY = -downSpeed.getValue();
 		} else {
+			mc.player.posY = mc.player.prevPosY;
 			mc.player.motionY = 0;
 		}
 
@@ -310,6 +304,7 @@ public final class ElytraFlight extends Hack {
 		} else if (mc.gameSettings.keyBindSneak.isKeyDown()) {
 			mc.player.motionY = -downSpeed.getValue();
 		} else {
+			mc.player.posY = mc.player.prevPosY;
 			mc.player.motionY = 0;
 		}
 	}
@@ -325,29 +320,9 @@ public final class ElytraFlight extends Hack {
 					event.setCanceled(true);
 				}
 			}
-
-			if (bounce.isChecked()) {
-					if (event.getPacket() instanceof CPacketPlayer.PositionRotation) {
-						CPacketPlayer.PositionRotation cPacketPlayer = (CPacketPlayer.PositionRotation) event.getPacket();
-
-						double y = cPacketPlayer.getY(mc.player.lastTickPosY) - MathUtils.calculateFallDistance(cPacketPlayer.getX(mc.player.lastTickPosX), cPacketPlayer.getY(mc.player.lastTickPosY), cPacketPlayer.getZ(mc.player.lastTickPosZ)) + bounceOffset.getValue();
-
-						if (MathUtils.calculateFallDistance(cPacketPlayer.getX(mc.player.lastTickPosX), cPacketPlayer.getY(mc.player.lastTickPosY), cPacketPlayer.getZ(mc.player.lastTickPosZ)) < bounceOffset.getValue()) {
-							event.setPacket(new CPacketPlayer.PositionRotation(cPacketPlayer.getX(mc.player.lastTickPosX), y, cPacketPlayer.getZ(mc.player.lastTickPosZ), cPacketPlayer.getYaw(mc.player.rotationYaw), cPacketPlayer.getPitch(mc.player.rotationPitch), mc.player.onGround));
-						}
-					}
-					if (event.getPacket() instanceof CPacketPlayer.Position) {
-						CPacketPlayer.Position cPacketPlayer = (CPacketPlayer.Position) event.getPacket();
-
-						double y = cPacketPlayer.getY(mc.player.lastTickPosY) - MathUtils.calculateFallDistance(cPacketPlayer.getX(mc.player.lastTickPosX), cPacketPlayer.getY(mc.player.lastTickPosY), cPacketPlayer.getZ(mc.player.lastTickPosZ)) + bounceOffset.getValue();
-
-						if (MathUtils.calculateFallDistance(cPacketPlayer.getX(mc.player.lastTickPosX), cPacketPlayer.getY(mc.player.lastTickPosY), cPacketPlayer.getZ(mc.player.lastTickPosZ)) < bounceOffset.getValue()) {
-							event.setPacket(new CPacketPlayer.Position(cPacketPlayer.getX(mc.player.lastTickPosX), y, cPacketPlayer.getZ(mc.player.lastTickPosZ), mc.player.onGround));
-						}
-					}
-				}
-			}
+		}
 	}
+
 	private enum Mode {
 		CONTROL("Control"),
 		BOOST("Boost"),

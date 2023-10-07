@@ -40,7 +40,7 @@ public class NotificationManager {
                     iterator.remove(); // Safely remove the element from the list.
                 }
 
-                WMinecraft.getFontRenderer().drawString(notification.getContent() + "   [" + notification.getTicksExisted() % 20 + "]", ClickGuiHack.notificationX.getValueI(), y, (int) IngameHUD.textColor, false);
+                WMinecraft.getFontRenderer().drawString(notification.getContent(), ClickGuiHack.notificationX.getValueI(), y, (int) IngameHUD.textColor, false);
 
                 y += 9;
             }
