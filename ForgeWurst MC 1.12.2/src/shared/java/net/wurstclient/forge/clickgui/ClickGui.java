@@ -11,11 +11,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.util.ResourceLocation;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.Hack;
@@ -27,12 +23,9 @@ import net.wurstclient.forge.utils.JsonUtils;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
-import javax.vecmath.Vector4d;
-import javax.vecmath.Vector4f;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -41,7 +34,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 
-import static java.lang.Math.abs;
 import static net.minecraft.client.gui.Gui.drawRect;
 
 public final class ClickGui
@@ -1116,7 +1108,6 @@ public final class ClickGui
             this.vy = vy;
         }
 
-        double lastNonZeroSpeed = 0;
         private void update() {
             // Get screen dimensions
             Minecraft minecraft = Minecraft.getMinecraft();
@@ -1137,22 +1128,23 @@ public final class ClickGui
                 vy = -vy;
             }
 
-            // Update velocity
-            double speed = ClickGuiHack.particleSpeed.getValue();
+            // Calculate the current velocity magnitude
             double velocityMagnitude = Math.sqrt(vx * vx + vy * vy);
 
-            if (velocityMagnitude < 0.0001) { // check for zero magnitude
-                // Randomly assign non-zero velocity
-                vx = (int) ((Math.random() - 0.5) * speed);
-                vy = (int) ((Math.random() - 0.5) * speed);
-                lastNonZeroSpeed = speed; // Update lastNonZeroSpeed
-            } else if (velocityMagnitude > speed) {
-                double scale = speed / velocityMagnitude;
+            // Get the desired speed
+            double desiredSpeed = ClickGuiHack.particleSpeed.getValue();
+
+            // Check if the velocity magnitude is too small (near zero)
+            if (velocityMagnitude < 0.0001) {
+                // Randomly assign a new velocity vector with the desired speed
+                double angle = Math.random() * 2 * Math.PI;
+                vx = (int) (Math.cos(angle) * desiredSpeed);
+                vy = (int) (Math.sin(angle) * desiredSpeed);
+            } else {
+                // Normalize the velocity vector to the desired speed
+                double scale = desiredSpeed / velocityMagnitude;
                 vx *= scale;
                 vy *= scale;
-                lastNonZeroSpeed = velocityMagnitude; // Update lastNonZeroSpeed
-            } else {
-                lastNonZeroSpeed = velocityMagnitude; // Update lastNonZeroSpeed
             }
         }
 
