@@ -15,6 +15,7 @@ import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.CheckboxSetting;
+import net.wurstclient.forge.utils.MathUtils;
 
 public final class AntiHunger extends Hack {
 
@@ -64,25 +65,39 @@ public final class AntiHunger extends Hack {
 		}
 
 		if (groundSpoof.isChecked()) {
-			if (mc.player.onGround && !mc.playerController.getIsHittingBlock()) {
-				if (mc.player.motionY > -0.01 && mc.player.motionY < 0.01) {
-					if (event.getPacket() instanceof CPacketPlayer) {
-						event.setPacket(new CPacketPlayer(false));
-					}
-					if (event.getPacket() instanceof CPacketPlayer.Rotation) {
-						CPacketPlayer.Rotation cPacketPlayerRotation = (CPacketPlayer.Rotation) event.getPacket();
-						event.setPacket(new CPacketPlayer.Rotation(cPacketPlayerRotation.getYaw(0), cPacketPlayerRotation.getPitch(0), false));
-					}
-					if (event.getPacket() instanceof CPacketPlayer.Position) {
-						CPacketPlayer.Position cPacketPlayerPosition = (CPacketPlayer.Position) event.getPacket();
-						event.setPacket(new CPacketPlayer.Position(cPacketPlayerPosition.getX(0), cPacketPlayerPosition.getY(1), cPacketPlayerPosition.getZ(0), false));
-					}
-					if (event.getPacket() instanceof CPacketPlayer.PositionRotation) {
-						CPacketPlayer.PositionRotation cPacketPlayerPositionRotation = (CPacketPlayer.PositionRotation) event.getPacket();
-						event.setPacket(new CPacketPlayer.PositionRotation(cPacketPlayerPositionRotation.getX(0), cPacketPlayerPositionRotation.getY(0), cPacketPlayerPositionRotation.getZ(0), cPacketPlayerPositionRotation.getYaw(0), cPacketPlayerPositionRotation.getPitch(0), false));
-					}
-				}
+			if (event.getPacket() instanceof CPacketPlayer) {
+				CPacketPlayer oldPacket = (CPacketPlayer) event.getPacket();
+
+				double x = oldPacket.getX(-1);
+				double y = oldPacket.getY(-1);
+				double z = oldPacket.getZ(-1);
+				float yaw = oldPacket.getYaw(-1);
+				float pitch = oldPacket.getPitch(-1);
+
+				if (mc.playerController.getIsHittingBlock())
+					return;
+
+				if (MathUtils.calculateFallDistance(x, y, z) > 0.5)
+					return;
+
+				if(changesPosition())
+					if(changesLook())
+						event.setPacket(new CPacketPlayer.PositionRotation(x, y, z, yaw, pitch, false));
+					else
+						event.setPacket(new CPacketPlayer.Position(x, y, z, false));
+				else if(changesLook())
+					event.setPacket(new CPacketPlayer.Rotation(yaw, pitch, false));
+				else
+					event.setPacket(new CPacketPlayer(false));
 			}
 		}
+	}
+
+	private boolean changesPosition() {
+		return mc.player.posX != mc.player.prevPosX || mc.player.posZ != mc.player.prevPosZ || mc.player.posY != mc.player.prevPosY;
+	}
+
+	private boolean changesLook() {
+		return mc.player.rotationYaw != mc.player.prevRotationYaw || mc.player.rotationPitch != mc.player.prevRotationPitch;
 	}
 }

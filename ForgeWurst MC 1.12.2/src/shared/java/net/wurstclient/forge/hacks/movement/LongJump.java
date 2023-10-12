@@ -15,8 +15,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.EnumSetting;
+import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.KeyBindingUtils;
 import net.wurstclient.forge.utils.MathUtils;
 
@@ -25,7 +25,13 @@ public final class LongJump extends Hack {
 	
 	private final EnumSetting<Mode> mode =
 			new EnumSetting<>("Mode", Mode.values(), Mode.OLDAAC);
-	
+
+	private final SliderSetting customSpeed =
+			new SliderSetting("CustomSpeed", 1, 0.5, 20, 0.5, SliderSetting.ValueDisplay.DECIMAL);
+
+	private final SliderSetting customHeight =
+			new SliderSetting("CustomHeight", 1, 0.5, 20, 0.5, SliderSetting.ValueDisplay.DECIMAL);
+
 	private int groundTick;
 	private boolean jump;
 	private int stage;
@@ -33,28 +39,18 @@ public final class LongJump extends Hack {
 	private int airTicks;
 
 	private enum Mode {
-		OLDAAC("OldAAC", true, false, false, false, false),
-		NCP("NCP", false, true, false, false, false),
-		OTHERNCP("OtherNCP", false, false, true, false, false),
-		MINESECURE("MineSecure", false, false, false, true, false),
-		GUARDIAN("Guardian", false, false, false, false, true);
+		OLDAAC("OldAAC"),
+		NCP("NCP"),
+		OTHERNCP("OtherNCP"),
+		MINESECURE("MineSecure"),
+		GUARDIAN("Guardian"),
+		CUSTOM("Custom");
 
 
 		private final String name;
-		private final boolean oldaac;
-		private final boolean ncp;
-		private final boolean otherncp;
-		private final boolean minesecure;
-		private final boolean guardian;
 
-		private Mode(String name, boolean oldacc, boolean ncp, boolean otherncp, boolean minesecure, boolean guardian) {
+		private Mode(String name) {
 			this.name = name;
-			this.oldaac = oldacc;
-			this.ncp = ncp;
-			this.otherncp = otherncp;
-			this.minesecure = minesecure;
-			this.guardian = guardian;
-
 		}
 
 		public String toString() {
@@ -66,24 +62,26 @@ public final class LongJump extends Hack {
 		super("LongJump", "Jump far");
 		setCategory(Category.MOVEMENT);
 		addSetting(mode);
+		addSetting(customSpeed);
+		addSetting(customHeight);
 	}
 
 	@Override
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
-		mc.player.setVelocity(0, mc.player.motionY, 0);
+		//mc.player.setVelocity(0, mc.player.motionY, 0);
 		groundTick = 0;
 	}
 
 	@Override
 	protected void onDisable() {
 		MinecraftForge.EVENT_BUS.unregister(this);
-		mc.player.setVelocity(0, mc.player.motionY, 0);
+		//mc.player.setVelocity(0, mc.player.motionY, 0);
 	}
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		if (mode.getSelected().oldaac) {
+		if (mode.getSelected() == Mode.OLDAAC) {
 			KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, false);
 			if (mc.player.onGround) {
 				jump = true;
@@ -96,7 +94,7 @@ public final class LongJump extends Hack {
 				mc.player.motionX = 0.0;
 				jump = false;
 			}
-		} else if (mode.getSelected().ncp) {
+		} else if (mode.getSelected() == Mode.NCP) {
 			if (MovementInput() && mc.player.fallDistance < 1.0f) {
 				float direction = mc.player.rotationYaw;
 				float x = (float) Math.cos((double) (direction + 90.0f) * 3.141592653589793 / 180.0);
@@ -110,7 +108,7 @@ public final class LongJump extends Hack {
 					mc.player.motionZ = (double) z * 1.261;
 				}
 			}
-		} else if (mode.getSelected().otherncp) {
+		} else if (mode.getSelected() == Mode.OTHERNCP) {
 			mc.player.prevPosY = 0;
 			float x2 = (float) (1f + 0.2873D * 0.45f);
 			if ((mc.player.moveForward != 0 || mc.player.moveStrafing != 0) && mc.player.onGround) {
@@ -158,7 +156,7 @@ public final class LongJump extends Hack {
 				}
 				air += x2;
 			}
-		} else if (mode.getSelected().minesecure) {
+		} else if (mode.getSelected() == Mode.MINESECURE) {
 			if (mc.player.onGround && MovementInput() && !mc.player.isInWater()) {
 				mc.player.motionY = 0.54;
 			} else if (MovementInput() && !mc.player.isInWater()) {
@@ -168,7 +166,7 @@ public final class LongJump extends Hack {
 				mc.player.motionZ = 0.0;
 				mc.player.motionX = 0.0;
 			}
-		} else if (mode.getSelected().guardian) {
+		} else if (mode.getSelected() == Mode.GUARDIAN) {
 			if (mc.gameSettings.keyBindForward.isKeyDown() && mc.player.onGround) {
 				mc.player.motionY = 0.41764345;
 				toFwd(0.4);
@@ -176,6 +174,12 @@ public final class LongJump extends Hack {
 			if (!MovementInput()) {
 				mc.player.motionZ = 0.0;
 				mc.player.motionX = 0.0;
+			}
+		} else if (mode.getSelected() == Mode.CUSTOM) {
+			if (mc.player.onGround) {
+				mc.player.motionY = customHeight.getValue();
+				toFwd(customSpeed.getValueF());
+				setEnabled(false);
 			}
 		}
 	}

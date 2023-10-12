@@ -41,7 +41,6 @@ public final class HackList extends WHackList
 	public final AutoJoinModule autoJoinModule = register(new AutoJoinModule());
 	public final AutoMine autoMine = register(new AutoMine());
 	public final AutoPilot autoPilot = register(new AutoPilot());
-	public final DummyPlayer dummyPlayer = register(new DummyPlayer());
 	public final HideMyAss hideMyAss = register(new HideMyAss());
 	public final ServerCrasher serverCrasher = register(new ServerCrasher());
 	public final AutoClicker autoClicker = register(new AutoClicker());
@@ -60,9 +59,10 @@ public final class HackList extends WHackList
 	public final Discord discord = register(new Discord());
 	public final NoKnockBack noKnockBack = register(new NoKnockBack());
 	public final Criticals criticals = register(new Criticals());
-	public final AutoCrystal autoCrystal = register(new AutoCrystal());
+	public final CrystalAuraHack crystalAuraHack = register(new CrystalAuraHack());
 	public final Nuker nuker = register(new Nuker());
 	public final Test test = register(new Test());
+	public final IllegalSlot illegalSlot = register(new IllegalSlot());
 	public final NoRender noRender = register(new NoRender());
 	public final NewChunks newChunks = register(new NewChunks());
 	public final Breadcrumbs breadcrumbs = register(new Breadcrumbs());

@@ -47,7 +47,7 @@ public final class PacketLimiter extends Hack {
 
 		if (packetCounter > maxPacketsPS.getValue()) {
 			if (mode.getSelected() == Mode.WARN) {
-				if (mc.player.ticksExisted % 20 == 0) {
+				if (mc.player.ticksExisted % 5 == 0) {
 					ChatUtils.message("[PacketLimiter] You are exceeding the set packet limit!");
 				}
 			} else if (mode.getSelected() == Mode.CANCEL) {

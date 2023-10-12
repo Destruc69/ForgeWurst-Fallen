@@ -11,13 +11,10 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.wurstclient.fmlevents.WPacketInputEvent;
 import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.hacks.movement.AutoSprintHack;
 import net.wurstclient.forge.settings.EnumSetting;
 
 public final class Criticals extends Hack {
@@ -39,11 +36,6 @@ public final class Criticals extends Hack {
 	@Override
 	protected void onDisable() {
 		MinecraftForge.EVENT_BUS.unregister(this);
-	}
-
-	@SubscribeEvent
-	public void onAttackEntity(AttackEntityEvent event) {
-		mc.player.onCriticalHit(event.getTarget());
 	}
 
 	private enum Mode {

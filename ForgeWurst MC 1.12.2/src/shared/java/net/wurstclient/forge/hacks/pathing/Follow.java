@@ -17,8 +17,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.pathfinding.LandPathUtils;
-import net.wurstclient.forge.pathfinding.TestPathfinderAStar;
+import net.wurstclient.forge.pathfinding.PathfinderAStar;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.utils.ChatUtils;
 import net.wurstclient.forge.utils.KeyBindingUtils;
@@ -70,14 +69,14 @@ public final class Follow extends Hack {
 					return; // Skip processing if onlyEntityPlayers flag is set and the closest entity is not a player
 				}
 
-				double[] rots = LandPathUtils.getYawAndPitchForPath(mc.player.getPosition().add(0, -1, 0), blockPosArrayList, PathfinderModule.smoothingFactor.getValue());
+				PathfinderAStar pathfinderAStar;
 
-				if (!LandPathUtils.isOnPath(blockPosArrayList) || blockPosArrayList.size() == 0 || LandPathUtils.isEntityMoving(closestEntity)) {
+				if (!PathfinderAStar.isOnPath(blockPosArrayList) || blockPosArrayList.size() == 0 || PathfinderAStar.isEntityMoving(closestEntity)) {
 					if (mc.player.ticksExisted % 60 == 0) {
-						blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition().add(0, -1, 0), closestEntity.getPosition().add(0, -1, 0), PathfinderModule.debug.isChecked());
+						pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), closestEntity.getPosition().add(0, -1, 0));
 						if (blockPosArrayList.size() > 0) {
-							if (LandPathUtils.calculateETA(blockPosArrayList) != null) {
-								ChatUtils.message("ETA: " + LandPathUtils.calculateETA(blockPosArrayList));
+							if (PathfinderAStar.calculateETA(blockPosArrayList) != null) {
+								ChatUtils.message("ETA: " + PathfinderAStar.calculateETA(blockPosArrayList));
 							}
 						}
 					}
@@ -92,13 +91,13 @@ public final class Follow extends Hack {
 
 						 */
 
-						double[] toMove = LandPathUtils.calculateMotion(blockPosArrayList, mc.player.rotationYaw, LandPathUtils.isYawStable(mc.player.rotationYaw));
+						double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, PathfinderAStar.isYawStable(mc.player.rotationYaw));
 						mc.player.motionX = toMove[0];
 						mc.player.motionZ = toMove[1];
 
 						KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, mc.player.onGround && mc.player.collidedHorizontally || mc.player.isInWater() && !mc.player.collidedHorizontally);
 					} else {
-						LandPathUtils.resetMovements();
+						//LandPathUtils.resetMovements();
 					}
 				}
 			}
@@ -110,7 +109,7 @@ public final class Follow extends Hack {
 	public void onRender(RenderWorldLastEvent event) {
 		try {
 			if (blockPosArrayList.size() > 0) {
-				LandPathUtils.render(PathfinderModule.isRenderTesla(), (ArrayList<BlockPos>) blockPosArrayList, 1, PathfinderModule.pathRed.getValueI(), PathfinderModule.pathGreen.getValueF(), PathfinderModule.pathBlue.getValueF());
+				PathfinderAStar.render(PathfinderModule.isRenderTesla(), (ArrayList<BlockPos>) blockPosArrayList, 1, PathfinderModule.pathRed.getValueI(), PathfinderModule.pathGreen.getValueF(), PathfinderModule.pathBlue.getValueF());
 			}
 		} catch (Exception ignored) {
 		}

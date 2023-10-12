@@ -9,25 +9,21 @@ package net.wurstclient.forge.hacks.player;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.wurstclient.forge.Category;
-import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.utils.InventoryUtils;
 
-public final class  HideMyAss extends Hack {
-
-	public HideMyAss() {
-		super("HideMyAss", "Turns all modules off.");
+public final class IllegalSlot extends Hack {
+	public IllegalSlot() {
+		super("IllegalSlot", "Triggers an illegal slot");
 		setCategory(Category.PLAYER);
 	}
 
 	@Override
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
-		for (Hack hack : ForgeWurst.getForgeWurst().getHax().getValues()) {
-			if (hack.isEnabled()) {
-				hack.setEnabled(false);
-			}
-		}
-		onDisable();
+
+		InventoryUtils.setSlot(-1);
+		setEnabled(false);
 	}
 
 	@Override

@@ -7,19 +7,15 @@
  */
 package net.wurstclient.forge.hacks.pathing;
 
-import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.hacks.movement.ElytraFlight;
-import net.wurstclient.forge.pathfinding.LandPathUtils;
-import net.wurstclient.forge.settings.CheckboxSetting;
+import net.wurstclient.forge.pathfinding.PathfinderAStar;
 import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.ChatUtils;
@@ -30,6 +26,8 @@ import java.util.ArrayList;
 public final class AutoPilot extends Hack {
 
 	private ArrayList<BlockPos> blockPosArrayList;
+
+	private PathfinderAStar pathfinderAStar;
 
 	private final EnumSetting<Mode> mode =
 			new EnumSetting<>("Mode", Mode.values(), Mode.NORMAL);
@@ -79,14 +77,6 @@ public final class AutoPilot extends Hack {
 		hasCheckedIfGoToNether = false;
 
 		blockPosArrayList = new ArrayList<>();
-
-		if (mode.getSelected() == Mode.BETA) {
-			setEnabled(false);
-			try {
-				ChatUtils.message("Beta mode is not yet ready...");
-			} catch (Exception ignored) {
-			}
-		}
 	}
 
 	@Override
@@ -98,12 +88,13 @@ public final class AutoPilot extends Hack {
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
 		if (mode.getSelected() == Mode.NORMAL) {
-			if (!LandPathUtils.isOnPath(blockPosArrayList) || blockPosArrayList.size() < 2) {
+			if (!PathfinderAStar.isOnPath(blockPosArrayList) || blockPosArrayList.size() < 2) {
 				if (mc.player.ticksExisted % 60 == 0) {
-					blockPosArrayList = LandPathUtils.createPath(mc.player.getPosition().add(0, -1, 0), new BlockPos(x.getValue(), y.getValue(), z.getValue()), PathfinderModule.debug.isChecked());
+					pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), new BlockPos(x.getValue(), y.getValue(), z.getValue()));
+					pathfinderAStar.compute();
 					if (blockPosArrayList.size() > 0) {
-						if (LandPathUtils.calculateETA(blockPosArrayList) != null) {
-							ChatUtils.message("ETA: " + LandPathUtils.calculateETA(blockPosArrayList));
+						if (PathfinderAStar.calculateETA(blockPosArrayList) != null) {
+							ChatUtils.message("ETA: " + PathfinderAStar.calculateETA(blockPosArrayList));
 						}
 					}
 				}
@@ -112,13 +103,13 @@ public final class AutoPilot extends Hack {
 			if (PathfinderModule.isAuto()) {
 				if (blockPosArrayList.size() > 0) {
 
-					double[] toMove = LandPathUtils.calculateMotion(blockPosArrayList, mc.player.rotationYaw, LandPathUtils.isYawStable(mc.player.rotationYaw));
+					double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, PathfinderAStar.isYawStable(mc.player.rotationYaw));
 					mc.player.motionX = toMove[0];
 					mc.player.motionZ = toMove[1];
 
 					KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, mc.player.onGround && mc.player.collidedHorizontally || mc.player.isInWater() && !mc.player.collidedHorizontally);
 				} else {
-					LandPathUtils.resetMovements();
+					//LandPathUtils.resetMovements();
 				}
 			}
 		} else if (mode.getSelected() == Mode.BETA) {
@@ -150,22 +141,43 @@ public final class AutoPilot extends Hack {
 			hasCheckedIfGoToNether = true;
 		} else {
 			if (shouldGoToNether) {
+				if (mc.player.dimension == 0) {
+					if (PathfinderAStar.findNearestReachableBlock(Blocks.PORTAL) != null) {
+						if (mc.player.ticksExisted % 20 == 0) {
+							pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), PathfinderAStar.findNearestReachableBlock(Blocks.PORTAL));
+							pathfinderAStar.compute();
+						}
+						if (pathfinderAStar.getPath().size() > 0) {
+							double[] toMove = PathfinderAStar.calculateMotion(pathfinderAStar.getPath(), mc.player.rotationYaw, PathfinderAStar.isYawStable(mc.player.rotationYaw));
+							mc.player.motionX = toMove[0];
+							mc.player.motionZ = toMove[1];
+						}
+					} else {
 
+					}
+				} else if (mc.player.dimension == -1) {
+
+				}
 			} else {
-
+				if (mc.player.ticksExisted % 20 == 0) {
+					pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), new BlockPos(x.getValue(), y.getValue(), z.getValue()));
+					pathfinderAStar.compute();
+				}
+				if (pathfinderAStar.getPath() != null) {
+					if (pathfinderAStar.getPath().size() > 0) {
+						double[] toMove = PathfinderAStar.calculateMotion(pathfinderAStar.getPath(), mc.player.rotationYaw, PathfinderAStar.isYawStable(mc.player.rotationYaw));
+						mc.player.motionX = toMove[0];
+						mc.player.motionZ = toMove[1];
+					}
+				}
 			}
 		}
-	}
-
-	private void pathFindToBlock(Block block) {
-		ArrayList<BlockPos> path = LandPathUtils.createPath(mc.player.getPosition().add(0, -1, 0), LandPathUtils.findNearestReachableBlock(block), PathfinderModule.debug.isChecked());
-
 	}
 
 	@SubscribeEvent
 	public void onRender(RenderWorldLastEvent event) {
 		if (!blockPosArrayList.isEmpty()) {
-			LandPathUtils.render(PathfinderModule.isRenderTesla(), blockPosArrayList, PathfinderModule.lineWidth.getValueI(), PathfinderModule.pathRed.getValueI(), PathfinderModule.pathGreen.getValueF(), PathfinderModule.pathBlue.getValueF());
+			PathfinderAStar.render(PathfinderModule.isRenderTesla(), blockPosArrayList, PathfinderModule.lineWidth.getValueI(), PathfinderModule.pathRed.getValueI(), PathfinderModule.pathGreen.getValueF(), PathfinderModule.pathBlue.getValueF());
 		}
 	}
 }

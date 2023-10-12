@@ -14,7 +14,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -22,14 +21,11 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.pathfinding.LandPathUtils;
-import net.wurstclient.forge.pathfinding.TestPathfinderAStar;
+import net.wurstclient.forge.pathfinding.PathfinderAStar;
 import net.wurstclient.forge.utils.*;
 import org.lwjgl.opengl.GL11;
-import scala.actors.threadpool.Arrays;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Objects;
 
@@ -122,14 +118,17 @@ public final class AutoMine extends Hack {
 					setEnabled(false);
 				}
 
+				PathfinderAStar pathfinderAStar;
+
 				if (targPos != null) {
 					if (mc.player.getDistance(targPos.getX(), targPos.getY(), targPos.getZ()) > 3) {
 						if (mc.player.onGround) {
 							if (mc.player.ticksExisted % 20 == 0) {
-								path = LandPathUtils.createPath(mc.player.getPosition().add(0, -1, 0), targPos, PathfinderModule.debug.isChecked());
+								pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), targPos);
+								pathfinderAStar.compute();
 							}
 
-							double[] toMove = LandPathUtils.calculateMotion(blockPosArrayList, mc.player.rotationYaw, LandPathUtils.isYawStable(mc.player.rotationYaw));
+							double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, PathfinderAStar.isYawStable(mc.player.rotationYaw));
 							mc.player.motionX = toMove[0];
 							mc.player.motionZ = toMove[1];
 
@@ -144,7 +143,7 @@ public final class AutoMine extends Hack {
 						mc.playerController.onPlayerDamageBlock(targPos, EnumFacing.DOWN);
 						mc.player.swingArm(EnumHand.MAIN_HAND);
 
-						double[] toMove = LandPathUtils.calculateMotion(blockPosArrayList, Math.toRadians(mc.player.rotationYaw), LandPathUtils.isYawStable(mc.player.rotationYaw));
+						double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, Math.toRadians(mc.player.rotationYaw), PathfinderAStar.isYawStable(mc.player.rotationYaw));
 						mc.player.motionX = toMove[0];
 						mc.player.motionZ = toMove[1];
 
@@ -197,7 +196,7 @@ public final class AutoMine extends Hack {
 
 		if (path != null) {
 			if (path.size() > 0) {
-				LandPathUtils.render(PathfinderModule.isRenderTesla(), path, PathfinderModule.lineWidth.getValueI(), PathfinderModule.pathRed.getValueF(), PathfinderModule.pathGreen.getValueF(), PathfinderModule.pathBlue.getValueF());
+				PathfinderAStar.render(PathfinderModule.isRenderTesla(), path, PathfinderModule.lineWidth.getValueI(), PathfinderModule.pathRed.getValueF(), PathfinderModule.pathGreen.getValueF(), PathfinderModule.pathBlue.getValueF());
 			}
 		}
 	}
