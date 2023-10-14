@@ -16,6 +16,7 @@ import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.pathfinding.PathfinderAStar;
+import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.ChatUtils;
@@ -40,6 +41,10 @@ public final class AutoPilot extends Hack {
 
 	private final SliderSetting z =
 			new SliderSetting("Z", 0, -32000000, 32000000, 1, SliderSetting.ValueDisplay.INTEGER);
+
+	private final CheckboxSetting setToCurrentPos =
+			new CheckboxSetting("SetToCurrentPos", "Sets the X and Z and Y slider to the players current coordinate.",
+					false);
 
 	private enum Mode {
 		NORMAL("Normal"),
@@ -66,6 +71,7 @@ public final class AutoPilot extends Hack {
 		addSetting(x);
 		addSetting(y);
 		addSetting(z);
+		addSetting(setToCurrentPos);
 	}
 
 	@Override
@@ -87,8 +93,14 @@ public final class AutoPilot extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
+		if (setToCurrentPos.isChecked()) {
+			x.setValue(mc.player.lastTickPosX);
+			y.setValue(mc.player.lastTickPosY);
+			z.setValue(mc.player.lastTickPosZ);
+			setToCurrentPos.setChecked(false);
+		}
 		if (mode.getSelected() == Mode.NORMAL) {
-			if (!PathfinderAStar.isOnPath(blockPosArrayList) || blockPosArrayList.size() < 2) {
+			if (!PathfinderAStar.isOnPath(blockPosArrayList) || blockPosArrayList.size() <= 0 || blockPosArrayList.isEmpty()) {
 				if (mc.player.ticksExisted % 60 == 0) {
 					pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), new BlockPos(x.getValue(), y.getValue(), z.getValue()));
 					pathfinderAStar.compute();
@@ -146,6 +158,7 @@ public final class AutoPilot extends Hack {
 						if (mc.player.ticksExisted % 20 == 0) {
 							pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), PathfinderAStar.findNearestReachableBlock(Blocks.PORTAL));
 							pathfinderAStar.compute();
+							blockPosArrayList = pathfinderAStar.getPath();
 						}
 						if (pathfinderAStar.getPath().size() > 0) {
 							double[] toMove = PathfinderAStar.calculateMotion(pathfinderAStar.getPath(), mc.player.rotationYaw, PathfinderAStar.isYawStable(mc.player.rotationYaw));
@@ -163,13 +176,9 @@ public final class AutoPilot extends Hack {
 					pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), new BlockPos(x.getValue(), y.getValue(), z.getValue()));
 					pathfinderAStar.compute();
 				}
-				if (pathfinderAStar.getPath() != null) {
-					if (pathfinderAStar.getPath().size() > 0) {
-						double[] toMove = PathfinderAStar.calculateMotion(pathfinderAStar.getPath(), mc.player.rotationYaw, PathfinderAStar.isYawStable(mc.player.rotationYaw));
-						mc.player.motionX = toMove[0];
-						mc.player.motionZ = toMove[1];
-					}
-				}
+				double[] toMove = PathfinderAStar.calculateMotion(pathfinderAStar.getPath(), mc.player.rotationYaw, PathfinderAStar.isYawStable(mc.player.rotationYaw));
+				mc.player.motionX = toMove[0];
+				mc.player.motionZ = toMove[1];
 			}
 		}
 	}

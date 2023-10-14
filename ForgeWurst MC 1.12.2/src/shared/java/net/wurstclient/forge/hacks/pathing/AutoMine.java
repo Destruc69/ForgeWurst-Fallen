@@ -126,6 +126,7 @@ public final class AutoMine extends Hack {
 							if (mc.player.ticksExisted % 20 == 0) {
 								pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), targPos);
 								pathfinderAStar.compute();
+								blockPosArrayList = pathfinderAStar.getPath();
 							}
 
 							double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, PathfinderAStar.isYawStable(mc.player.rotationYaw));

@@ -7,6 +7,8 @@
  */
 package net.wurstclient.forge.hacks.render;
 
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -93,5 +95,44 @@ public final class Pointer extends Hack {
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glDisable(GL11.GL_BLEND);
         GL11.glDisable(GL11.GL_LINE_SMOOTH);
+    }
+
+    public void drawNametags(String content, double x, double y, double z) {
+        float distance = (float) mc.player.getDistance(x, y, z);
+        float var13 = (distance / 5 <= 2 ? 2.0F : distance / 5) * 0.7F;
+        float var14 = 0.016666668F * var13;
+        GlStateManager.pushMatrix();
+        RenderHelper.enableStandardItemLighting();
+        GlStateManager.translate(x, y, z);
+        GL11.glNormal3f(0.0F, 1.0F, 0.0F);
+        if (mc.gameSettings.thirdPersonView == 2) {
+            GlStateManager.rotate(-mc.getRenderManager().playerViewY, 0.0F, 1.0F, 0.0F);
+            GlStateManager.rotate(mc.getRenderManager().playerViewX, -1.0F, 0.0F, 0.0F);
+        } else {
+            GlStateManager.rotate(-mc.getRenderManager().playerViewY, 0.0F, 1.0F, 0.0F);
+            GlStateManager.rotate(mc.getRenderManager().playerViewX, 1.0F, 0.0F, 0.0F);
+        }
+        GlStateManager.scale(-var14, -var14, var14);
+        GlStateManager.disableLighting();
+        GlStateManager.depthMask(false);
+        GlStateManager.disableDepth();
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        int var17 = 0;
+        var17 -= distance / 5;
+        if (var17 < -8) {
+            var17 = -8;
+        }
+        GlStateManager.disableTexture2D();
+        float var18 = mc.fontRenderer.getStringWidth(content);
+        GlStateManager.enableTexture2D();
+        mc.fontRenderer.drawStringWithShadow(content, -var18, var17 - 1,0xFFFFFFFF);
+        GlStateManager.enableDepth();
+        GlStateManager.depthMask(true);
+        GlStateManager.enableLighting();
+        GlStateManager.disableBlend();
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderHelper.disableStandardItemLighting();
+        GlStateManager.popMatrix();
     }
 }

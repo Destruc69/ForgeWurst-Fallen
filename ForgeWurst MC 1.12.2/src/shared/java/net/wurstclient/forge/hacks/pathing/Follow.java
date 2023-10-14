@@ -73,7 +73,9 @@ public final class Follow extends Hack {
 
 				if (!PathfinderAStar.isOnPath(blockPosArrayList) || blockPosArrayList.size() == 0 || PathfinderAStar.isEntityMoving(closestEntity)) {
 					if (mc.player.ticksExisted % 60 == 0) {
-						pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), closestEntity.getPosition().add(0, -1, 0));
+						pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), closestEntity.getPosition());
+						pathfinderAStar.compute();
+						blockPosArrayList = pathfinderAStar.getPath();
 						if (blockPosArrayList.size() > 0) {
 							if (PathfinderAStar.calculateETA(blockPosArrayList) != null) {
 								ChatUtils.message("ETA: " + PathfinderAStar.calculateETA(blockPosArrayList));

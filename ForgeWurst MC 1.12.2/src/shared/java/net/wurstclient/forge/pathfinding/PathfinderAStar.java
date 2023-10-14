@@ -453,7 +453,7 @@ public class PathfinderAStar {
         double targetAngle = Math.atan2(deltaZ, deltaX);
         double playerAngle = Math.toRadians(rotationYaw);
 
-        // Calculate the difference in angles
+        // Calculate the angle difference between player's rotation and target position
         double angleDifference = targetAngle - playerAngle;
 
         // Calculate the distance to the target position
