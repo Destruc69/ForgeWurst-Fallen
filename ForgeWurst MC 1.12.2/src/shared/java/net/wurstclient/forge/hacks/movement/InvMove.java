@@ -40,15 +40,19 @@ public final class InvMove extends Hack {
 		if (!(mc.currentScreen instanceof GuiChat) && !(mc.currentScreen instanceof GuiEditSign)) {
 			if (Keyboard.isKeyDown(mc.gameSettings.keyBindForward.getKeyCode())) {
 				event.getMovementInput().moveForward = 1;
+				event.getMovementInput().forwardKeyDown = true;
 			}
 			if (Keyboard.isKeyDown(mc.gameSettings.keyBindBack.getKeyCode())) {
 				event.getMovementInput().moveForward = -1;
+				event.getMovementInput().backKeyDown = true;
 			}
 			if (Keyboard.isKeyDown(mc.gameSettings.keyBindRight.getKeyCode())) {
 				event.getMovementInput().moveStrafe = -1;
+				event.getMovementInput().rightKeyDown = true;
 			}
 			if (Keyboard.isKeyDown(mc.gameSettings.keyBindLeft.getKeyCode())) {
 				event.getMovementInput().moveStrafe = 1;
+				event.getMovementInput().leftKeyDown = true;
 			}
 			if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
 				mc.player.rotationYaw = mc.player.rotationYaw + 3;

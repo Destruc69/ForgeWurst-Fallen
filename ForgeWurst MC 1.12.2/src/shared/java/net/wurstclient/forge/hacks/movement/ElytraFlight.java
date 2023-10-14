@@ -152,8 +152,7 @@ public final class ElytraFlight extends Hack {
 		} else if (mc.gameSettings.keyBindSneak.isKeyDown()) {
 			mc.player.motionY = -downSpeed.getValue();
 		} else {
-			mc.player.posY = mc.player.prevPosY;
-			mc.player.motionY = 0;
+			mc.player.motionY = MathUtils.calculateYMotionForElytraFlight(mc.player.rotationPitch, mc.player.motionY);
 		}
 
 		if (isKeyInputs()) {
@@ -304,8 +303,7 @@ public final class ElytraFlight extends Hack {
 		} else if (mc.gameSettings.keyBindSneak.isKeyDown()) {
 			mc.player.motionY = -downSpeed.getValue();
 		} else {
-			mc.player.posY = mc.player.prevPosY;
-			mc.player.motionY = 0;
+			mc.player.motionY = MathUtils.calculateYMotionForElytraFlight(mc.player.rotationPitch, mc.player.motionY);
 		}
 	}
 
