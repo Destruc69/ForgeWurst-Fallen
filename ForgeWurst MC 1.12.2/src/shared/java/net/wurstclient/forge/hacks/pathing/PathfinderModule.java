@@ -35,13 +35,11 @@ public final class PathfinderModule extends Hack {
 	private static final EnumSetting<ModeType> modeType =
 			new EnumSetting<>("ModeType", ModeType.values(), ModeType.AUTO);
 
-	public static SliderSetting smoothingFactor = new SliderSetting("SmoothingFactor",
-			"How smooth is the turning? \n" +
-					"If its not smooth enough it may start spinning in circles.", 0.2, 0, 2, 0.01, SliderSetting.ValueDisplay.DECIMAL);
+	public static SliderSetting depth = new SliderSetting("Depth",
+			"How deep should the pathfinding algorithm more? Only increase if your computer can handle it.", 4, 2, 20, 1, SliderSetting.ValueDisplay.DECIMAL);
 
-	public static CheckboxSetting safetyPlus =
-			new CheckboxSetting("SafetyPlus", "Ensures more safety while pathfinding.",
-					false);
+	public static SliderSetting loops = new SliderSetting("Loops",
+			"How many dynamically calculated paths should the pathfinding algorithm look at? Only increase if your computer can handle it.", 1000, 1000, 25000, 1000, SliderSetting.ValueDisplay.DECIMAL);
 
 	public PathfinderModule() {
 		super("Pathfinder", "Pathfinding settings.");
@@ -52,9 +50,9 @@ public final class PathfinderModule extends Hack {
 		addSetting(pathGreen);
 		addSetting(pathBlue);
 		addSetting(lineWidth);
-		addSetting(smoothingFactor);
 		addSetting(modeType);
-		addSetting(safetyPlus);
+		addSetting(depth);
+		addSetting(loops);
 	}
 
 	private enum Mode {

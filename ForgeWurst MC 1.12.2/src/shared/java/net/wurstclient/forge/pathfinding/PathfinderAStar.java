@@ -7,22 +7,26 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.wurstclient.forge.hacks.pathing.AutoPilot;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 
 public class PathfinderAStar {
-    private BlockPos startBlockPos;
-    private BlockPos endBlockPos;
+
+    private static final Minecraft mc = Minecraft.getMinecraft();
+
+    private BlockPos startVec3;
+    private BlockPos endVec3;
     private ArrayList<BlockPos> path = new ArrayList<BlockPos>();
     private ArrayList<Hub> hubs = new ArrayList<Hub>();
     private ArrayList<Hub> hubsToWork = new ArrayList<Hub>();
     private double minDistanceSquared = 9;
     private boolean nearest = true;
-
-    private static final Minecraft mc = Minecraft.getMinecraft();
+    private static boolean air;
 
     private static BlockPos[] flatCardinalDirections = {
             new BlockPos(1, 0, 0),
@@ -31,9 +35,10 @@ public class PathfinderAStar {
             new BlockPos(0, 0, -1)
     };
 
-    public PathfinderAStar(BlockPos startBlockPos, BlockPos endBlockPos) {
-        this.startBlockPos = startBlockPos;
-        this.endBlockPos = endBlockPos;
+    public PathfinderAStar(BlockPos startVec3, BlockPos endVec3, boolean air) {
+        this.startVec3 = startVec3.add(0, 0, 0);
+        this.endVec3 = endVec3.add(0, 0, 0);
+        this.air = air;
     }
 
     public ArrayList<BlockPos> getPath() {
@@ -48,8 +53,8 @@ public class PathfinderAStar {
         path.clear();
         hubsToWork.clear();
         ArrayList<BlockPos> initPath = new ArrayList<BlockPos>();
-        initPath.add(startBlockPos);
-        hubsToWork.add(new Hub(startBlockPos, null, initPath, startBlockPos.distanceSq(endBlockPos), 0, 0));
+        initPath.add(startVec3);
+        hubsToWork.add(new Hub(startVec3, null, initPath, startVec3.distanceSq(endVec3), 0, 0));
         search:
         for (int i = 0; i < loops; i++) {
             Collections.sort(hubsToWork, new CompareHub());
@@ -74,14 +79,14 @@ public class PathfinderAStar {
                         }
                     }
 
-                    BlockPos loc1 = hub.getLoc().up();
+                    BlockPos loc1 = hub.getLoc().add(0, 1, 0);
                     if (checkPositionValidity(loc1, false)) {
                         if (addHub(hub, loc1, 0)) {
                             break search;
                         }
                     }
 
-                    BlockPos loc2 = hub.getLoc().down();
+                    BlockPos loc2 = hub.getLoc().add(0, -1, 0);
                     if (checkPositionValidity(loc2, false)) {
                         if (addHub(hub, loc2, 0)) {
                             break search;
@@ -97,14 +102,24 @@ public class PathfinderAStar {
     }
 
     public static boolean checkPositionValidity(BlockPos loc, boolean checkGround) {
-        return checkPositionValidity(loc.getX(), loc.getY(), loc.getZ(), checkGround);
+        return checkPositionValidity((int) loc.getX(), (int) loc.getY(), (int) loc.getZ(), checkGround);
     }
 
     public static boolean checkPositionValidity(int x, int y, int z, boolean checkGround) {
-        BlockPos block1 = new BlockPos(x, y, z);
-        BlockPos block2 = new BlockPos(x, y + 1, z);
-        BlockPos block3 = new BlockPos(x, y - 1, z);
-        return !isBlockSolid(block1) && !isBlockSolid(block2) && (isBlockSolid(block3) || !checkGround) && isSafeToWalkOn(block3);
+        if (!air) {
+            BlockPos block1 = new BlockPos(x, y, z);
+            BlockPos block2 = new BlockPos(x, y + 1, z);
+            BlockPos block3 = new BlockPos(x, y - 1, z);
+            return !isBlockSolid(block1) && !isBlockSolid(block2) && (isBlockSolid(block3) || !checkGround) && isSafeToWalkOn(block3);
+        } else {
+            BlockPos block1 = new BlockPos(x, y, z);
+            BlockPos block2 = new BlockPos(x, y + 1, z);
+            BlockPos block3 = new BlockPos(x, y - 1, z);
+
+            // For air pathfinding, you want to allow movement through empty spaces (air blocks).
+            // So, return true if block1 and block2 are air blocks, and you may want to avoid checking ground.
+            return !isBlockSolid(block1) && !isBlockSolid(block2) && (isBlockSolid(block3) || !checkGround) && isSafeToWalkOn(block3);
+        }
     }
 
     private static boolean isBlockSolid(BlockPos block) {
@@ -133,12 +148,12 @@ public class PathfinderAStar {
 
     public Hub isHubExisting(BlockPos loc) {
         for (Hub hub : hubs) {
-            if (hub.getLoc().equals(loc)) {
+            if (hub.getLoc().getX() == loc.getX() && hub.getLoc().getY() == loc.getY() && hub.getLoc().getZ() == loc.getZ()) {
                 return hub;
             }
         }
         for (Hub hub : hubsToWork) {
-            if (hub.getLoc().equals(loc)) {
+            if (hub.getLoc().getX() == loc.getX() && hub.getLoc().getY() == loc.getY() && hub.getLoc().getZ() == loc.getZ()) {
                 return hub;
             }
         }
@@ -152,23 +167,23 @@ public class PathfinderAStar {
             totalCost += parent.getTotalCost();
         }
         if (existingHub == null) {
-            if ((loc.equals(endBlockPos) || (minDistanceSquared != 0 && loc.distanceSq(endBlockPos) <= minDistanceSquared))) {
+            if ((loc.getX() == endVec3.getX() && loc.getY() == endVec3.getY() && loc.getZ() == endVec3.getZ()) || (minDistanceSquared != 0 && loc.distanceSq(endVec3) <= minDistanceSquared)) {
                 path.clear();
                 path = parent.getPath();
                 path.add(loc);
                 return true;
             } else {
-                ArrayList<BlockPos> path = new ArrayList<BlockPos>(parent.getPath());
+                ArrayList<BlockPos> path = new ArrayList<BlockPos>((Collection<? extends BlockPos>) parent.getPath());
                 path.add(loc);
-                hubsToWork.add(new Hub(loc, parent, path, loc.distanceSq(endBlockPos), cost, totalCost));
+                hubsToWork.add(new Hub(loc, parent, path, loc.distanceSq(endVec3), cost, totalCost));
             }
         } else if (existingHub.getCost() > cost) {
-            ArrayList<BlockPos> path = new ArrayList<BlockPos>(parent.getPath());
+            ArrayList<BlockPos> path = new ArrayList<>(parent.getPath());
             path.add(loc);
             existingHub.setLoc(loc);
             existingHub.setParent(parent);
             existingHub.setPath(path);
-            existingHub.setSquareDistanceToFromTarget(loc.distanceSq(endBlockPos));
+            existingHub.setSquareDistanceToFromTarget(loc.distanceSq(endVec3));
             existingHub.setCost(cost);
             existingHub.setTotalCost(totalCost);
         }
@@ -406,7 +421,7 @@ public class PathfinderAStar {
     }
 
     public static String calculateETA(ArrayList<BlockPos> path) {
-        double etaInSeconds = path.size() / 4.956; // 4.956 is the average of walking speed and sprinting speed
+        double etaInSeconds = path.size() / AutoPilot.baseSpeed.getValue();
 
         int minutes = (int) Math.floor(etaInSeconds / 60);
         int seconds = (int) Math.round(etaInSeconds % 60);
@@ -487,7 +502,7 @@ public class PathfinderAStar {
                 for (int z = -a; z <= a; z++) {
                     BlockPos currentPos = new BlockPos(playerPos.x + x, y, playerPos.z + z);
                     if (mc.world.getBlockState(currentPos).getBlock() == targetBlock) {
-                        double distance = playerPos.distanceTo(new Vec3d(currentPos.getX(), currentPos.getY(), currentPos.getZ()));
+                        double distance = playerPos.distanceTo(new Vec3d(new BlockPos(currentPos.getX(), currentPos.getY(), currentPos.getZ()).getX(), new BlockPos(currentPos.getX(), currentPos.getY(), currentPos.getZ()).getY(), new BlockPos(currentPos.getX(), currentPos.getY(), currentPos.getZ()).getZ()));
 
                         if (distance < closestDistance && isBlockReachable(currentPos, mc.player)) {
                             closestDistance = distance;
@@ -503,26 +518,10 @@ public class PathfinderAStar {
 
     // Check if a block is reachable (assuming no block needs to be mined)
     public static boolean isBlockReachable(BlockPos blockPos, EntityPlayer entityPlayer) {
-        PathfinderAStar pathfinderAStar;
-        pathfinderAStar = new PathfinderAStar(entityPlayer.getPosition(), blockPos);
+        PathfinderAStarAIR pathfinderAStar;
+        pathfinderAStar = new PathfinderAStarAIR(entityPlayer.getPosition(), blockPos);
         pathfinderAStar.compute();
         return pathfinderAStar.getPath().size() > 0;
-    }
-
-    // Convert Overworld coordinates to Nether coordinates
-    public static int[] overworldToNether(int overworldX, int overworldZ) {
-        int netherX = overworldX / 8;
-        int netherZ = overworldZ / 8;
-
-        return new int[]{netherX, netherZ};
-    }
-
-    // Convert Nether coordinates to Overworld coordinates
-    public static int[] netherToOverworld(int netherX, int netherZ) {
-        int overworldX = netherX * 8;
-        int overworldZ = netherZ * 8;
-
-        return new int[]{overworldX, overworldZ};
     }
 
     public static BlockPos getClosestSolidBlock(BlockPos targetPos) {

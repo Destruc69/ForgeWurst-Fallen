@@ -129,7 +129,7 @@ public final class AutoMine extends Hack {
 								blockPosArrayList = pathfinderAStar.getPath();
 							}
 
-							double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, PathfinderAStar.isYawStable(mc.player.rotationYaw));
+							double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, 0.2);
 							mc.player.motionX = toMove[0];
 							mc.player.motionZ = toMove[1];
 
@@ -144,7 +144,7 @@ public final class AutoMine extends Hack {
 						mc.playerController.onPlayerDamageBlock(targPos, EnumFacing.DOWN);
 						mc.player.swingArm(EnumHand.MAIN_HAND);
 
-						double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, Math.toRadians(mc.player.rotationYaw), PathfinderAStar.isYawStable(mc.player.rotationYaw));
+						double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, Math.toRadians(mc.player.rotationYaw), 0.2);
 						mc.player.motionX = toMove[0];
 						mc.player.motionZ = toMove[1];
 

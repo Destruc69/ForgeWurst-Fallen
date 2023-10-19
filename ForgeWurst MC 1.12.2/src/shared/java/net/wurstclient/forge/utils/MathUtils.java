@@ -151,22 +151,4 @@ public final class MathUtils
 
 		return dist;
 	}
-
-	public static double calculateYMotionForElytraFlight(double currentPitch, double currentYMotion) {
-		// Assuming that currentYMotion is a negative value when facing down
-		// and a positive value when facing up
-		double pitchRadians = Math.toRadians(currentPitch);
-
-		// Adjust the Y motion based on the player's pitch angle
-		double newYMotion = Math.sin(pitchRadians) * Math.abs(currentYMotion);
-
-		// Make sure the direction of Y motion aligns with the pitch angle
-		if (currentPitch < 0) {
-			newYMotion *= -1.25; // Reverse the direction if looking up
-		} else if (currentPitch > 0) {
-			newYMotion *= 1.25;
-		}
-
-		return newYMotion;
-	}
 }

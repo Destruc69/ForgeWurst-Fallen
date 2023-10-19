@@ -93,7 +93,7 @@ public final class Follow extends Hack {
 
 						 */
 
-						double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, PathfinderAStar.isYawStable(mc.player.rotationYaw));
+						double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, 0.2);
 						mc.player.motionX = toMove[0];
 						mc.player.motionZ = toMove[1];
 

@@ -29,40 +29,20 @@ import java.lang.reflect.Field;
 
 public final class ElytraFlight extends Hack {
 
-	private final EnumSetting<Mode> mode =
-			new EnumSetting<>("Mode", Mode.values(), Mode.CONTROL);
-
-	private final SliderSetting upSpeed =
-			new SliderSetting("Up-Speed", 1, 0, 3, 0.01, SliderSetting.ValueDisplay.DECIMAL);
-
-	private final SliderSetting baseSpeed =
-			new SliderSetting("Base-Speed", 1, 0, 3, 0.01, SliderSetting.ValueDisplay.DECIMAL);
-
-	private final SliderSetting downSpeed =
-			new SliderSetting("Down-Speed", 1, 0, 3, 0.01, SliderSetting.ValueDisplay.DECIMAL);
-
-	private final CheckboxSetting autoTakeOff =
-			new CheckboxSetting("AutoTakeOff", "Takes off automatically.",
-					false);
-
-	private final CheckboxSetting shouldGlide =
-			new CheckboxSetting("ShouldGlide", "Should we glide?.",
-					false);
-
-	private final SliderSetting glide =
-			new SliderSetting("Glide", "2 == half normal glide speed", 1, 0.1, 50, 0.1, SliderSetting.ValueDisplay.DECIMAL);
-
-	private final CheckboxSetting shouldLockPitch =
-			new CheckboxSetting("ShouldLockPitch", "Should we lock pitch?.",
-					false);
-
-	private final SliderSetting lockPitch =
-			new SliderSetting("LockPitch", 4, -10, 10, 0.5, SliderSetting.ValueDisplay.DECIMAL);
+	private final EnumSetting<Mode> mode = new EnumSetting<>("Mode", Mode.values(), Mode.CONTROL);
+	private final SliderSetting upSpeed = new SliderSetting("Up-Speed", 1, 0, 3, 0.01, SliderSetting.ValueDisplay.DECIMAL);
+	private final SliderSetting baseSpeed = new SliderSetting("Base-Speed", 1, 0, 3, 0.01, SliderSetting.ValueDisplay.DECIMAL);
+	private final SliderSetting downSpeed = new SliderSetting("Down-Speed", 1, 0, 3, 0.01, SliderSetting.ValueDisplay.DECIMAL);
+	private final CheckboxSetting autoTakeOff = new CheckboxSetting("AutoTakeOff", "Takes off automatically.", false);
+	private final CheckboxSetting shouldGlide = new CheckboxSetting("ShouldGlide", "Should we glide?.", false);
+	private final SliderSetting glide = new SliderSetting("Glide", "2 == half normal glide speed", 1, 0.1, 50, 0.1, SliderSetting.ValueDisplay.DECIMAL);
+	private final CheckboxSetting shouldLockPitch = new CheckboxSetting("ShouldLockPitch", "Should we lock pitch?.", false);
+	private final SliderSetting lockPitch = new SliderSetting("LockPitch", 4, -10, 10, 0.5, SliderSetting.ValueDisplay.DECIMAL);
 
 	private int jumpTimer;
+	private double oldY;
 
-	public ElytraFlight()
-	{
+	public ElytraFlight() {
 		super("ElytraFlight", "Fly with an elytra.");
 		setCategory(Category.MOVEMENT);
 		addSetting(mode);
@@ -79,6 +59,7 @@ public final class ElytraFlight extends Hack {
 	@Override
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
+		oldY = mc.player.lastTickPosY;
 	}
 
 	@Override
@@ -102,8 +83,7 @@ public final class ElytraFlight extends Hack {
 					}
 				}
 			}
-			if (mode.getSelected() == Mode.BOOST ||
-					mode.getSelected() == Mode.BOOSTPLUS) {
+			if (mode.getSelected() == Mode.BOOST || mode.getSelected() == Mode.BOOSTPLUS) {
 				boostEF();
 			} else if (mode.getSelected() == Mode.CONTROL) {
 				controlEF();
@@ -117,9 +97,6 @@ public final class ElytraFlight extends Hack {
 		} else if (!(mode.getSelected() == Mode.WUYRST7)) {
 			if (autoTakeOff.isChecked()) {
 				if (mc.player.onGround) {
-					//mc.player.jump();
-					//mc.player.motionX = 0;
-					//mc.player.motionZ = 0;
 					a = true;
 				} else if (mc.world.getBlockState(new BlockPos(mc.player.posX, mc.player.posY - 0.5, mc.player.posZ)).getBlock().equals(Blocks.AIR)) {
 					if (mc.player.ticksExisted % 2 == 0) {
@@ -149,10 +126,12 @@ public final class ElytraFlight extends Hack {
 	private void packetEF() {
 		if (mc.gameSettings.keyBindJump.isKeyDown()) {
 			mc.player.motionY = upSpeed.getValueF();
+			oldY = mc.player.lastTickPosY;
 		} else if (mc.gameSettings.keyBindSneak.isKeyDown()) {
 			mc.player.motionY = -downSpeed.getValue();
+			oldY = mc.player.lastTickPosY;
 		} else {
-			mc.player.motionY = MathUtils.calculateYMotionForElytraFlight(mc.player.rotationPitch, mc.player.motionY);
+			mc.player.posY = oldY;
 		}
 
 		if (isKeyInputs()) {
@@ -167,61 +146,52 @@ public final class ElytraFlight extends Hack {
 	}
 
 	private void wurst7EF() {
-		if(jumpTimer > 0)
+		if (jumpTimer > 0)
 			jumpTimer--;
 
 		ItemStack chest = mc.player.inventory.armorItemInSlot(2);
-		if(chest.getItem() != Items.ELYTRA)
+		if (chest.getItem() != Items.ELYTRA)
 			return;
 
-		if(mc.player.isElytraFlying())
-		{
+		if (mc.player.isElytraFlying()) {
 			controlSpeed();
 			controlHeight();
 			return;
 		}
 
-		if(ItemElytra.isUsable(chest) && mc.gameSettings.keyBindJump.isKeyDown() && autoTakeOff.isChecked())
+		if (ItemElytra.isUsable(chest) && mc.gameSettings.keyBindJump.isKeyDown() && autoTakeOff.isChecked())
 			doInstantFly();
 	}
 
-	private void sendStartStopPacket()
-	{
-		CPacketEntityAction packet = new CPacketEntityAction(mc.player,
-				CPacketEntityAction.Action.START_FALL_FLYING);
+	private void sendStartStopPacket() {
+		CPacketEntityAction packet = new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_FALL_FLYING);
 		mc.player.connection.sendPacket(packet);
 	}
 
-	private void controlHeight()
-	{
-
+	private void controlHeight() {
 		Vec3d v = new Vec3d(mc.player.motionX, mc.player.motionY, mc.player.motionZ);
 
-		if(mc.gameSettings.keyBindJump.isKeyDown()) {
+		if (mc.gameSettings.keyBindJump.isKeyDown()) {
 			mc.player.setVelocity(v.x, v.y + 0.08, v.z);
-		} else if(mc.gameSettings.keyBindSneak.isKeyDown()) {
+		} else if (mc.gameSettings.keyBindSneak.isKeyDown()) {
 			mc.player.setVelocity(v.x, v.y - 0.04, v.z);
 		}
 	}
 
-	private void controlSpeed()
-	{
-		float yaw = (float)Math.toRadians(mc.player.rotationYaw);
-		Vec3d forward = new Vec3d(-MathHelper.sin(yaw) * 0.05, 0,
-				MathHelper.cos(yaw) * 0.05);
+	private void controlSpeed() {
+		float yaw = (float) Math.toRadians(mc.player.rotationYaw);
+		Vec3d forward = new Vec3d(-MathHelper.sin(yaw) * 0.05, 0, MathHelper.cos(yaw) * 0.05);
 
 		Vec3d v = new Vec3d(mc.player.motionX, mc.player.motionY, mc.player.motionZ);
 
-		if(mc.gameSettings.keyBindForward.isKeyDown())
+		if (mc.gameSettings.keyBindForward.isKeyDown())
 			mc.player.setVelocity(v.add(forward).x, v.add(forward).y, v.add(forward).z);
-		else if(mc.gameSettings.keyBindBack.isKeyDown())
+		else if (mc.gameSettings.keyBindBack.isKeyDown())
 			mc.player.setVelocity(v.subtract(forward).x, v.subtract(forward).y, v.subtract(forward).z);
 	}
 
-	private void doInstantFly()
-	{
-		if(jumpTimer <= 0)
-		{
+	private void doInstantFly() {
+		if (jumpTimer <= 0) {
 			jumpTimer = 20;
 			mc.player.setJumping(false);
 			mc.player.setSprinting(true);
@@ -286,8 +256,6 @@ public final class ElytraFlight extends Hack {
 			mc.player.motionX *= 0.9900000095367432D;
 			mc.player.motionY *= 0.9800000190734863D;
 			mc.player.motionZ *= 0.9900000095367432D;
-
-			// mc.player.move(MoverType.SELF, mc.player.motionX, mc.player.motionY, mc.player.motionZ);
 		}
 	}
 
@@ -300,10 +268,12 @@ public final class ElytraFlight extends Hack {
 		}
 		if (mc.gameSettings.keyBindJump.isKeyDown()) {
 			mc.player.motionY = upSpeed.getValue();
+			oldY = mc.player.lastTickPosY;
 		} else if (mc.gameSettings.keyBindSneak.isKeyDown()) {
 			mc.player.motionY = -downSpeed.getValue();
+			oldY = mc.player.lastTickPosY;
 		} else {
-			mc.player.motionY = MathUtils.calculateYMotionForElytraFlight(mc.player.rotationPitch, mc.player.motionY);
+			mc.player.posY = oldY;
 		}
 	}
 
