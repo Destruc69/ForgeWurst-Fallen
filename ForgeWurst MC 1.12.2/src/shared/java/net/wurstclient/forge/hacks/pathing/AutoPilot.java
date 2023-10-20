@@ -10,7 +10,6 @@ package net.wurstclient.forge.hacks.pathing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
@@ -26,6 +25,8 @@ public final class AutoPilot extends Hack {
 	private ArrayList<BlockPos> blockPosArrayList;
 
 	private PathfinderAStar pathfinderAStar;
+
+	private boolean a;
 
 	public static final SliderSetting x =
 			new SliderSetting("X", 0, -32000000, 32000000, 1, SliderSetting.ValueDisplay.INTEGER);
@@ -53,6 +54,8 @@ public final class AutoPilot extends Hack {
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
 		blockPosArrayList = new ArrayList<>();
+
+		a = true;
 	}
 
 	@Override
@@ -63,66 +66,65 @@ public final class AutoPilot extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		try {
-			if (setToCurrentPos.isChecked()) {
-				x.setValue(mc.player.lastTickPosX);
-				y.setValue(mc.player.lastTickPosY);
-				z.setValue(mc.player.lastTickPosZ);
-				setToCurrentPos.setChecked(false);
-				return;
+		if (setToCurrentPos.isChecked()) {
+			x.setValue(mc.player.posX);
+			y.setValue(mc.player.posY);
+			z.setValue(mc.player.posZ);
+			setToCurrentPos.setChecked(false);
+			return;
+		}
+
+		if (PathfinderModule.actionTypeEnumSetting.getSelected() == PathfinderModule.ActionType.GROUND) {
+			if (!PathfinderAStar.isOnPath(blockPosArrayList) || a || mc.player.getDistance(blockPosArrayList.get(0).getX(), mc.player.posY, blockPosArrayList.get(0).getZ()) >= mc.gameSettings.renderDistanceChunks * 15) {
+				a = false;
+				pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), new BlockPos(x.getValue(), y.getValueF(), z.getValue()), false);
+				pathfinderAStar.compute();
+				blockPosArrayList = pathfinderAStar.getPath();
 			}
 
-			if (PathfinderModule.actionTypeEnumSetting.getSelected() == PathfinderModule.ActionType.GROUND) {
-				if (mc.player.getDistance(pathfinderAStar.getPath().get(0).getX(), pathfinderAStar.getPath().get(0).getY(), pathfinderAStar.getPath().get(0).getZ()) > FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getViewDistance() * 16 || blockPosArrayList.isEmpty()) {
-					pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), new BlockPos(x.getValue(), y.getValueF(), z.getValue()), false);
-					pathfinderAStar.compute();
-					blockPosArrayList = pathfinderAStar.getPath();
-				}
+			if (PathfinderModule.isAuto()) {
+				double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, mc.player.isSprinting() ? 0.2 : 0.26);
+				mc.player.motionX = toMove[0];
+				mc.player.motionZ = toMove[1];
 
-				if (PathfinderModule.isAuto() && blockPosArrayList.size() > 0) {
-					double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, mc.player.isSprinting() ? 0.2 : 0.26);
-					mc.player.motionX = toMove[0];
-					mc.player.motionZ = toMove[1];
-
-					if (!PathfinderAStar.isEntityMoving(mc.player) && mc.player.onGround) {
-						mc.player.jump();
-					}
-				}
-			} else {
-				if (mc.player.getDistance(pathfinderAStar.getPath().get(0).getX(), pathfinderAStar.getPath().get(0).getY(), pathfinderAStar.getPath().get(0).getZ()) > FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getViewDistance() * 16 || blockPosArrayList.isEmpty()) {
-					pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), new BlockPos(x.getValue(), y.getValueF(), z.getValue()), true);
-					pathfinderAStar.compute();
-					blockPosArrayList = pathfinderAStar.getPath();
-				}
-
-				if (PathfinderModule.isAuto() && blockPosArrayList.size() > 0) {
-					if (mc.player.lastTickPosY > PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY()) {
-						mc.player.motionY = -mc.player.getDistance(mc.player.lastTickPosX, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY(), mc.player.lastTickPosZ);
-
-						mc.player.motionX = 0;
-						mc.player.motionZ = 0;
-					} else if (mc.player.lastTickPosY < PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY()) {
-						mc.player.motionY = mc.player.getDistance(mc.player.lastTickPosX, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY(), mc.player.lastTickPosZ);
-
-						mc.player.motionX = 0;
-						mc.player.motionZ = 0;
-					} else {
-						mc.player.motionY = 0;
-
-						double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, PathfinderModule.airPathfinderBaseSpeed.getValueF());
-						mc.player.motionX = toMove[0];
-						mc.player.motionZ = toMove[1];
-					}
+				if (!PathfinderAStar.isEntityMoving(mc.player) && mc.player.onGround) {
+					mc.player.jump();
 				}
 			}
-		} catch (Exception ignored) {
+		} else {
+			if (!PathfinderAStar.isOnPath(blockPosArrayList) || a || mc.player.getDistance(blockPosArrayList.get(0).getX(), mc.player.posY, blockPosArrayList.get(0).getZ()) >= mc.gameSettings.renderDistanceChunks * 15) {
+				a = false;
+				pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), new BlockPos(x.getValue(), y.getValueF(), z.getValue()), true);
+				pathfinderAStar.compute();
+				blockPosArrayList = pathfinderAStar.getPath();
+			}
+
+			if (PathfinderModule.isAuto()) {
+				if (mc.player.posY > PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY()) {
+					mc.player.motionY = -mc.player.getDistance(mc.player.posX, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY(), mc.player.posZ);
+
+					mc.player.motionX = 0;
+					mc.player.motionZ = 0;
+				} else if (mc.player.posY < PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY()) {
+					mc.player.motionY = mc.player.getDistance(mc.player.posX, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY(), mc.player.posZ);
+
+					mc.player.motionX = 0;
+					mc.player.motionZ = 0;
+				} else {
+					mc.player.motionY = 0;
+				}
+
+				double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, PathfinderModule.airPathfinderBaseSpeed.getValueF());
+				mc.player.motionX = toMove[0];
+				mc.player.motionZ = toMove[1];
+			}
 		}
 	}
 
 	@SubscribeEvent
 	public void onRender(RenderWorldLastEvent event) {
 		if (!blockPosArrayList.isEmpty()) {
-			PathfinderAStar.render(PathfinderModule.isRenderTesla(), blockPosArrayList, PathfinderModule.lineWidth.getValueI(), PathfinderModule.pathRed.getValueI(), PathfinderModule.pathGreen.getValueF(), PathfinderModule.pathBlue.getValueF());
+			PathfinderAStar.render(blockPosArrayList, PathfinderModule.lineWidth.getValueI(), PathfinderModule.pathRed.getValueI(), PathfinderModule.pathGreen.getValueF(), PathfinderModule.pathBlue.getValueF());
 		}
 	}
 }

@@ -2,6 +2,7 @@ package net.wurstclient.forge.pathfinding;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -9,6 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.wurstclient.forge.hacks.pathing.PathfinderModule;
+import net.wurstclient.forge.utils.RenderUtils;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -32,7 +34,17 @@ public class PathfinderAStar {
             new BlockPos(1, 0, 0),
             new BlockPos(-1, 0, 0),
             new BlockPos(0, 0, 1),
-            new BlockPos(0, 0, -1)
+            new BlockPos(0, 0, -1),
+
+            new BlockPos(1, -1, 0),
+            new BlockPos(-1, -1, 0),
+            new BlockPos(0, -1, 1),
+            new BlockPos(0, -1, -1),
+
+            new BlockPos(1, 1, 0),
+            new BlockPos(-1, 1, 0),
+            new BlockPos(0, 1, 1),
+            new BlockPos(0, 1, -1),
     };
 
     public PathfinderAStar(BlockPos startVec3, BlockPos endVec3, boolean air) {
@@ -244,106 +256,36 @@ public class PathfinderAStar {
         }
     }
 
-    public static void render(boolean tesla, ArrayList<BlockPos> blockPosArrayList, int lineWidth, float pathRed, float pathGreen, float pathBlue) {
-        if (!tesla) {
-            Minecraft mc = Minecraft.getMinecraft();
-            EntityPlayer player = mc.player;
-            ArrayList<BlockPos> path = blockPosArrayList; // Replace getPath() with the method that returns the ArrayList of BlockPos
+    public static void render(ArrayList<BlockPos> blockPosArrayList, int lineWidth, float pathRed, float pathGreen, float pathBlue) {
+        // GL settings
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glEnable(GL11.GL_LINE_SMOOTH);
+        GL11.glLineWidth(2);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_CULL_FACE);
+        GL11.glDisable(GL11.GL_DEPTH_TEST);
 
-            GL11.glPushMatrix();
-            GL11.glEnable(GL11.GL_BLEND);
-            GL11.glDisable(GL11.GL_TEXTURE_2D);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            GL11.glLineWidth(lineWidth);
-            GL11.glBegin(GL11.GL_LINES);
-            GL11.glColor4f(pathRed, pathGreen, pathBlue, 1.0f);
+        GL11.glPushMatrix();
+        GL11.glTranslated(-TileEntityRendererDispatcher.staticPlayerX,
+                -TileEntityRendererDispatcher.staticPlayerY,
+                -TileEntityRendererDispatcher.staticPlayerZ);
 
-            for (int i = 0; i < path.size() - 1; i++) {
-                BlockPos start = path.get(i);
-                BlockPos end = path.get(i + 1);
-                double startX = start.getX() + 0.5 - player.posX;
-                double startY = start.getY() + 1.5 - player.posY;
-                double startZ = start.getZ() + 0.5 - player.posZ;
-                double endX = end.getX() + 0.5 - player.posX;
-                double endY = end.getY() + 1.5 - player.posY;
-                double endZ = end.getZ() + 0.5 - player.posZ;
-                GL11.glVertex3d(startX, startY, startZ);
-                GL11.glVertex3d(endX, endY, endZ);
-            }
+        for (int i = 0; i < blockPosArrayList.size() - 1; i++) {
+            GL11.glColor4f(pathRed, pathGreen, pathBlue, 1F);
+            GL11.glBegin(GL11.GL_LINE);
+            RenderUtils.drawArrow(new Vec3d(blockPosArrayList.get(i).getX() + 0.5, blockPosArrayList.get(i).getY(), blockPosArrayList.get(i).getZ() + 0.5), new Vec3d(blockPosArrayList.get(i + 1).getX() + 0.5, blockPosArrayList.get(i + 1).getY(), blockPosArrayList.get(i + 1).getZ() + 0.5));
             GL11.glEnd();
-            GL11.glDisable(GL11.GL_BLEND);
-            GL11.glEnable(GL11.GL_TEXTURE_2D);
-            GL11.glPopMatrix();
-        } else if (tesla) {
-            Minecraft mc = Minecraft.getMinecraft();
-            EntityPlayer player = mc.player;
-            ArrayList<BlockPos> path = blockPosArrayList; // Replace getPath() with the method that returns the ArrayList of BlockPos
-
-            GL11.glPushMatrix();
-            GL11.glEnable(GL11.GL_BLEND);
-            GL11.glDisable(GL11.GL_TEXTURE_2D);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            GL11.glLineWidth(lineWidth);
-
-            // Calculate the player's direction vector
-            Vec3d lookVec = player.getLook(1.0f);
-            double lookX = lookVec.x;
-            double lookZ = lookVec.z;
-
-            // Calculate the offset vector perpendicular to the player's direction vector
-            double offsetX = -lookZ;
-            double offsetY = 0.0;
-            double offsetZ = lookX;
-
-            // Normalize the offset vector
-            double offsetLength = Math.sqrt(offsetX * offsetX + offsetZ * offsetZ);
-            offsetX /= offsetLength;
-            offsetZ /= offsetLength;
-
-            // Draw the two lines
-            GL11.glBegin(GL11.GL_LINES);
-            GL11.glColor4f(pathRed, pathGreen, pathBlue, 1.0f);
-
-            for (int i = 0; i < path.size() - 1; i++) {
-                BlockPos start = path.get(i);
-                BlockPos end = path.get(i + 1);
-                double startX = start.getX() + 0.5 - player.posX;
-                double startY = start.getY() + 1.5 - player.posY;
-                double startZ = start.getZ() + 0.5 - player.posZ;
-                double endX = end.getX() + 0.5 - player.posX;
-                double endY = end.getY() + 1.5 - player.posY;
-                double endZ = end.getZ() + 0.5 - player.posZ;
-
-                // Calculate the start and end points for the left line
-                double leftStartX = startX + offsetX;
-                double leftStartY = startY + offsetY;
-                double leftStartZ = startZ + offsetZ;
-                double leftEndX = endX + offsetX;
-                double leftEndY = endY + offsetY;
-                double leftEndZ = endZ + offsetZ;
-
-                // Calculate the start and end points for the right line
-                double rightStartX = startX - offsetX;
-                double rightStartY = startY - offsetY;
-                double rightStartZ = startZ - offsetZ;
-                double rightEndX = endX - offsetX;
-                double rightEndY = endY - offsetY;
-                double rightEndZ = endZ - offsetZ;
-
-                // Draw the left line
-                GL11.glVertex3d(leftStartX, leftStartY, leftStartZ);
-                GL11.glVertex3d(leftEndX, leftEndY, leftEndZ);
-
-                // Draw the right line
-                GL11.glVertex3d(rightStartX, rightStartY, rightStartZ);
-                GL11.glVertex3d(rightEndX, rightEndY, rightEndZ);
-            }
-
-            GL11.glEnd();
-            GL11.glDisable(GL11.GL_BLEND);
-            GL11.glEnable(GL11.GL_TEXTURE_2D);
-            GL11.glPopMatrix();
         }
+
+        GL11.glPopMatrix();
+
+        // GL resets
+        GL11.glColor4f(1, 1, 1, 1);
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glDisable(GL11.GL_BLEND);
+        GL11.glDisable(GL11.GL_LINE_SMOOTH);
     }
 
     public static boolean isOnPath(ArrayList<BlockPos> blockPosArrayList) {
@@ -404,6 +346,7 @@ public class PathfinderAStar {
         double playerZ = mc.player.posZ;
         double velocityX = mc.player.motionX;
         double velocityZ = mc.player.motionZ;
+
         rotationYaw = Math.toRadians(rotationYaw);
 
         int closestBlockIndex = 0;
@@ -423,8 +366,9 @@ public class PathfinderAStar {
         BlockPos nextBlock = (closestBlockIndex == path.size() - 1) ? closestBlock : path.get(closestBlockIndex + 1);
 
         // Adjust delta values based on player's velocity
-        double deltaX = nextBlock.getX() + 0.5 - playerX + velocityX;
-        double deltaZ = nextBlock.getZ() + 0.5 - playerZ + velocityZ;
+
+        double deltaX = nextBlock.getX() + 0.55 - playerX + velocityX;
+        double deltaZ = nextBlock.getZ() + 0.55 - playerZ + velocityZ;
 
         // Calculate the target rotationYaw based on angle difference
         double targetAngle = Math.atan2(deltaZ, deltaX);
@@ -475,7 +419,7 @@ public class PathfinderAStar {
             nextBlock = path.get(closestBlockIndex + 1);
         }
 
-        return air ? nextBlock.add(0.5, 1, 0.5) : nextBlock.add(0.5, 0, 0.5);
+        return nextBlock;
     }
 
     // Given a block type, find the nearest reachable block position of that type

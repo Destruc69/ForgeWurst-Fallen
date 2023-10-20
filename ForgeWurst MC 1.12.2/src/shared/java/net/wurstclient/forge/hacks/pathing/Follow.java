@@ -105,7 +105,7 @@ public final class Follow extends Hack {
 	public void onRender(RenderWorldLastEvent event) {
 		try {
 			if (blockPosArrayList.size() > 0) {
-				PathfinderAStar.render(PathfinderModule.isRenderTesla(), (ArrayList<BlockPos>) blockPosArrayList, 1, PathfinderModule.pathRed.getValueI(), PathfinderModule.pathGreen.getValueF(), PathfinderModule.pathBlue.getValueF());
+				PathfinderAStar.render((ArrayList<BlockPos>) blockPosArrayList, 1, PathfinderModule.pathRed.getValueI(), PathfinderModule.pathGreen.getValueF(), PathfinderModule.pathBlue.getValueF());
 			}
 		} catch (Exception ignored) {
 		}

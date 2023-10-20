@@ -53,7 +53,7 @@ public final class Breadcrumbs extends Hack {
 	public void onRender(RenderWorldLastEvent event) {
 		if (blockPosArrayList.size() > 2) {
 			// Just use pathfinding renders
-			PathfinderAStar.render(false, blockPosArrayList, 1, 0, 1, 0);
+			PathfinderAStar.render(blockPosArrayList, 1, 0, 1, 0);
 		}
 	}
 }

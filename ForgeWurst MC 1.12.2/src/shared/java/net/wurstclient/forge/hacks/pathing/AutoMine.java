@@ -197,7 +197,7 @@ public final class AutoMine extends Hack {
 
 		if (path != null) {
 			if (path.size() > 0) {
-				PathfinderAStar.render(PathfinderModule.isRenderTesla(), path, PathfinderModule.lineWidth.getValueI(), PathfinderModule.pathRed.getValueF(), PathfinderModule.pathGreen.getValueF(), PathfinderModule.pathBlue.getValueF());
+				PathfinderAStar.render(path, PathfinderModule.lineWidth.getValueI(), PathfinderModule.pathRed.getValueF(), PathfinderModule.pathGreen.getValueF(), PathfinderModule.pathBlue.getValueF());
 			}
 		}
 	}

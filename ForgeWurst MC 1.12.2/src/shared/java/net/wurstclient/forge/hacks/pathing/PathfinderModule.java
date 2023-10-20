@@ -20,9 +20,6 @@ public final class PathfinderModule extends Hack {
 			new CheckboxSetting("Debug", "Debug mode.",
 					false);
 
-	private static final EnumSetting<Mode> renderMode =
-			new EnumSetting<>("RenderMode", Mode.values(), Mode.BARITONE);
-
 	public static SliderSetting pathRed = new SliderSetting("Path red",
 			"Path red", 0, 0, 1, 0.1, SliderSetting.ValueDisplay.DECIMAL);
 	public static SliderSetting pathGreen = new SliderSetting("Path green",
@@ -39,7 +36,7 @@ public final class PathfinderModule extends Hack {
 			"How deep should the pathfinding algorithm more? Only increase if your computer can handle it.", 4, 2, 20, 1, SliderSetting.ValueDisplay.DECIMAL);
 
 	public static SliderSetting loops = new SliderSetting("Loops",
-			"How many dynamically calculated paths should the pathfinding algorithm look at? Only increase if your computer can handle it.", 1000, 1000, 25000, 1000, SliderSetting.ValueDisplay.DECIMAL);
+			"How many dynamically calculated paths should the pathfinding algorithm look at? Only increase if your computer can handle it.", 1000, 100, 25000, 100, SliderSetting.ValueDisplay.DECIMAL);
 
 	public static EnumSetting<ActionType> actionTypeEnumSetting =
 			new EnumSetting<>("Mode", ActionType.values(), ActionType.GROUND);
@@ -67,7 +64,6 @@ public final class PathfinderModule extends Hack {
 		setCategory(Category.PATHING);
 		addSetting(actionTypeEnumSetting);
 		addSetting(debug);
-		addSetting(renderMode);
 		addSetting(pathRed);
 		addSetting(pathGreen);
 		addSetting(pathBlue);
@@ -76,28 +72,6 @@ public final class PathfinderModule extends Hack {
 		addSetting(depth);
 		addSetting(loops);
 		addSetting(airPathfinderBaseSpeed);
-	}
-
-	private enum Mode {
-		BARITONE("Baritone", true, false, false),
-		TESLA("Tesla", false, true, false),
-		BLOCK("Block", false, false, true);
-
-		private final String name;
-		private final boolean baritone;
-		private final boolean tesla;
-		private final boolean block;
-
-		Mode(String name, boolean baritone, boolean tesla, boolean block) {
-			this.name = name;
-			this.tesla = tesla;
-			this.baritone = baritone;
-			this.block = block;
-		}
-
-		public String toString() {
-			return name;
-		}
 	}
 
 	private enum ModeType {
@@ -130,15 +104,6 @@ public final class PathfinderModule extends Hack {
 		MinecraftForge.EVENT_BUS.unregister(this);
 	}
 
-	public static boolean isRenderTesla() {
-		return renderMode.getSelected().tesla;
-	}
-	public static boolean isRenderBaritone() {
-		return renderMode.getSelected().baritone;
-	}
-	public static boolean isRenderBlock() {
-		return renderMode.getSelected().block;
-	}
 	public static boolean isAuto() {
 		return modeType.getSelected().auto;
 	}
