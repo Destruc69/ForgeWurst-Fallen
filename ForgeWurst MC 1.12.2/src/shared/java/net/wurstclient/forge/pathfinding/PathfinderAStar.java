@@ -1,24 +1,21 @@
 package net.wurstclient.forge.pathfinding;
 
-import net.minecraft.block.*;
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.wurstclient.forge.hacks.pathing.AutoPilot;
+import net.wurstclient.forge.hacks.pathing.PathfinderModule;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 
 public class PathfinderAStar {
-
-    private static final Minecraft mc = Minecraft.getMinecraft();
-
     private BlockPos startVec3;
     private BlockPos endVec3;
     private ArrayList<BlockPos> path = new ArrayList<BlockPos>();
@@ -26,7 +23,10 @@ public class PathfinderAStar {
     private ArrayList<Hub> hubsToWork = new ArrayList<Hub>();
     private double minDistanceSquared = 9;
     private boolean nearest = true;
+
     private static boolean air;
+
+    private static final Minecraft mc = Minecraft.getMinecraft();
 
     private static BlockPos[] flatCardinalDirections = {
             new BlockPos(1, 0, 0),
@@ -36,8 +36,9 @@ public class PathfinderAStar {
     };
 
     public PathfinderAStar(BlockPos startVec3, BlockPos endVec3, boolean air) {
-        this.startVec3 = startVec3.add(0, 0, 0);
-        this.endVec3 = endVec3.add(0, 0, 0);
+        this.startVec3 = new BlockPos(MathHelper.floor(startVec3.getX()), MathHelper.floor(startVec3.getY()), MathHelper.floor(startVec3.getZ()));
+        this.endVec3 = new BlockPos(MathHelper.floor(endVec3.getX()), MathHelper.floor(endVec3.getY()), MathHelper.floor(endVec3.getZ()));
+
         this.air = air;
     }
 
@@ -46,7 +47,7 @@ public class PathfinderAStar {
     }
 
     public void compute() {
-        compute(1000, 4);
+        compute(PathfinderModule.loops.getValueI(), PathfinderModule.depth.getValueI());
     }
 
     public void compute(int loops, int depth) {
@@ -71,7 +72,7 @@ public class PathfinderAStar {
                     hubs.add(hub);
 
                     for (BlockPos direction : flatCardinalDirections) {
-                        BlockPos loc = hub.getLoc().add(direction);
+                        BlockPos loc = new BlockPos(MathHelper.floor(hub.getLoc().add(direction).getX()), MathHelper.floor(hub.getLoc().add(direction).getY()), MathHelper.floor(hub.getLoc().add(direction).getZ()));
                         if (checkPositionValidity(loc, false)) {
                             if (addHub(hub, loc, 0)) {
                                 break search;
@@ -79,14 +80,14 @@ public class PathfinderAStar {
                         }
                     }
 
-                    BlockPos loc1 = hub.getLoc().add(0, 1, 0);
+                    BlockPos loc1 = new BlockPos(MathHelper.floor(hub.getLoc().add(0, 1, 0).getX()), MathHelper.floor(hub.getLoc().add(0, 1, 0).getY()), MathHelper.floor(hub.getLoc().add(0, 1, 0).getZ()));
                     if (checkPositionValidity(loc1, false)) {
                         if (addHub(hub, loc1, 0)) {
                             break search;
                         }
                     }
 
-                    BlockPos loc2 = hub.getLoc().add(0, -1, 0);
+                    BlockPos loc2 = new BlockPos(MathHelper.floor(hub.getLoc().add(0, -1, 0).getX()), MathHelper.floor(hub.getLoc().add(0, -1, 0).getY()), MathHelper.floor(hub.getLoc().add(0, -1, 0).getZ()));
                     if (checkPositionValidity(loc2, false)) {
                         if (addHub(hub, loc2, 0)) {
                             break search;
@@ -106,54 +107,32 @@ public class PathfinderAStar {
     }
 
     public static boolean checkPositionValidity(int x, int y, int z, boolean checkGround) {
-        if (!air) {
-            BlockPos block1 = new BlockPos(x, y, z);
-            BlockPos block2 = new BlockPos(x, y + 1, z);
-            BlockPos block3 = new BlockPos(x, y - 1, z);
-            return !isBlockSolid(block1) && !isBlockSolid(block2) && (isBlockSolid(block3) || !checkGround) && isSafeToWalkOn(block3);
+        BlockPos block1 = new BlockPos(x, y, z);
+        BlockPos block2 = new BlockPos(x, y + 1, z);
+        BlockPos block3 = new BlockPos(x, y - 1, z);
+        if (air) {
+            return mc.world.getBlockState(block1).getBlock().equals(Blocks.AIR) && mc.world.getBlockState(block2).getBlock().equals(Blocks.AIR) && mc.world.getBlockState(block3).getBlock().equals(Blocks.AIR);
         } else {
-            BlockPos block1 = new BlockPos(x, y, z);
-            BlockPos block2 = new BlockPos(x, y + 1, z);
-            BlockPos block3 = new BlockPos(x, y - 1, z);
-
-            // For air pathfinding, you want to allow movement through empty spaces (air blocks).
-            // So, return true if block1 and block2 are air blocks, and you may want to avoid checking ground.
             return !isBlockSolid(block1) && !isBlockSolid(block2) && (isBlockSolid(block3) || !checkGround) && isSafeToWalkOn(block3);
         }
     }
 
     private static boolean isBlockSolid(BlockPos block) {
-        return Minecraft.getMinecraft().world.getBlockState(new BlockPos(block.getX(), block.getY(), block.getZ())).isFullBlock() ||
-                (Minecraft.getMinecraft().world.getBlockState(new BlockPos(block.getX(), block.getY(), block.getZ())).getBlock() instanceof BlockSlab) ||
-                (Minecraft.getMinecraft().world.getBlockState(new BlockPos(block.getX(), block.getY(), block.getZ())).getBlock() instanceof BlockStairs)||
-                (Minecraft.getMinecraft().world.getBlockState(new BlockPos(block.getX(), block.getY(), block.getZ())).getBlock() instanceof BlockCactus)||
-                (Minecraft.getMinecraft().world.getBlockState(new BlockPos(block.getX(), block.getY(), block.getZ())).getBlock() instanceof BlockChest)||
-                (Minecraft.getMinecraft().world.getBlockState(new BlockPos(block.getX(), block.getY(), block.getZ())).getBlock() instanceof BlockEnderChest)||
-                (Minecraft.getMinecraft().world.getBlockState(new BlockPos(block.getX(), block.getY(), block.getZ())).getBlock() instanceof BlockSkull)||
-                (Minecraft.getMinecraft().world.getBlockState(new BlockPos(block.getX(), block.getY(), block.getZ())).getBlock() instanceof BlockPane)||
-                (Minecraft.getMinecraft().world.getBlockState(new BlockPos(block.getX(), block.getY(), block.getZ())).getBlock() instanceof BlockFence)||
-                (Minecraft.getMinecraft().world.getBlockState(new BlockPos(block.getX(), block.getY(), block.getZ())).getBlock() instanceof BlockWall)||
-                (Minecraft.getMinecraft().world.getBlockState(new BlockPos(block.getX(), block.getY(), block.getZ())).getBlock() instanceof BlockGlass)||
-                (Minecraft.getMinecraft().world.getBlockState(new BlockPos(block.getX(), block.getY(), block.getZ())).getBlock() instanceof BlockPistonBase)||
-                (Minecraft.getMinecraft().world.getBlockState(new BlockPos(block.getX(), block.getY(), block.getZ())).getBlock() instanceof BlockPistonExtension)||
-                (Minecraft.getMinecraft().world.getBlockState(new BlockPos(block.getX(), block.getY(), block.getZ())).getBlock() instanceof BlockPistonMoving)||
-                (Minecraft.getMinecraft().world.getBlockState(new BlockPos(block.getX(), block.getY(), block.getZ())).getBlock() instanceof BlockStainedGlass)||
-                (Minecraft.getMinecraft().world.getBlockState(new BlockPos(block.getX(), block.getY(), block.getZ())).getBlock() instanceof BlockTrapDoor);
+        return !mc.world.getBlockState(block).getBlock().equals(Blocks.AIR);
     }
 
     private static boolean isSafeToWalkOn(BlockPos block) {
-        return !(Minecraft.getMinecraft().world.getBlockState(new BlockPos(block.getX(), block.getY(), block.getZ())) instanceof BlockFence) &&
-                !(Minecraft.getMinecraft().world.getBlockState(new BlockPos(block.getX(), block.getY(), block.getZ())) instanceof BlockWall);
+        return !mc.world.getBlockState(block).getBlock().equals(Blocks.AIR) && mc.world.getBlockState(block.add(0, 1, 0)).getBlock().equals(Blocks.AIR) && mc.world.getBlockState(block.add(0, 2, 0)).getBlock().equals(Blocks.AIR);
     }
 
     public Hub isHubExisting(BlockPos loc) {
         for (Hub hub : hubs) {
-            if (hub.getLoc().getX() == loc.getX() && hub.getLoc().getY() == loc.getY() && hub.getLoc().getZ() == loc.getZ()) {
+            if (hub.getLoc().equals(loc)) {
                 return hub;
             }
         }
         for (Hub hub : hubsToWork) {
-            if (hub.getLoc().getX() == loc.getX() && hub.getLoc().getY() == loc.getY() && hub.getLoc().getZ() == loc.getZ()) {
+            if (hub.getLoc().equals(loc)) {
                 return hub;
             }
         }
@@ -173,12 +152,12 @@ public class PathfinderAStar {
                 path.add(loc);
                 return true;
             } else {
-                ArrayList<BlockPos> path = new ArrayList<BlockPos>((Collection<? extends BlockPos>) parent.getPath());
+                ArrayList<BlockPos> path = new ArrayList<BlockPos>(parent.getPath());
                 path.add(loc);
                 hubsToWork.add(new Hub(loc, parent, path, loc.distanceSq(endVec3), cost, totalCost));
             }
         } else if (existingHub.getCost() > cost) {
-            ArrayList<BlockPos> path = new ArrayList<>(parent.getPath());
+            ArrayList<BlockPos> path = new ArrayList<BlockPos>(parent.getPath());
             path.add(loc);
             existingHub.setLoc(loc);
             existingHub.setParent(parent);
@@ -416,30 +395,68 @@ public class PathfinderAStar {
         double deltaY = currentPosY - prevPosY;
         double deltaZ = currentPosZ - prevPosZ;
 
-        double EPSILON = 0.001;
+        double EPSILON = 0.1;
         return Math.abs(deltaX) > EPSILON || Math.abs(deltaY) > EPSILON || Math.abs(deltaZ) > EPSILON;
     }
 
-    public static String calculateETA(ArrayList<BlockPos> path) {
-        double etaInSeconds = path.size() / AutoPilot.baseSpeed.getValue();
-
-        int minutes = (int) Math.floor(etaInSeconds / 60);
-        int seconds = (int) Math.round(etaInSeconds % 60);
-
-        if (minutes == 0 && seconds == 0) {
-            return null;
-        } else {
-            return String.format("%d minutes, %d seconds", minutes, seconds);
-        }
-    }
-
-    public static double[] calculateMotion(ArrayList<BlockPos> path, double rotationYaw, boolean sprint) {
-        // Player's current position (assumed values for demonstration)
-        double playerX = mc.player.lastTickPosX;
-        double playerZ = mc.player.lastTickPosZ;
-
+    public static double[] calculateMotion(ArrayList<BlockPos> path, double rotationYaw, double speed) {
+        double playerX = mc.player.posX;
+        double playerZ = mc.player.posZ;
+        double velocityX = mc.player.motionX;
+        double velocityZ = mc.player.motionZ;
         rotationYaw = Math.toRadians(rotationYaw);
 
+        int closestBlockIndex = 0;
+        double closestBlockDistance = Double.POSITIVE_INFINITY;
+
+        for (int i = 0; i < path.size(); i++) {
+            double distance = mc.player.getDistanceSq(path.get(i));
+            if (distance < closestBlockDistance) {
+                closestBlockDistance = distance;
+                closestBlockIndex = i;
+            }
+        }
+
+        BlockPos closestBlock = path.get(closestBlockIndex);
+
+        // Ensure we don't exceed the array size when accessing nextBlock
+        BlockPos nextBlock = (closestBlockIndex == path.size() - 1) ? closestBlock : path.get(closestBlockIndex + 1);
+
+        // Adjust delta values based on player's velocity
+        double deltaX = nextBlock.getX() + 0.5 - playerX + velocityX;
+        double deltaZ = nextBlock.getZ() + 0.5 - playerZ + velocityZ;
+
+        // Calculate the target rotationYaw based on angle difference
+        double targetAngle = Math.atan2(deltaZ, deltaX);
+        double playerAngle = Math.toRadians(rotationYaw);
+
+        // Smoothly adjust the player's rotationYaw
+        double angleDifference = targetAngle - playerAngle;
+        if (angleDifference > Math.PI) {
+            angleDifference -= 2 * Math.PI;
+        } else if (angleDifference < -Math.PI) {
+            angleDifference += 2 * Math.PI;
+        }
+        rotationYaw = Math.toDegrees(playerAngle + angleDifference);
+
+        // Calculate the distance to the target position
+        double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
+
+        // Calculate the motion components (motionX and motionZ)
+        double motionX = Math.cos(angleDifference) * distance;
+        double motionZ = Math.sin(angleDifference) * distance;
+
+        // Apply motion limits based on speed
+        double motionMagnitude = Math.sqrt(motionX * motionX + motionZ * motionZ);
+        if (motionMagnitude > speed) {
+            motionX *= speed / motionMagnitude;
+            motionZ *= speed / motionMagnitude;
+        }
+
+        return new double[]{motionX, motionZ};
+    }
+
+    public static BlockPos getTargetPositionInPathArray(ArrayList<BlockPos> path) {
         int closestBlockIndex = 0;
         double closestBlockDistance = Double.POSITIVE_INFINITY;
         for (int i = 0; i < path.size(); i++) {
@@ -458,35 +475,7 @@ public class PathfinderAStar {
             nextBlock = path.get(closestBlockIndex + 1);
         }
 
-        BlockPos targetPos = nextBlock;
-
-        // Calculate the distance to the target position
-        double deltaX = targetPos.getX() + 0.5 - playerX; // Adding 0.5 to target center of the block
-        double deltaZ = targetPos.getZ() + 0.5 - playerZ; // Adding 0.5 to target center of the block
-
-        // Calculate the angle between the player's rotation and the target position
-        double targetAngle = Math.atan2(deltaZ, deltaX);
-        double playerAngle = Math.toRadians(rotationYaw);
-
-        // Calculate the angle difference between player's rotation and target position
-        double angleDifference = targetAngle - playerAngle;
-
-        // Calculate the distance to the target position
-        double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
-
-        // Calculate the motion components (motionX and motionZ)
-        double motionX = Math.cos(angleDifference) * distance;
-        double motionZ = Math.sin(angleDifference) * distance;
-
-        // Apply motion limits based on sprinting
-        double maxMotion = sprint ? 0.26 : 0.2;
-        double motionMagnitude = Math.sqrt(motionX * motionX + motionZ * motionZ);
-        if (motionMagnitude > maxMotion) {
-            motionX *= maxMotion / motionMagnitude;
-            motionZ *= maxMotion / motionMagnitude;
-        }
-
-        return new double[]{motionX, motionZ};
+        return air ? nextBlock.add(0.5, 1, 0.5) : nextBlock.add(0.5, 0, 0.5);
     }
 
     // Given a block type, find the nearest reachable block position of that type
@@ -518,8 +507,8 @@ public class PathfinderAStar {
 
     // Check if a block is reachable (assuming no block needs to be mined)
     public static boolean isBlockReachable(BlockPos blockPos, EntityPlayer entityPlayer) {
-        PathfinderAStarAIR pathfinderAStar;
-        pathfinderAStar = new PathfinderAStarAIR(entityPlayer.getPosition(), blockPos);
+        PathfinderAStar pathfinderAStar;
+        pathfinderAStar = new PathfinderAStar(entityPlayer.getPosition(), blockPos, air);
         pathfinderAStar.compute();
         return pathfinderAStar.getPath().size() > 0;
     }

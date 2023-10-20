@@ -72,55 +72,55 @@ public final class ElytraFlight extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		if (mc.player.isElytraFlying()) {
-			if (shouldLockPitch.isChecked()) {
-				mc.player.rotationPitch = lockPitch.getValueF();
-			}
-			if (shouldGlide.isChecked()) {
-				if (glide.getValue() > 0) {
-					if (mc.player.motionY < 0) {
-						mc.player.motionY = -mc.player.motionY / -glide.getValueF();
+			if (mc.player.isElytraFlying()) {
+				if (shouldLockPitch.isChecked()) {
+					mc.player.rotationPitch = lockPitch.getValueF();
+				}
+				if (shouldGlide.isChecked()) {
+					if (glide.getValue() > 0) {
+						if (mc.player.motionY < 0) {
+							mc.player.motionY = -mc.player.motionY / -glide.getValueF();
+						}
+					}
+				}
+				if (mode.getSelected() == Mode.BOOST || mode.getSelected() == Mode.BOOSTPLUS) {
+					boostEF();
+				} else if (mode.getSelected() == Mode.CONTROL) {
+					controlEF();
+				} else if (mode.getSelected() == Mode.WUYRST7) {
+					wurst7EF();
+				}
+
+				if (!a) {
+					setTickLength(50);
+				}
+			} else if (!(mode.getSelected() == Mode.WUYRST7)) {
+				if (autoTakeOff.isChecked()) {
+					if (mc.player.onGround) {
+						a = true;
+					} else if (mc.world.getBlockState(new BlockPos(mc.player.posX, mc.player.posY - 0.5, mc.player.posZ)).getBlock().equals(Blocks.AIR)) {
+						if (mc.player.ticksExisted % 2 == 0) {
+							mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_FALL_FLYING));
+						}
+						if (a) {
+							setTickLength(50 / 0.05f);
+							a = false;
+						}
 					}
 				}
 			}
-			if (mode.getSelected() == Mode.BOOST || mode.getSelected() == Mode.BOOSTPLUS) {
-				boostEF();
-			} else if (mode.getSelected() == Mode.CONTROL) {
-				controlEF();
-			} else if (mode.getSelected() == Mode.WUYRST7) {
-				wurst7EF();
-			}
 
-			if (!a) {
-				setTickLength(50);
-			}
-		} else if (!(mode.getSelected() == Mode.WUYRST7)) {
-			if (autoTakeOff.isChecked()) {
-				if (mc.player.onGround) {
-					a = true;
-				} else if (mc.world.getBlockState(new BlockPos(mc.player.posX, mc.player.posY - 0.5, mc.player.posZ)).getBlock().equals(Blocks.AIR)) {
-					if (mc.player.ticksExisted % 2 == 0) {
-						mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_FALL_FLYING));
-					}
-					if (a) {
-						setTickLength(50 / 0.05f);
-						a = false;
+			for (Entity entity : mc.world.loadedEntityList) {
+				if (entity instanceof EntityFireworkRocket) {
+					if (entity.ticksExisted > 0) {
+						mc.world.removeEntity(entity);
 					}
 				}
 			}
-		}
 
-		for (Entity entity : mc.world.loadedEntityList) {
-			if (entity instanceof EntityFireworkRocket) {
-				if (entity.ticksExisted > 0) {
-					mc.world.removeEntity(entity);
-				}
+			if (mode.getSelected() == Mode.PACKET) {
+				packetEF();
 			}
-		}
-
-		if (mode.getSelected() == Mode.PACKET) {
-			packetEF();
-		}
 	}
 
 	private void packetEF() {
@@ -279,15 +279,15 @@ public final class ElytraFlight extends Hack {
 
 	@SubscribeEvent
 	public void onPacket(WPacketOutputEvent event) {
-		if (mc.player.isElytraFlying()) {
-			if (mode.getSelected() == Mode.CONTROL && !isKeyInputs() && !mc.gameSettings.keyBindJump.isKeyDown() && !mc.gameSettings.keyBindSneak.isKeyDown()) {
-				if (event.getPacket() instanceof CPacketPlayer ||
-						event.getPacket() instanceof CPacketPlayer.Rotation ||
-						event.getPacket() instanceof CPacketPlayer.PositionRotation ||
-						event.getPacket() instanceof CPacketPlayer.Position) {
-					event.setCanceled(true);
+			if (mc.player.isElytraFlying()) {
+				if (mode.getSelected() == Mode.CONTROL && !isKeyInputs() && !mc.gameSettings.keyBindJump.isKeyDown() && !mc.gameSettings.keyBindSneak.isKeyDown()) {
+					if (event.getPacket() instanceof CPacketPlayer ||
+							event.getPacket() instanceof CPacketPlayer.Rotation ||
+							event.getPacket() instanceof CPacketPlayer.PositionRotation ||
+							event.getPacket() instanceof CPacketPlayer.Position) {
+						event.setCanceled(true);
+					}
 				}
-			}
 		}
 	}
 

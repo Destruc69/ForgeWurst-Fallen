@@ -41,9 +41,31 @@ public final class PathfinderModule extends Hack {
 	public static SliderSetting loops = new SliderSetting("Loops",
 			"How many dynamically calculated paths should the pathfinding algorithm look at? Only increase if your computer can handle it.", 1000, 1000, 25000, 1000, SliderSetting.ValueDisplay.DECIMAL);
 
+	public static EnumSetting<ActionType> actionTypeEnumSetting =
+			new EnumSetting<>("Mode", ActionType.values(), ActionType.GROUND);
+
+	public static final SliderSetting airPathfinderBaseSpeed = new SliderSetting("AirPathfinderBaseSpeed", 1, 0, 10, 0.5, SliderSetting.ValueDisplay.DECIMAL);
+
+	public static enum ActionType {
+		GROUND("Ground"),
+		AIR("Air");
+
+		private final String name;
+
+		private ActionType(String name) {
+			this.name = name;
+		}
+
+		public String toString() {
+			return name;
+		}
+	}
+
+
 	public PathfinderModule() {
 		super("Pathfinder", "Pathfinding settings.");
 		setCategory(Category.PATHING);
+		addSetting(actionTypeEnumSetting);
 		addSetting(debug);
 		addSetting(renderMode);
 		addSetting(pathRed);
@@ -53,6 +75,7 @@ public final class PathfinderModule extends Hack {
 		addSetting(modeType);
 		addSetting(depth);
 		addSetting(loops);
+		addSetting(airPathfinderBaseSpeed);
 	}
 
 	private enum Mode {

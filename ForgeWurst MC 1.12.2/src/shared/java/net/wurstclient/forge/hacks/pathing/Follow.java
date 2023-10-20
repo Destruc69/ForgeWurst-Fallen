@@ -19,7 +19,6 @@ import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.pathfinding.PathfinderAStar;
 import net.wurstclient.forge.settings.CheckboxSetting;
-import net.wurstclient.forge.utils.ChatUtils;
 import net.wurstclient.forge.utils.KeyBindingUtils;
 
 import java.util.ArrayList;
@@ -73,14 +72,9 @@ public final class Follow extends Hack {
 
 				if (!PathfinderAStar.isOnPath(blockPosArrayList) || blockPosArrayList.size() == 0 || PathfinderAStar.isEntityMoving(closestEntity)) {
 					if (mc.player.ticksExisted % 60 == 0) {
-						pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), closestEntity.getPosition());
+						pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), closestEntity.getPosition(), false);
 						pathfinderAStar.compute();
 						blockPosArrayList = pathfinderAStar.getPath();
-						if (blockPosArrayList.size() > 0) {
-							if (PathfinderAStar.calculateETA(blockPosArrayList) != null) {
-								ChatUtils.message("ETA: " + PathfinderAStar.calculateETA(blockPosArrayList));
-							}
-						}
 					}
 				}
 
