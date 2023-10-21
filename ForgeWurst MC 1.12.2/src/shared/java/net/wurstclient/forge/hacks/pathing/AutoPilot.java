@@ -75,7 +75,7 @@ public final class AutoPilot extends Hack {
 		}
 
 		if (PathfinderModule.actionTypeEnumSetting.getSelected() == PathfinderModule.ActionType.GROUND) {
-			if (!PathfinderAStar.isOnPath(blockPosArrayList) || a || mc.player.getDistance(blockPosArrayList.get(0).getX(), mc.player.posY, blockPosArrayList.get(0).getZ()) >= mc.gameSettings.renderDistanceChunks * 15) {
+			if (!PathfinderAStar.isOnPath(blockPosArrayList) || a || mc.player.getDistance(blockPosArrayList.get(0).getX(), mc.player.posY, blockPosArrayList.get(0).getZ()) >= mc.gameSettings.renderDistanceChunks * 14 || mc.player.getDistance(blockPosArrayList.get(blockPosArrayList.size() - 1).getX(), mc.player.lastTickPosY, blockPosArrayList.get(blockPosArrayList.size() - 1).getZ()) <= 1) {
 				a = false;
 				pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), new BlockPos(x.getValue(), y.getValueF(), z.getValue()), false);
 				pathfinderAStar.compute();
@@ -92,7 +92,7 @@ public final class AutoPilot extends Hack {
 				}
 			}
 		} else {
-			if (!PathfinderAStar.isOnPath(blockPosArrayList) || a || mc.player.getDistance(blockPosArrayList.get(0).getX(), mc.player.posY, blockPosArrayList.get(0).getZ()) >= mc.gameSettings.renderDistanceChunks * 15) {
+			if (!PathfinderAStar.isOnPath(blockPosArrayList) || a || mc.player.getDistance(blockPosArrayList.get(0).getX(), mc.player.posY, blockPosArrayList.get(0).getZ()) >= mc.gameSettings.renderDistanceChunks * 14 || mc.player.getDistance(blockPosArrayList.get(blockPosArrayList.size() - 1).getX(), mc.player.lastTickPosY, blockPosArrayList.get(blockPosArrayList.size() - 1).getZ()) <= 1) {
 				a = false;
 				pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), new BlockPos(x.getValue(), y.getValueF(), z.getValue()), true);
 				pathfinderAStar.compute();

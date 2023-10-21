@@ -85,7 +85,7 @@ public class PathfinderAStar {
 
                     for (BlockPos direction : flatCardinalDirections) {
                         BlockPos loc = new BlockPos(MathHelper.floor(hub.getLoc().add(direction).getX()), MathHelper.floor(hub.getLoc().add(direction).getY()), MathHelper.floor(hub.getLoc().add(direction).getZ()));
-                        if (checkPositionValidity(loc, false)) {
+                        if (!air ? checkPositionValidity(loc, false) : checkPositionValidity(loc, true)) {
                             if (addHub(hub, loc, 0)) {
                                 break search;
                             }
@@ -93,14 +93,14 @@ public class PathfinderAStar {
                     }
 
                     BlockPos loc1 = new BlockPos(MathHelper.floor(hub.getLoc().add(0, 1, 0).getX()), MathHelper.floor(hub.getLoc().add(0, 1, 0).getY()), MathHelper.floor(hub.getLoc().add(0, 1, 0).getZ()));
-                    if (checkPositionValidity(loc1, false)) {
+                    if (!air ? checkPositionValidity(loc1, false) : checkPositionValidity(loc1, true)) {
                         if (addHub(hub, loc1, 0)) {
                             break search;
                         }
                     }
 
                     BlockPos loc2 = new BlockPos(MathHelper.floor(hub.getLoc().add(0, -1, 0).getX()), MathHelper.floor(hub.getLoc().add(0, -1, 0).getY()), MathHelper.floor(hub.getLoc().add(0, -1, 0).getZ()));
-                    if (checkPositionValidity(loc2, false)) {
+                    if (!air ? checkPositionValidity(loc2, false) : checkPositionValidity(loc2, true)) {
                         if (addHub(hub, loc2, 0)) {
                             break search;
                         }

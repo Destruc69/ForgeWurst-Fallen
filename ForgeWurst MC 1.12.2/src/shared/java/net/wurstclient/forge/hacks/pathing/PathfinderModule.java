@@ -36,7 +36,7 @@ public final class PathfinderModule extends Hack {
 			"How deep should the pathfinding algorithm more? Only increase if your computer can handle it.", 4, 2, 20, 1, SliderSetting.ValueDisplay.DECIMAL);
 
 	public static SliderSetting loops = new SliderSetting("Loops",
-			"How many dynamically calculated paths should the pathfinding algorithm look at? Only increase if your computer can handle it.", 1000, 100, 25000, 100, SliderSetting.ValueDisplay.DECIMAL);
+			"How many dynamically calculated paths should the pathfinding algorithm look at? Only increase if your computer can handle it.", 1000, 50, 25000, 50, SliderSetting.ValueDisplay.DECIMAL);
 
 	public static EnumSetting<ActionType> actionTypeEnumSetting =
 			new EnumSetting<>("Mode", ActionType.values(), ActionType.GROUND);
