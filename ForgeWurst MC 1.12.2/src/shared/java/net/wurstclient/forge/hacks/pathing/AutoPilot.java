@@ -114,7 +114,7 @@ public final class AutoPilot extends Hack {
 					mc.player.motionY = 0;
 				}
 
-				double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, PathfinderModule.airPathfinderBaseSpeed.getValueF());
+				double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, PathfinderModule.airPathfinderBaseSpeed.getValue());
 				mc.player.motionX = toMove[0];
 				mc.player.motionZ = toMove[1];
 			}

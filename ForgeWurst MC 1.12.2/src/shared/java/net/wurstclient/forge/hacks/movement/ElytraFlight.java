@@ -40,7 +40,6 @@ public final class ElytraFlight extends Hack {
 	private final SliderSetting lockPitch = new SliderSetting("LockPitch", 4, -10, 10, 0.5, SliderSetting.ValueDisplay.DECIMAL);
 
 	private int jumpTimer;
-	private double oldY;
 
 	public ElytraFlight() {
 		super("ElytraFlight", "Fly with an elytra.");
@@ -59,7 +58,6 @@ public final class ElytraFlight extends Hack {
 	@Override
 	protected void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
-		oldY = mc.player.lastTickPosY;
 	}
 
 	@Override
@@ -126,12 +124,10 @@ public final class ElytraFlight extends Hack {
 	private void packetEF() {
 		if (mc.gameSettings.keyBindJump.isKeyDown()) {
 			mc.player.motionY = upSpeed.getValueF();
-			oldY = mc.player.lastTickPosY;
 		} else if (mc.gameSettings.keyBindSneak.isKeyDown()) {
 			mc.player.motionY = -downSpeed.getValue();
-			oldY = mc.player.lastTickPosY;
 		} else {
-			mc.player.posY = oldY;
+			mc.player.motionY = 0;
 		}
 
 		if (isKeyInputs()) {
@@ -268,12 +264,10 @@ public final class ElytraFlight extends Hack {
 		}
 		if (mc.gameSettings.keyBindJump.isKeyDown()) {
 			mc.player.motionY = upSpeed.getValue();
-			oldY = mc.player.lastTickPosY;
 		} else if (mc.gameSettings.keyBindSneak.isKeyDown()) {
 			mc.player.motionY = -downSpeed.getValue();
-			oldY = mc.player.lastTickPosY;
 		} else {
-			mc.player.posY = oldY;
+			mc.player.motionY = 0;
 		}
 	}
 

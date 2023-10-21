@@ -367,8 +367,8 @@ public class PathfinderAStar {
 
         // Adjust delta values based on player's velocity
 
-        double deltaX = nextBlock.getX() + 0.55 - playerX + velocityX;
-        double deltaZ = nextBlock.getZ() + 0.55 - playerZ + velocityZ;
+        double deltaX = nextBlock.getX() + 0.5 - playerX + velocityX;
+        double deltaZ = nextBlock.getZ() + 0.5 - playerZ + velocityZ;
 
         // Calculate the target rotationYaw based on angle difference
         double targetAngle = Math.atan2(deltaZ, deltaX);
