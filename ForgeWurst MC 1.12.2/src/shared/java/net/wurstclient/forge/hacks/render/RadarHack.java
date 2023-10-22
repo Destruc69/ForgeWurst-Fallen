@@ -16,7 +16,6 @@ import net.minecraft.entity.passive.EntityAmbientCreature;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityWaterMob;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -42,7 +41,7 @@ public final class RadarHack extends Hack
     private final ArrayList<Entity> entities = new ArrayList<>();
 
     private final SliderSetting radius = new SliderSetting("Radius",
-            "Radius in blocks.", 100, 26, 500, 1, ValueDisplay.INTEGER);
+            "Radius in blocks.", 100, 26, 100, 1, ValueDisplay.INTEGER);
     private final CheckboxSetting rotate =
             new CheckboxSetting("Rotate with player", true);
 
@@ -56,6 +55,8 @@ public final class RadarHack extends Hack
             "Filter animals", "Won't show pigs, cows, etc.", false);
     private final CheckboxSetting filterInvisible = new CheckboxSetting(
             "Filter invisible", "Won't show invisible entities.", false);
+
+    private Radar radar;
 
     public RadarHack()
     {
@@ -75,10 +76,12 @@ public final class RadarHack extends Hack
         addSetting(filterAnimals);
         addSetting(filterInvisible);
 
+        radar = new Radar(this);
+
         window = new Window("Radar");
         window.setPinned(true);
         window.setInvisible(true);
-        window.add(new Radar(this));
+        window.add(radar);
     }
 
     @Override

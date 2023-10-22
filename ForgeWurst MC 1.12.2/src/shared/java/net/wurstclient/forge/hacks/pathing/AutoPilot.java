@@ -17,6 +17,7 @@ import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.pathfinding.PathfinderAStar;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.SliderSetting;
+import net.wurstclient.forge.utils.KeyBindingUtils;
 
 import java.util.ArrayList;
 
@@ -87,9 +88,7 @@ public final class AutoPilot extends Hack {
 				mc.player.motionX = toMove[0];
 				mc.player.motionZ = toMove[1];
 
-				if (!PathfinderAStar.isEntityMoving(mc.player) && mc.player.onGround) {
-					mc.player.jump();
-				}
+				KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY() > mc.player.lastTickPosY && mc.player.onGround || mc.player.isInWater());
 			}
 		} else {
 			if (!PathfinderAStar.isOnPath(blockPosArrayList) || a || mc.player.getDistance(blockPosArrayList.get(0).getX(), mc.player.posY, blockPosArrayList.get(0).getZ()) >= mc.gameSettings.renderDistanceChunks * 14 || mc.player.getDistance(blockPosArrayList.get(blockPosArrayList.size() - 1).getX(), mc.player.lastTickPosY, blockPosArrayList.get(blockPosArrayList.size() - 1).getZ()) <= 1) {

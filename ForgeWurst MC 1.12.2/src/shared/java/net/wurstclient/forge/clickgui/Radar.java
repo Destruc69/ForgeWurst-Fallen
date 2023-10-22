@@ -7,6 +7,7 @@
  */
 package net.wurstclient.forge.clickgui;
 
+import net.minecraft.util.math.BlockPos;
 import net.wurstclient.forge.hacks.render.RadarHack;
 import org.lwjgl.opengl.GL11;
 
@@ -20,9 +21,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.compatibility.WMinecraft;
 
+import java.util.ArrayList;
+
 public final class Radar extends Component
 {
 	private final RadarHack hack;
+
+	public static ArrayList<BlockPos> HIGHLIGHTED_POSITIONS;
 
 	public Radar(RadarHack hack)
 	{
@@ -144,6 +149,42 @@ public final class Radar extends Component
 			GL11.glVertex2d(middleX + renderX, middleY + renderY);
 		}
 		GL11.glEnd();
+
+
+
+
+		GL11.glPushMatrix();
+		GL11.glTranslated(middleX, middleY, 0);
+		if (!hack.isRotateEnabled())
+			GL11.glRotated(180 + player.rotationYaw, 0, 0, 1);
+
+		if (HIGHLIGHTED_POSITIONS != null && HIGHLIGHTED_POSITIONS.size() > 0) {
+			for (BlockPos pos : HIGHLIGHTED_POSITIONS) {
+				// Calculate the relative position of 'pos' with respect to the radar's center
+				double diffX = pos.getX() - player.posX;
+				double diffZ = pos.getZ() - player.posZ;
+				double distance = Math.sqrt(diffX * diffX + diffZ * diffZ) * (getWidth() * 0.5 / hack.getRadius());
+				double neededRotation = Math.toDegrees(Math.atan2(diffZ, diffX));
+
+				double angle = Math.toRadians(player.rotationYaw - neededRotation - 90);
+
+				double renderX = Math.sin(angle) * distance;
+				double renderY = Math.cos(angle) * distance;
+
+				// Check if the highlighted position is within the radar boundaries
+				if (Math.abs(renderX) > getWidth() / 2.0 || Math.abs(renderY) > getHeight() / 2.0)
+					continue;
+
+				// Render the highlighted position
+				GL11.glColor4f(1.0F, 0.0F, 0.0F, opacity); // Red color for highlighting
+				GL11.glPointSize(4); // Adjust the size as needed
+				GL11.glBegin(GL11.GL_POINTS);
+				GL11.glVertex2d(renderX, renderY);
+				GL11.glEnd();
+			}
+		}
+
+		GL11.glPopMatrix();
 	}
 
 	@Override

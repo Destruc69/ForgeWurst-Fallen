@@ -9,6 +9,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.wurstclient.forge.clickgui.Radar;
 import net.wurstclient.forge.hacks.pathing.PathfinderModule;
 import net.wurstclient.forge.utils.RenderUtils;
 import org.lwjgl.opengl.GL11;
@@ -286,6 +287,8 @@ public class PathfinderAStar {
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glDisable(GL11.GL_BLEND);
         GL11.glDisable(GL11.GL_LINE_SMOOTH);
+
+        Radar.HIGHLIGHTED_POSITIONS = blockPosArrayList;
     }
 
     public static boolean isOnPath(ArrayList<BlockPos> blockPosArrayList) {
