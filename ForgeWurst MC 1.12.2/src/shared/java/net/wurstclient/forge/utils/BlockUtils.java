@@ -31,9 +31,19 @@ import net.wurstclient.forge.compatibility.WVec3d;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public final class BlockUtils
 {
+
+	public static List<Block> blacklistedBlocks = Arrays.asList(Blocks.AIR, Blocks.WATER, Blocks.FLOWING_WATER, Blocks.LAVA, Blocks.FLOWING_LAVA,
+			Blocks.ENCHANTING_TABLE, Blocks.CARPET, Blocks.GLASS_PANE, Blocks.STAINED_GLASS_PANE, Blocks.IRON_BARS,
+			Blocks.SNOW_LAYER, Blocks.ICE, Blocks.PACKED_ICE, Blocks.COAL_ORE, Blocks.DIAMOND_ORE, Blocks.EMERALD_ORE,
+			Blocks.CHEST, Blocks.TORCH, Blocks.ANVIL, Blocks.TRAPPED_CHEST, Blocks.NOTEBLOCK, Blocks.JUKEBOX, Blocks.TNT,
+			Blocks.GOLD_ORE, Blocks.IRON_ORE, Blocks.LAPIS_ORE, Blocks.LIT_REDSTONE_ORE, Blocks.QUARTZ_ORE, Blocks.REDSTONE_ORE,
+			Blocks.WOODEN_PRESSURE_PLATE, Blocks.STONE_PRESSURE_PLATE, Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE,
+			Blocks.STONE_BUTTON, Blocks.WOODEN_BUTTON, Blocks.LEVER);
+
 	private static final Minecraft mc = Minecraft.getMinecraft();
 	
 	public static IBlockState getState(BlockPos pos)
@@ -346,4 +356,5 @@ public final class BlockUtils
 
 		return new ArrayList<>(Arrays.asList(blockPosArray));
 	}
+
 }

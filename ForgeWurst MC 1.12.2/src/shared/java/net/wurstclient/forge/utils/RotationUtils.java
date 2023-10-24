@@ -7,10 +7,11 @@
  */
 package net.wurstclient.forge.utils;
 
-import java.lang.reflect.Field;
-
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.common.Mod;
@@ -20,6 +21,8 @@ import net.wurstclient.fmlevents.WPreMotionEvent;
 import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.compatibility.WVec3d;
+
+import java.lang.reflect.Field;
 
 @Mod.EventBusSubscriber
 public final class RotationUtils
@@ -159,5 +162,20 @@ public final class RotationUtils
 		EntityPlayerSP player = WMinecraft.getPlayer();
 		player.rotationYaw = needed[0];
 		player.rotationPitch = 0;
+	}
+
+	public static float[] getRotationsBlock(BlockPos block, EnumFacing face) {
+		Minecraft mc = Minecraft.getMinecraft();
+		double x = (double)block.getX() + 0.5 - mc.player.posX + (double)face.getFrontOffsetX() / 2.0;
+		double z = (double)block.getZ() + 0.5 - mc.player.posZ + (double)face.getFrontOffsetZ() / 2.0;
+		double y = (double)block.getY() + 0.5;
+		double d1 = mc.player.posY + (double)mc.player.getEyeHeight() - y;
+		double d3 = MathHelper.sqrt(x * x + z * z);
+		float yaw = (float)(Math.atan2(z, x) * 180.0 / 3.141592653589793) - 90.0f;
+		float pitch = (float)(Math.atan2(d1, d3) * 180.0 / 3.141592653589793);
+		if (yaw < 0.0f) {
+			yaw += 360.0f;
+		}
+		return new float[]{yaw, pitch};
 	}
 }

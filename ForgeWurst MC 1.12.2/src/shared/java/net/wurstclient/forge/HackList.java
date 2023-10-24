@@ -33,6 +33,7 @@ public final class HackList extends WHackList
 	public final NoFall noFall = register(new NoFall());
 	public final Speed speed = register(new Speed());
 	public final Step step = register(new Step());
+	public final AutoClutch autoClutch = register(new AutoClutch());
 	public final Arson arson = register(new Arson());
 	public final AutoTNT autoTNT = register(new AutoTNT());
 	public final AutoMount autoMount = register(new AutoMount());
@@ -96,7 +97,6 @@ public final class HackList extends WHackList
 	public final Killaura killaura = register(new Killaura());
 	public final Scaffold scaffold = register(new Scaffold());
 	public final Timerr timerr = register(new Timerr());
-	public final AutoDupe autoDupe = register(new AutoDupe());
 	public final LongJump longJump = register(new LongJump());
 	public final NameTags nameTags = register(new NameTags());
 	public final NoHurtCam noHurtCam = register(new NoHurtCam());
