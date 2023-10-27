@@ -41,10 +41,13 @@ public final class ForgeWurst
 
 	private Path configFolder;
 
+	private FriendProccessor friendProccessor;
+
 	private HackList hax;
 	private CommandList cmds;
 	private KeybindList keybinds;
 	private ClickGui gui;
+	private FriendsList friendsList;
 
 	private GUITweaks guiTweaks;
 	private AutoJoin autoJoin;
@@ -88,8 +91,14 @@ public final class ForgeWurst
 		gui = new ClickGui(configFolder.resolve("windows.json"));
 		gui.init(hax);
 
+		friendsList = new FriendsList(configFolder.resolve("friends.json"));
+		friendsList.init();
+
 		hud = new IngameHUD(hax, gui);
 		MinecraftForge.EVENT_BUS.register(hud);
+
+		friendProccessor = new FriendProccessor();
+		MinecraftForge.EVENT_BUS.register(friendProccessor);
 
 		cmdProcessor = new CommandProcessor(cmds);
 		MinecraftForge.EVENT_BUS.register(cmdProcessor);
@@ -139,5 +148,9 @@ public final class ForgeWurst
 	public ClickGui getGui()
 	{
 		return gui;
+	}
+
+	public FriendsList getFriendsList() {
+		return friendsList;
 	}
 }

@@ -63,6 +63,8 @@ public final class HackList extends WHackList
 	public final CrystalAuraHack crystalAuraHack = register(new CrystalAuraHack());
 	public final Nuker nuker = register(new Nuker());
 	public final Test test = register(new Test());
+	public final FriendsModule friendsModule = register(new FriendsModule());
+	public final SinglePlayerFunner singlePlayerFunner = register(new SinglePlayerFunner());
 	public final IllegalSlot illegalSlot = register(new IllegalSlot());
 	public final NoRender noRender = register(new NoRender());
 	public final NewChunks newChunks = register(new NewChunks());

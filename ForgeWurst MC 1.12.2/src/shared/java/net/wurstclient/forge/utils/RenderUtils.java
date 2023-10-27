@@ -129,6 +129,40 @@ public final class RenderUtils
 		GL11.glVertex3d(midX, midY, bb.maxZ);
 	}
 
+
+	public static void drawUnique3DObject() {
+		GL11.glPushMatrix();
+		GL11.glBegin(GL11.GL_TRIANGLES);
+
+		// Define the vertices of the 3D object
+		double scale = 0.1; // Adjust the scale as needed
+
+		double x1 = 0.0;
+		double y1 = 0.0;
+		double z1 = 0.0;
+
+		double x2 = 1.0 * scale;
+		double y2 = 0.0;
+		double z2 = 0.0;
+
+		double x3 = 0.5 * scale;
+		double y3 = 1.0 * scale;
+		double z3 = 0.0;
+
+		// Define a unique color for your object
+		GL11.glColor3d(1.0, 0.5, 0.0); // Orange color
+
+		// Draw the faces of the 3D object
+		GL11.glVertex3d(x1, y1, z1);
+		GL11.glVertex3d(x2, y2, z2);
+		GL11.glVertex3d(x3, y3, z3);
+
+		// You can define more vertices and faces to make it more complex
+
+		GL11.glEnd();
+		GL11.glPopMatrix();
+	}
+
 	public static void drawArrow(Vec3d from, Vec3d to)
 	{
 		double startX = WVec3d.getX(from);

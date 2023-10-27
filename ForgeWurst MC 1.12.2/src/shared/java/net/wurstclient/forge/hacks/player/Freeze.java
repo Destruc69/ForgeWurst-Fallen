@@ -1,10 +1,8 @@
 package net.wurstclient.forge.hacks.player;
 
 import net.minecraft.network.Packet;
-import net.minecraft.network.login.server.SPacketEncryptionRequest;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import net.wurstclient.fmlevents.WPacketInputEvent;
 import net.wurstclient.fmlevents.WPacketOutputEvent;
 import net.wurstclient.forge.Category;
