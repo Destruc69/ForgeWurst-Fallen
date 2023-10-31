@@ -19,10 +19,7 @@ import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.network.play.client.CPacketPlayerDigging.Action;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.*;
 import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.compatibility.WPlayerController;
@@ -355,6 +352,37 @@ public final class BlockUtils
 		}
 
 		return new ArrayList<>(Arrays.asList(blockPosArray));
+	}
+
+	public static ArrayList<BlockPos> getAllBlocksBetween(BlockPos posA, BlockPos posB) {
+		ArrayList<BlockPos> blockPosList = new ArrayList<>();
+
+		int minX = Math.min(posA.getX(), posB.getX());
+		int minY = Math.min(posA.getY(), posB.getY());
+		int minZ = Math.min(posA.getZ(), posB.getZ());
+		int maxX = Math.max(posA.getX(), posB.getX());
+		int maxY = Math.max(posA.getY(), posB.getY());
+		int maxZ = Math.max(posA.getZ(), posB.getZ());
+
+		for (int x = minX; x <= maxX; x++) {
+			for (int y = minY; y <= maxY; y++) {
+				for (int z = minZ; z <= maxZ; z++) {
+					blockPosList.add(new BlockPos(x, y, z));
+				}
+			}
+		}
+
+		return blockPosList;
+	}
+
+	public static boolean canPlayerSeeBlockPos(BlockPos targetPos) {
+		EntityPlayer player = mc.player;
+		Vec3d start = new Vec3d(player.posX, player.posY + player.getEyeHeight(), player.posZ);
+		Vec3d end = new Vec3d(targetPos.getX() + 0.5, targetPos.getY() + 0.5, targetPos.getZ() + 0.5); // Center of the target BlockPos
+
+		RayTraceResult result = mc.world.rayTraceBlocks(start, end);
+
+		return result != null && result.typeOfHit == RayTraceResult.Type.BLOCK;
 	}
 
 }

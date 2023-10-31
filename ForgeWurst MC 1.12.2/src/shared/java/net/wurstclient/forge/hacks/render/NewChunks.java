@@ -45,13 +45,12 @@ public final class NewChunks extends Hack {
 	}
 
 	@SubscribeEvent
-	public void onUpdate(WPacketInputEvent event) {
+	public void onPacketIn(WPacketInputEvent event) {
 		if (event.getPacket() instanceof SPacketChunkData) {
 			SPacketChunkData sPacketChunkData = (SPacketChunkData) event.getPacket();
 			if (!sPacketChunkData.isFullChunk()) {
-				Chunk chunk = new Chunk(mc.world, sPacketChunkData.getChunkX() * 16, sPacketChunkData.getChunkZ() * 16);
-				if (!chunkArrayList.contains(chunk)) {
-					chunkArrayList.add(chunk);
+				if (!chunkArrayList.contains(mc.world.getChunkFromChunkCoords(sPacketChunkData.getChunkX(), sPacketChunkData.getChunkZ()))) {
+					chunkArrayList.add(mc.world.getChunkFromChunkCoords(sPacketChunkData.getChunkX(), sPacketChunkData.getChunkZ()));
 				}
 			}
 		}
@@ -76,22 +75,17 @@ public final class NewChunks extends Hack {
 
 		if (chunkArrayList.size() > 0) {
 			for (Chunk chunk : chunkArrayList) {
-				if (mc.player.getDistance(chunk.x, mc.player.lastTickPosY, chunk.z) < mc.gameSettings.renderDistanceChunks * 15) {
-					for (int x = -10; x < 10; x++) {
-						for (int z = -10; z < 10; z++) {
-							BlockPos blockPos = new BlockPos(chunk.x + x, 0, chunk.z + z);
-
-							GL11.glColor4f(0, 1, 0, 0.5F);
-							GL11.glBegin(GL11.GL_QUADS);
-							RenderUtils.drawSolidBox(BlockUtils.getBoundingBox(blockPos));
-							GL11.glEnd();
-						}
+				GL11.glColor4f(0, 1, 0, 0.5F);
+				GL11.glBegin(GL11.GL_QUADS);
+				for (int x = -5; x < 5; x++) {
+					for (int z = -5; z < 5; z++) {
+						RenderUtils.drawSolidBox(BlockUtils.getBoundingBox(new BlockPos(chunk.x + x, 0, chunk.z + z)));
 					}
-				} else {
-					chunkArrayList.remove(chunk);
 				}
+				GL11.glEnd();
 			}
 		}
+
 
 		GL11.glPopMatrix();
 

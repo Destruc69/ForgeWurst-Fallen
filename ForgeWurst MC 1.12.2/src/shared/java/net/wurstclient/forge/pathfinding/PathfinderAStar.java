@@ -11,12 +11,11 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.wurstclient.forge.clickgui.Radar;
 import net.wurstclient.forge.hacks.pathing.PathfinderModule;
+import net.wurstclient.forge.utils.BlockUtils;
 import net.wurstclient.forge.utils.RenderUtils;
 import org.lwjgl.opengl.GL11;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.*;
 
 public class PathfinderAStar {
     private BlockPos startVec3;
@@ -279,6 +278,11 @@ public class PathfinderAStar {
             GL11.glEnd();
         }
 
+        GL11.glColor4f(pathRed, pathGreen, pathBlue, 1F);
+        GL11.glBegin(GL11.GL_LINE);
+        RenderUtils.drawNode(BlockUtils.getBoundingBox(blockPosArrayList.get(blockPosArrayList.size() - 1)));
+        GL11.glEnd();
+
         GL11.glPopMatrix();
 
         // GL resets
@@ -425,31 +429,40 @@ public class PathfinderAStar {
         return nextBlock;
     }
 
-    // Given a block type, find the nearest reachable block position of that type
     public static BlockPos findNearestReachableBlock(Block targetBlock) {
-        Minecraft mc = Minecraft.getMinecraft();
-        Vec3d playerPos = mc.player.getPositionVector();
-        double closestDistance = Double.MAX_VALUE;
-        BlockPos closestBlockPos = null;
+        EntityPlayer entityPlayer = mc.player;
+        int maxRadius = mc.gameSettings.renderDistanceChunks * 15; // Set the maximum search radius
+        BlockPos playerPos = entityPlayer.getPosition();
+        Queue<BlockPos> queue = new ArrayDeque<>();
+        boolean[][][] visited = new boolean[maxRadius * 2 + 1][256][maxRadius * 2 + 1];
 
-        int a = mc.gameSettings.renderDistanceChunks * 15;
-        for (int x = -a; x <= a; x++) {
-            for (int y = 0; y <= 256; y++) {
-                for (int z = -a; z <= a; z++) {
-                    BlockPos currentPos = new BlockPos(playerPos.x + x, y, playerPos.z + z);
-                    if (mc.world.getBlockState(currentPos).getBlock() == targetBlock) {
-                        double distance = playerPos.distanceTo(new Vec3d(new BlockPos(currentPos.getX(), currentPos.getY(), currentPos.getZ()).getX(), new BlockPos(currentPos.getX(), currentPos.getY(), currentPos.getZ()).getY(), new BlockPos(currentPos.getX(), currentPos.getY(), currentPos.getZ()).getZ()));
+        queue.add(playerPos);
 
-                        if (distance < closestDistance && isBlockReachable(currentPos, mc.player)) {
-                            closestDistance = distance;
-                            closestBlockPos = currentPos;
+        while (!queue.isEmpty()) {
+            BlockPos currentPos = queue.poll();
+
+            if (ibra(currentPos, entityPlayer) && mc.world.getBlockState(currentPos).getBlock().equals(targetBlock)) {
+                return currentPos; // Return the position if a matching block is found and it's reachable.
+            }
+
+            for (int x = -1; x <= 1; x++) {
+                for (int y = -1; y <= 1; y++) {
+                    for (int z = -1; z <= 1; z++) {
+                        BlockPos neighborPos = currentPos.add(x, y, z);
+
+                        if (Math.abs(neighborPos.getX() - playerPos.getX()) <= maxRadius &&
+                                neighborPos.getY() >= 0 && neighborPos.getY() <= 255 &&
+                                Math.abs(neighborPos.getZ() - playerPos.getZ()) <= maxRadius &&
+                                !visited[neighborPos.getX() - playerPos.getX() + maxRadius][neighborPos.getY()][neighborPos.getZ() - playerPos.getZ() + maxRadius]) {
+                            queue.add(neighborPos);
+                            visited[neighborPos.getX() - playerPos.getX() + maxRadius][neighborPos.getY()][neighborPos.getZ() - playerPos.getZ() + maxRadius] = true;
                         }
                     }
                 }
             }
         }
 
-        return closestBlockPos;
+        return null; // Return null if no matching block is found within the search radius.
     }
 
     // Check if a block is reachable (assuming no block needs to be mined)
@@ -457,6 +470,15 @@ public class PathfinderAStar {
         PathfinderAStar pathfinderAStar;
         pathfinderAStar = new PathfinderAStar(entityPlayer.getPosition(), blockPos, air);
         pathfinderAStar.compute();
+        return pathfinderAStar.getPath().size() > 0;
+    }
+
+
+    // Check if a block is reachable (assuming no block needs to be mined)
+    private static boolean ibra(BlockPos blockPos, EntityPlayer entityPlayer) {
+        PathfinderAStar pathfinderAStar;
+        pathfinderAStar = new PathfinderAStar(entityPlayer.getPosition(), blockPos, air);
+        pathfinderAStar.compute(1, 1); // Its so resource intensive we must use 1 loop 1 depth.
         return pathfinderAStar.getPath().size() > 0;
     }
 

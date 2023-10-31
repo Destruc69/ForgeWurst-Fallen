@@ -1,10 +1,3 @@
-/*
- * Copyright (C) 2017 - 2019 | Wurst-Imperium | All rights reserved.
- *
- * This source code is subject to the terms of the GNU General Public
- * License, version 3. If a copy of the GPL was not distributed with this
- * file, You can obtain one at: https://www.gnu.org/licenses/gpl-3.0.txt
- */
 package net.wurstclient.forge.hacks.pathing;
 
 import net.minecraft.block.Block;
@@ -126,10 +119,10 @@ public final class AutoMine extends Hack {
 							if (mc.player.ticksExisted % 20 == 0) {
 								pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), targPos, false);
 								pathfinderAStar.compute();
-								blockPosArrayList = pathfinderAStar.getPath();
+								path = pathfinderAStar.getPath();
 							}
 
-							double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, 0.2);
+							double[] toMove = PathfinderAStar.calculateMotion(path, mc.player.rotationYaw, 0.2);
 							mc.player.motionX = toMove[0];
 							mc.player.motionZ = toMove[1];
 
@@ -144,7 +137,7 @@ public final class AutoMine extends Hack {
 						mc.playerController.onPlayerDamageBlock(targPos, EnumFacing.DOWN);
 						mc.player.swingArm(EnumHand.MAIN_HAND);
 
-						double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, Math.toRadians(mc.player.rotationYaw), 0.2);
+						double[] toMove = PathfinderAStar.calculateMotion(path, Math.toRadians(mc.player.rotationYaw), 0.2);
 						mc.player.motionX = toMove[0];
 						mc.player.motionZ = toMove[1];
 
