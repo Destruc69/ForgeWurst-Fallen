@@ -94,7 +94,7 @@ public final class AutoPilot extends Hack {
 					mc.player.motionX = toMove[0];
 					mc.player.motionZ = toMove[1];
 
-					KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY() > mc.player.lastTickPosY && mc.player.onGround || mc.player.isInWater());
+					jump(PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY() > mc.player.lastTickPosY && mc.player.onGround || mc.player.isInWater());
 				}
 			} else {
 				if (!PathfinderAStar.isOnPath(blockPosArrayList) || a || mc.player.getDistance(blockPosArrayList.get(0).getX(), mc.player.posY, blockPosArrayList.get(0).getZ()) >= mc.gameSettings.renderDistanceChunks * 14 || mc.player.getDistance(blockPosArrayList.get(blockPosArrayList.size() - 1).getX(), mc.player.lastTickPosY, blockPosArrayList.get(blockPosArrayList.size() - 1).getZ()) <= 1) {
@@ -186,6 +186,16 @@ public final class AutoPilot extends Hack {
 	public void onRender(RenderWorldLastEvent event) {
 		if (!blockPosArrayList.isEmpty()) {
 			PathfinderAStar.render(blockPosArrayList, PathfinderModule.lineWidth.getValueI(), PathfinderModule.pathRed.getValueI(), PathfinderModule.pathGreen.getValueF(), PathfinderModule.pathBlue.getValueF());
+		}
+	}
+
+	private void jump(boolean u) {
+		if (u) {
+			if (mc.player.onGround) {
+				mc.player.jump();
+			} else if (mc.player.isInWater()) {
+				mc.player.motionY = 0.02;
+			}
 		}
 	}
 }

@@ -1,7 +1,12 @@
 package net.wurstclient.forge.hacks.render;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.entity.MoverType;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.play.client.CPacketPlayer;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -9,37 +14,39 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.*;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.settings.CheckboxSetting;
+import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.settings.SliderSetting;
 
 public final class FreeCam extends Hack {
 
-	private Vec3d playerPosSave;
+	private final EnumSetting<Mode> mode =
+			new EnumSetting<>("Mode", Mode.values(), Mode.NORMAL);
 
 	private final SliderSetting speed =
 			new SliderSetting("Speed", 1, 0.05, 10, 0.05, SliderSetting.ValueDisplay.DECIMAL);
 
-	private final CheckboxSetting teleport =
-			new CheckboxSetting("Teleport", "Teleports you to where you disabled the module.",
-					false);
+	private EntityPlayer entityOtherPlayerMP;
+
+	private Vec3d playerPosSave;
 
 	public FreeCam() {
 		super("FreeCam", "Go outside of your body.");
 		setCategory(Category.RENDER);
 		addSetting(speed);
-		addSetting(teleport);
-	}
-
-	@Override
-	public String getRenderName()
-	{
-		return getName() + " [" + speed.getValueString() + "]";
+		addSetting(mode);
 	}
 
 	@Override
 	public void onEnable() {
 		MinecraftForge.EVENT_BUS.register(this);
-		if (!teleport.isChecked()) {
+
+		if (mode.getSelected() == Mode.CAMERA) {
+			entityOtherPlayerMP = new EntityOtherPlayerMP(mc.world, mc.getSession().getProfile());
+			//mc.world.addEntityToWorld(-100, entityOtherPlayerMP);
+			mc.world.spawnEntity(entityOtherPlayerMP);
+			entityOtherPlayerMP.copyLocationAndAnglesFrom(mc.player);
+			mc.setRenderViewEntity(entityOtherPlayerMP);
+		} else {
 			playerPosSave = new Vec3d(mc.player.lastTickPosX, mc.player.lastTickPosY, mc.player.lastTickPosZ);
 		}
 	}
@@ -47,25 +54,71 @@ public final class FreeCam extends Hack {
 	@Override
 	public void onDisable() {
 		MinecraftForge.EVENT_BUS.unregister(this);
-		if (!teleport.isChecked()) {
+
+		if (mode.getSelected() == Mode.CAMERA) {
+			mc.setRenderViewEntity(mc.player);
+			mc.world.removeEntity(entityOtherPlayerMP);
+		} else {
 			mc.player.setPosition(playerPosSave.x, playerPosSave.y, playerPosSave.z);
 		}
 	}
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		EntityPlayerSP player = event.getPlayer();
+		if (mode.getSelected() == Mode.CAMERA) {
+			if (Minecraft.getMinecraft().gameSettings.keyBindForward.isKeyDown() ||
+					Minecraft.getMinecraft().gameSettings.keyBindRight.isKeyDown() ||
+					Minecraft.getMinecraft().gameSettings.keyBindBack.isKeyDown() ||
+					Minecraft.getMinecraft().gameSettings.keyBindLeft.isKeyDown()) {
+				entityOtherPlayerMP.motionX = -MathHelper.sin(getDirection()) * speed.getValue();
+				entityOtherPlayerMP.motionZ = MathHelper.cos(getDirection()) * speed.getValue();
+			} else {
+				entityOtherPlayerMP.motionX = 0;
+				entityOtherPlayerMP.motionZ = 0;
+			}
+			if (mc.gameSettings.keyBindJump.isKeyDown()) {
+				entityOtherPlayerMP.motionY = speed.getValue();
+			} else if (mc.gameSettings.keyBindSneak.isKeyDown()) {
+				entityOtherPlayerMP.motionY = -speed.getValue();
+			} else {
+				entityOtherPlayerMP.motionY = 0;
+			}
 
-		player.onGround = false;
-		player.motionX = 0;
-		player.motionY = 0;
-		player.motionZ = 0;
-		player.jumpMovementFactor = speed.getValueF();
+			entityOtherPlayerMP.noClip = true;
 
-		if (mc.gameSettings.keyBindJump.isKeyDown())
-			player.motionY += speed.getValue();
-		if (mc.gameSettings.keyBindSneak.isKeyDown())
-			player.motionY -= speed.getValue();
+			entityOtherPlayerMP.rotationYaw = mc.player.rotationYaw;
+			entityOtherPlayerMP.rotationPitch = mc.player.rotationPitch;
+
+			entityOtherPlayerMP.move(MoverType.SELF, entityOtherPlayerMP.motionX, entityOtherPlayerMP.motionY, entityOtherPlayerMP.motionZ);
+		} else {
+			EntityPlayerSP player = event.getPlayer();
+
+			player.onGround = false;
+			player.motionX = 0;
+			player.motionY = 0;
+			player.motionZ = 0;
+			player.jumpMovementFactor = speed.getValueF();
+
+			if (mc.gameSettings.keyBindJump.isKeyDown())
+				player.motionY += speed.getValue();
+			if (mc.gameSettings.keyBindSneak.isKeyDown())
+				player.motionY -= speed.getValue();
+		}
+	}
+
+	private float getDirection() {
+		float yaw = entityOtherPlayerMP.rotationYaw;
+		final float forward = mc.gameSettings.keyBindForward.isKeyDown() ? 1 : (mc.gameSettings.keyBindBack.isKeyDown() ? -1 : 0);
+		final float strafe = mc.gameSettings.keyBindLeft.isKeyDown() ? 1 : (mc.gameSettings.keyBindRight.isKeyDown() ? -1 : 0);;
+		yaw += ((forward < 0.0f) ? 180 : 0);
+		int i = (forward < 0.0f) ? -45 : ((forward == 0.0f) ? 90 : 45);
+		if (strafe < 0.0f) {
+			yaw += i;
+		}
+		if (strafe > 0.0f) {
+			yaw -= i;
+		}
+		return yaw * 0.017453292f;
 	}
 
 	@SubscribeEvent
@@ -73,28 +126,51 @@ public final class FreeCam extends Hack {
 		event.setCanceled(true);
 	}
 
+	private enum Mode {
+		CAMERA("Camera"),
+		NORMAL("Normal");
+
+		private final String name;
+
+		private Mode(String name) {
+			this.name = name;
+		}
+
+		public String toString() {
+			return name;
+		}
+	}
+
 	@SubscribeEvent
 	public void onPlayerMove(WPlayerMoveEvent event) {
-		event.getPlayer().noClip = true;
+		if (mode.getSelected() == Mode.NORMAL) {
+			event.getPlayer().noClip = true;
+		}
 	}
 
 	@SubscribeEvent
 	public void onIsNormalCube(WIsNormalCubeEvent event) {
-		event.setCanceled(true);
+		if (mode.getSelected() == Mode.NORMAL) {
+			event.setCanceled(true);
+		}
 	}
 
 	@SubscribeEvent
 	public void onSetOpaqueCube(WSetOpaqueCubeEvent event) {
-		event.setCanceled(true);
+		if (mode.getSelected() == Mode.NORMAL) {
+			event.setCanceled(true);
+		}
 	}
 
 	@SubscribeEvent
 	public void onPacketOut(WPacketOutputEvent event) {
-		try {
-			if (event.getPacket() instanceof CPacketPlayer || event.getPacket() instanceof CPacketPlayer.Position || event.getPacket() instanceof CPacketPlayer.Rotation || event.getPacket() instanceof CPacketPlayer.PositionRotation) {
-				event.setCanceled(true);
+		if (mode.getSelected() == Mode.NORMAL) {
+			try {
+				if (event.getPacket() instanceof CPacketPlayer || event.getPacket() instanceof CPacketPlayer.Position || event.getPacket() instanceof CPacketPlayer.Rotation || event.getPacket() instanceof CPacketPlayer.PositionRotation) {
+					event.setCanceled(true);
+				}
+			} catch (Exception ignored) {
 			}
-		} catch (Exception ignored) {
 		}
 	}
 }

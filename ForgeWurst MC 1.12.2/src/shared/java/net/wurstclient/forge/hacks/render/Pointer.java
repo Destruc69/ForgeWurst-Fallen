@@ -18,7 +18,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.hacks.pathing.AutoPilot;
 import net.wurstclient.forge.pathfinding.PathfinderAStar;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.SliderSetting;
@@ -27,27 +26,21 @@ import org.lwjgl.opengl.GL11;
 
 public final class Pointer extends Hack {
 
-    private final SliderSetting x =
+    public static final SliderSetting x =
             new SliderSetting("X", 0, -32000000, 32000000, 1, SliderSetting.ValueDisplay.INTEGER);
 
-    private final SliderSetting z =
+    public static final SliderSetting z =
             new SliderSetting("Z", 0, -32000000, 32000000, 1, SliderSetting.ValueDisplay.INTEGER);
 
     private final CheckboxSetting setToCurrentPos =
             new CheckboxSetting("SetToCurrentPos", "Sets the X and Z slider to the players current coordinate.",
                     false);
-
-    private final CheckboxSetting syncCoordinatesWithAutoPilot =
-            new CheckboxSetting("SyncCoordinatesWithAutoPilot", "Syncs the coordinate settings with the autopilot coordinate settings.",
-                    false);
-
     public Pointer() {
         super("Pointer", "Lets you save temporary points.");
         setCategory(Category.RENDER);
         addSetting(x);
         addSetting(z);
         addSetting(setToCurrentPos);
-        addSetting(syncCoordinatesWithAutoPilot);
     }
 
     @Override
@@ -66,11 +59,6 @@ public final class Pointer extends Hack {
             x.setValue(mc.player.lastTickPosX);
             z.setValue(mc.player.lastTickPosZ);
             setToCurrentPos.setChecked(false);
-        }
-        if (syncCoordinatesWithAutoPilot.isChecked()) {
-            x.setValue(AutoPilot.x.getValue());
-            z.setValue(AutoPilot.z.getValue());
-            syncCoordinatesWithAutoPilot.setChecked(false);
         }
     }
 

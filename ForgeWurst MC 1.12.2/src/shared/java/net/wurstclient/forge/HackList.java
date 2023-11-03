@@ -33,6 +33,7 @@ public final class HackList extends WHackList
 	public final NoFall noFall = register(new NoFall());
 	public final Speed speed = register(new Speed());
 	public final Step step = register(new Step());
+	public final AntiForge antiForge = register(new AntiForge());
 	public final AutoClutch autoClutch = register(new AutoClutch());
 	public final Arson arson = register(new Arson());
 	public final AutoTNT autoTNT = register(new AutoTNT());
@@ -64,7 +65,6 @@ public final class HackList extends WHackList
 	public final Nuker nuker = register(new Nuker());
 	public final Test test = register(new Test());
 	public final FriendsModule friendsModule = register(new FriendsModule());
-	public final SinglePlayerFunner singlePlayerFunner = register(new SinglePlayerFunner());
 	public final IllegalSlot illegalSlot = register(new IllegalSlot());
 	public final NoRender noRender = register(new NoRender());
 	public final NewChunks newChunks = register(new NewChunks());

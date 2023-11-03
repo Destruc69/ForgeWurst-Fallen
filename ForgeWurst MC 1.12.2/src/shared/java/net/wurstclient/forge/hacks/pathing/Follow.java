@@ -70,12 +70,10 @@ public final class Follow extends Hack {
 
 				PathfinderAStar pathfinderAStar;
 
-				if (!PathfinderAStar.isOnPath(blockPosArrayList) || blockPosArrayList.size() == 0 || PathfinderAStar.isEntityMoving(closestEntity)) {
-					if (mc.player.ticksExisted % 60 == 0) {
-						pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), closestEntity.getPosition(), false);
-						pathfinderAStar.compute();
-						blockPosArrayList = pathfinderAStar.getPath();
-					}
+				if (!PathfinderAStar.isOnPath(blockPosArrayList) || blockPosArrayList.isEmpty() || PathfinderAStar.isEntityMoving(closestEntity)) {
+					pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), closestEntity.getPosition(), false);
+					pathfinderAStar.compute();
+					blockPosArrayList = pathfinderAStar.getPath();
 				}
 
 				if (PathfinderModule.isAuto()) {
@@ -87,11 +85,11 @@ public final class Follow extends Hack {
 
 						 */
 
-						double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, 0.2);
+						double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, mc.player.isSprinting() ? 0.26 : 0.2);
 						mc.player.motionX = toMove[0];
 						mc.player.motionZ = toMove[1];
 
-						KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, mc.player.onGround && mc.player.collidedHorizontally || mc.player.isInWater() && !mc.player.collidedHorizontally);
+						KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY() > mc.player.lastTickPosY && mc.player.onGround || mc.player.isInWater());
 					} else {
 						//LandPathUtils.resetMovements();
 					}
@@ -105,7 +103,7 @@ public final class Follow extends Hack {
 	public void onRender(RenderWorldLastEvent event) {
 		try {
 			if (blockPosArrayList.size() > 0) {
-				PathfinderAStar.render((ArrayList<BlockPos>) blockPosArrayList, 1, PathfinderModule.pathRed.getValueI(), PathfinderModule.pathGreen.getValueF(), PathfinderModule.pathBlue.getValueF());
+				PathfinderAStar.render((ArrayList<BlockPos>) blockPosArrayList, PathfinderModule.lineWidth.getValueI(), PathfinderModule.pathRed.getValueI(), PathfinderModule.pathGreen.getValueF(), PathfinderModule.pathBlue.getValueF());
 			}
 		} catch (Exception ignored) {
 		}

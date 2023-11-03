@@ -47,6 +47,8 @@ public final class AutoMine extends Hack {
 		posB = new BlockPos(0, 0, 0);
 		save = 0;
 
+		a = false;
+
 		try {
 			ChatUtils.message("[AutoMine] Right click Pos A and B.");
 		} catch (Exception ignored) {
@@ -60,11 +62,14 @@ public final class AutoMine extends Hack {
 
 	private ArrayList<BlockPos> path;
 
+	private boolean a;
+
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
 		BlockPos blockPos = mc.objectMouseOver.getBlockPos();
 
 		if (!isStarted) {
+			 a = false;
 			if (mc.gameSettings.keyBindAttack.isKeyDown()) {
 				if (posA.getY() == 0 && posB.getY() == 0) {
 					KeyBindingUtils.setPressed(mc.gameSettings.keyBindAttack, false);
@@ -115,35 +120,28 @@ public final class AutoMine extends Hack {
 
 				if (targPos != null) {
 					if (mc.player.getDistance(targPos.getX(), targPos.getY(), targPos.getZ()) > 3) {
-						if (mc.player.onGround) {
-							if (mc.player.ticksExisted % 20 == 0) {
-								pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), targPos, false);
-								pathfinderAStar.compute();
-								path = pathfinderAStar.getPath();
-							}
+						if (!a || !PathfinderAStar.isOnPath(path)) {
+							a = true;
+							pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), targPos, false);
+							pathfinderAStar.compute();
+							path = pathfinderAStar.getPath();
+						}
 
+						if (!PathfinderAStar.isEntityMoving(mc.player) && !mc.playerController.getIsHittingBlock()) {
+							a = false;
+						}
+
+						if (mc.player.getDistance(PathfinderAStar.getTargetPositionInPathArray(path).getX(), PathfinderAStar.getTargetPositionInPathArray(path).getY(), PathfinderAStar.getTargetPositionInPathArray(path).getZ()) > 0.5) {
 							double[] toMove = PathfinderAStar.calculateMotion(path, mc.player.rotationYaw, 0.2);
 							mc.player.motionX = toMove[0];
 							mc.player.motionZ = toMove[1];
-
-							KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, mc.player.onGround && mc.player.collidedHorizontally || mc.player.isInWater() && !mc.player.collidedHorizontally);
-
-							KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, true);
-							KeyBindingUtils.setPressed(mc.gameSettings.keyBindSprint, true);
 						}
+
+						KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY() > mc.player.lastTickPosY && mc.player.onGround || mc.player.isInWater());
 					} else {
-						KeyBindingUtils.setPressed(mc.gameSettings.keyBindForward, false);
-						KeyBindingUtils.setPressed(mc.gameSettings.keyBindSprint, false);
 						mc.playerController.onPlayerDamageBlock(targPos, EnumFacing.DOWN);
 						mc.player.swingArm(EnumHand.MAIN_HAND);
-
-						double[] toMove = PathfinderAStar.calculateMotion(path, Math.toRadians(mc.player.rotationYaw), 0.2);
-						mc.player.motionX = toMove[0];
-						mc.player.motionZ = toMove[1];
-
-						if (mc.player.onGround && mc.player.collidedHorizontally || mc.player.isInWater() && !mc.player.collidedHorizontally) {
-							mc.player.jump();
-						}
+						a = false;
 					}
 				}
 			} catch (Exception ignored) {

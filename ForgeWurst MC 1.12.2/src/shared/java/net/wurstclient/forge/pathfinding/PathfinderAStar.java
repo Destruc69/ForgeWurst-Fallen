@@ -449,7 +449,6 @@ public class PathfinderAStar {
                 for (int y = -1; y <= 1; y++) {
                     for (int z = -1; z <= 1; z++) {
                         BlockPos neighborPos = currentPos.add(x, y, z);
-
                         if (Math.abs(neighborPos.getX() - playerPos.getX()) <= maxRadius &&
                                 neighborPos.getY() >= 0 && neighborPos.getY() <= 255 &&
                                 Math.abs(neighborPos.getZ() - playerPos.getZ()) <= maxRadius &&
