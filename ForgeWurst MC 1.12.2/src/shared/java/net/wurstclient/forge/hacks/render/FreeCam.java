@@ -14,6 +14,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.*;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
+import net.wurstclient.forge.compatibility.WVec3d;
 import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.settings.SliderSetting;
 
@@ -172,5 +173,22 @@ public final class FreeCam extends Hack {
 			} catch (Exception ignored) {
 			}
 		}
+	}
+
+	private float[] getNeededRotations(Vec3d vec)
+	{
+		Vec3d eyesPos = new Vec3d(entityOtherPlayerMP.lastTickPosX, entityOtherPlayerMP.lastTickPosY + entityOtherPlayerMP.eyeHeight, entityOtherPlayerMP.lastTickPosZ);
+
+		double diffX = WVec3d.getX(vec) - WVec3d.getX(eyesPos);
+		double diffY = WVec3d.getY(vec) - WVec3d.getY(eyesPos);
+		double diffZ = WVec3d.getZ(vec) - WVec3d.getZ(eyesPos);
+
+		double diffXZ = Math.sqrt(diffX * diffX + diffZ * diffZ);
+
+		float yaw = (float)Math.toDegrees(Math.atan2(diffZ, diffX)) - 90F;
+		float pitch = (float)-Math.toDegrees(Math.atan2(diffY, diffXZ));
+
+		return new float[]{MathHelper.wrapDegrees(yaw),
+				MathHelper.wrapDegrees(pitch)};
 	}
 }

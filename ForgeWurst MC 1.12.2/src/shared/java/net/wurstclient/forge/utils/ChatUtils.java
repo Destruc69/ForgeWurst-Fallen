@@ -35,7 +35,7 @@ public final class ChatUtils
 		component(new TextComponentString(message));
 
 		// Temporary Maybe
-		NotificationManager.addNotification(new Notification("[MESSAGE] " + message));
+		NotificationManager.addNotification(new Notification("\u00a7c[\u00a76MESSAGE\u00a7c]\u00a7r " + message));
 	}
 	
 	public static void warning(String message)
@@ -43,7 +43,7 @@ public final class ChatUtils
 		message("\u00a7c[\u00a76\u00a7lWARNING\u00a7c]\u00a7r " + message);
 
 		// Temporary Maybe
-		NotificationManager.addNotification(new Notification("[WARNING] " + message));
+		NotificationManager.addNotification(new Notification("\u00a7c[\u00a76WARNING\u00a7c]\u00a7r " + message));
 	}
 	
 	public static void error(String message)
@@ -51,6 +51,6 @@ public final class ChatUtils
 		message("\u00a7c[\u00a74\u00a7lERROR\u00a7c]\u00a7r " + message);
 
 		// Temporary Maybe
-		NotificationManager.addNotification(new Notification("[ERROR] " + message));
+		NotificationManager.addNotification(new Notification("\u00a7c[\u00a76ERROR\u00a7c]\u00a7r " + message));
 	}
 }

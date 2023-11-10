@@ -7,17 +7,10 @@
  */
 package net.wurstclient.forge.hacks.player;
 
-import net.minecraft.network.login.client.CPacketLoginStart;
-import net.minecraft.network.login.server.SPacketLoginSuccess;
-import net.minecraft.network.play.client.CPacketClientSettings;
-import net.minecraft.network.play.server.*;
-import net.minecraft.network.status.server.SPacketPong;
-import net.minecraft.network.status.server.SPacketServerInfo;
+import net.minecraft.network.play.server.SPacketCooldown;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.network.FMLNetworkEvent;
-import net.wurstclient.fmlevents.WPacketOutputEvent;
-import net.wurstclient.fmlevents.WUpdateEvent;
+import net.wurstclient.fmlevents.WPacketInputEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 
@@ -38,7 +31,7 @@ public final class AntiCooldown extends Hack {
 	}
 
 	@SubscribeEvent
-	public void onPacket(WPacketOutputEvent event) {
+	public void onPacket(WPacketInputEvent event) {
 		if (event.getPacket() instanceof SPacketCooldown) {
 			event.setCanceled(true);
 		}

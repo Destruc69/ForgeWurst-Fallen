@@ -292,7 +292,9 @@ public class PathfinderAStar {
         GL11.glDisable(GL11.GL_BLEND);
         GL11.glDisable(GL11.GL_LINE_SMOOTH);
 
-        Radar.HIGHLIGHTED_POSITIONS = blockPosArrayList;
+        if (blockPosArrayList.size() > 0) {
+            Radar.HIGHLIGHTED_POSITIONS = blockPosArrayList;
+        }
     }
 
     public static boolean isOnPath(ArrayList<BlockPos> blockPosArrayList) {

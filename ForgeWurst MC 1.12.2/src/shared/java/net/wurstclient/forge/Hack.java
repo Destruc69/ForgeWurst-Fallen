@@ -7,6 +7,10 @@
  */
 package net.wurstclient.forge;
 
+import net.minecraft.client.Minecraft;
+import net.wurstclient.forge.compatibility.WForgeRegistryEntry;
+import net.wurstclient.forge.settings.Setting;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -14,10 +18,6 @@ import java.lang.annotation.Target;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import net.minecraft.client.Minecraft;
-import net.wurstclient.forge.compatibility.WForgeRegistryEntry;
-import net.wurstclient.forge.settings.Setting;
 
 public abstract class Hack extends WForgeRegistryEntry<Hack>
 {
@@ -106,15 +106,15 @@ public abstract class Hack extends WForgeRegistryEntry<Hack>
 	{
 		return stateSaved;
 	}
-	
+
 	protected void onEnable()
 	{
-		
+
 	}
-	
+
 	protected void onDisable()
 	{
-		
+
 	}
 	
 	@Retention(RetentionPolicy.RUNTIME)

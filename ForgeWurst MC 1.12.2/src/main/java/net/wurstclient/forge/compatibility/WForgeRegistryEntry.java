@@ -12,5 +12,5 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 public class WForgeRegistryEntry<T extends IForgeRegistryEntry<T>>
 	extends IForgeRegistryEntry.Impl<T>
 {
-	
+
 }
