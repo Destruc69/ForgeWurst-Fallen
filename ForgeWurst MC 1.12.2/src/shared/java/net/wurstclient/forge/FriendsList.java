@@ -1,139 +1,94 @@
 package net.wurstclient.forge;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.JsonReader;
 import net.wurstclient.forge.utils.JsonUtils;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.TreeSet;
 
 public final class FriendsList {
     private final Path path;
-    private final ArrayList<Friend> friends = new ArrayList<>();
+    private final TreeSet<String> friends = new TreeSet<>();
 
-    public FriendsList(Path file)
-    {
-        path = file;
+    public FriendsList(Path path) {
+        this.path = path;
     }
 
-    public void init()
-    {
-        JsonObject json;
-        try(BufferedReader reader = Files.newBufferedReader(path))
-        {
-            json = JsonUtils.jsonParser.parse(reader).getAsJsonObject();
-
-        }catch(NoSuchFileException e)
-        {
-            loadDefaults();
-            return;
-
-        }catch(Exception e)
-        {
-            System.out.println("Failed to load " + path.getFileName());
-            e.printStackTrace();
-
-            loadDefaults();
-            return;
+    public void init() {
+        try {
+            try (JsonReader reader = new JsonReader(new FileReader(path.toFile()))) {
+                friends.clear();
+                for (JsonElement s : JsonUtils.jsonParser.parse(reader).getAsJsonArray()) {
+                    friends.add(s.getAsString());
+                }
+            } catch (IOException | JsonIOException | JsonSyntaxException e) {
+                e.printStackTrace();
+            }
+        } catch (Exception ignored) {
         }
-
-        friends.clear();
-
-        TreeMap<String, String> friendd = new TreeMap<>();
-        for(Map.Entry<String, JsonElement> entry : json.entrySet())
-        {
-            String name = entry.getKey().toUpperCase();
-            if(!entry.getValue().isJsonPrimitive()
-                    || !entry.getValue().getAsJsonPrimitive().isString())
-                continue;
-            String tag = entry.getValue().getAsString();
-
-            friendd.put(name, tag);
-        }
-
-        for(Map.Entry<String, String> entry : friendd.entrySet())
-            friends.add(new Friend(entry.getKey(), entry.getValue()));
 
         save();
     }
 
-    public void loadDefaults()
-    {
+    public void loadDefaults() {
         friends.clear();
+        // You can add default friends here if needed
         save();
     }
 
-    private void save()
-    {
-        JsonObject json = new JsonObject();
-        for(Friend friend : friends)
-            json.addProperty(friend.name, friend.tag);
-
-        try(BufferedWriter writer = Files.newBufferedWriter(path))
-        {
-            JsonUtils.prettyGson.toJson(json, writer);
-
-        }catch(IOException e)
-        {
+    private void save() {
+        try (BufferedWriter writer = Files.newBufferedWriter(path)) {
+            JsonUtils.prettyGson.toJson(createJson(), writer);
+        } catch (IOException e) {
             System.out.println("Failed to save " + path.getFileName());
             e.printStackTrace();
         }
     }
 
-    public int size()
-    {
+    private JsonArray createJson() {
+        JsonArray json = new JsonArray();
+        friends.forEach(json::add);
+        return json;
+    }
+
+    public int size() {
         return friends.size();
     }
 
-    public Friend get(int index)
-    {
-        return friends.get(index);
+    public String get(int index) {
+        // Converting TreeSet to an ArrayList for compatibility with the original structure
+        return new ArrayList<>(friends).get(index);
     }
 
-    public void add(String name, String tag)
-    {
-        friends.add(new Friend(name, tag));
+    public boolean contains(String name) {
+        return friends.contains(name);
+    }
+
+    public void add(String name) {
+        friends.add(name);
         save();
     }
 
-    public void remove(int index)
-    {
-        friends.remove(index);
+    public void remove(String name) {
+        friends.remove(name);
         save();
     }
 
-    public void removeAll()
-    {
+    public void removeAll() {
         friends.clear();
         save();
     }
 
-    public static class Friend
-    {
-        private final String name;
-        private final String tag;
-
-        public Friend(String name, String tag)
-        {
-            this.name = name;
-            this.tag = tag;
-        }
-
-        public String getName()
-        {
-            return name;
-        }
-
-        public String getTag()
-        {
-            return tag;
-        }
+    public TreeSet<String> getFriends() {
+        return friends;
     }
 }

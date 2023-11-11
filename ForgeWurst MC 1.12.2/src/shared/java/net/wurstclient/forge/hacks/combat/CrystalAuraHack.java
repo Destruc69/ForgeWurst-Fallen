@@ -197,6 +197,7 @@ public class CrystalAuraHack extends Hack {
 						.filter(e -> !e.isDead)
 						.filter(e -> e instanceof EntityLivingBase
 								&& ((EntityLivingBase) e).getHealth() > 0)
+						.filter(e -> e != mc.player)
 						.filter(e -> mc.player.getDistanceSq(e) <= rangeSq);
 
 		// Apply entity filters here if needed.

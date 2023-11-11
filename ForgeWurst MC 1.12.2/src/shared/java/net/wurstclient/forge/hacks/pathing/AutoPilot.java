@@ -119,21 +119,18 @@ public final class AutoPilot extends Hack {
 				if (PathfinderModule.isAuto()) {
 					if (mc.player.posY > PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY()) {
 						mc.player.motionY = -mc.player.getDistance(mc.player.posX, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY(), mc.player.posZ);
-
 						mc.player.motionX = 0;
 						mc.player.motionZ = 0;
 					} else if (mc.player.posY < PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY()) {
 						mc.player.motionY = mc.player.getDistance(mc.player.posX, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY(), mc.player.posZ);
-
 						mc.player.motionX = 0;
 						mc.player.motionZ = 0;
 					} else {
 						mc.player.motionY = 0;
-
-						double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, PathfinderModule.airPathfinderBaseSpeed.getValue());
-						mc.player.motionX = toMove[0];
-						mc.player.motionZ = toMove[1];
 					}
+					double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, PathfinderModule.airPathfinderBaseSpeed.getValue());
+					mc.player.motionX = toMove[0];
+					mc.player.motionZ = toMove[1];
 				}
 
 				if (PathfinderModule.isLookDontMove()) {
@@ -191,11 +188,10 @@ public final class AutoPilot extends Hack {
 							mc.player.motionZ = 0;
 						} else {
 							mc.player.motionY = 0;
-
-							double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, PathfinderModule.airPathfinderBaseSpeed.getValue());
-							mc.player.motionX = toMove[0];
-							mc.player.motionZ = toMove[1];
 						}
+						double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, PathfinderModule.airPathfinderBaseSpeed.getValue());
+						mc.player.motionX = toMove[0];
+						mc.player.motionZ = toMove[1];
 					}
 				}
 			}
