@@ -117,9 +117,13 @@ public final class Flight extends Hack
 				mc.player.motionY = 0;
 				MathUtils.setSpeed(baseSpeed.getValueF());
 				if (mc.player.ticksExisted % 2 == 0) {
-					mc.player.setPosition(mc.player.lastTickPosX, mc.player.lastTickPosY + 0.01, mc.player.lastTickPosZ);
+					for (int i = 0; i < 10000; i ++) {
+						mc.player.setPosition(mc.player.lastTickPosX, mc.player.lastTickPosY + 0.01, mc.player.lastTickPosZ);
+					}
 				} else {
-					mc.player.setPosition(mc.player.lastTickPosX, mc.player.lastTickPosY - 0.01, mc.player.lastTickPosZ);
+					for (int i = 0; i < 10000; i ++) {
+						mc.player.setPosition(mc.player.lastTickPosX, mc.player.lastTickPosY - 0.01, mc.player.lastTickPosZ);
+					}
 				}
 			} else if (mc.gameSettings.keyBindJump.isKeyDown()) {
 				mc.player.motionY = upSpeed.getValue();

@@ -11,7 +11,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.wurstclient.forge.clickgui.Radar;
 import net.wurstclient.forge.hacks.pathing.PathfinderModule;
-import net.wurstclient.forge.utils.BlockUtils;
 import net.wurstclient.forge.utils.RenderUtils;
 import org.lwjgl.opengl.GL11;
 
@@ -26,9 +25,9 @@ public class PathfinderAStar {
     private double minDistanceSquared = 9;
     private boolean nearest = true;
 
-    private static boolean air;
-
     private static final Minecraft mc = Minecraft.getMinecraft();
+
+    private static TYPE type;
 
     private static BlockPos[] flatCardinalDirections = {
             new BlockPos(1, 0, 0),
@@ -47,11 +46,11 @@ public class PathfinderAStar {
             new BlockPos(0, 1, -1),
     };
 
-    public PathfinderAStar(BlockPos startVec3, BlockPos endVec3, boolean air) {
+    public PathfinderAStar(BlockPos startVec3, BlockPos endVec3, TYPE typeEnum) {
         this.startVec3 = new BlockPos(MathHelper.floor(startVec3.getX()), MathHelper.floor(startVec3.getY()), MathHelper.floor(startVec3.getZ()));
         this.endVec3 = new BlockPos(MathHelper.floor(endVec3.getX()), MathHelper.floor(endVec3.getY()), MathHelper.floor(endVec3.getZ()));
 
-        this.air = air;
+        this.type = typeEnum;
     }
 
     public ArrayList<BlockPos> getPath() {
@@ -85,7 +84,7 @@ public class PathfinderAStar {
 
                     for (BlockPos direction : flatCardinalDirections) {
                         BlockPos loc = new BlockPos(MathHelper.floor(hub.getLoc().add(direction).getX()), MathHelper.floor(hub.getLoc().add(direction).getY()), MathHelper.floor(hub.getLoc().add(direction).getZ()));
-                        if (!air ? checkPositionValidity(loc, false) : checkPositionValidity(loc, true)) {
+                        if (!type.equals(TYPE.AIR) ? checkPositionValidity(loc, false) : checkPositionValidity(loc, true)) {
                             if (addHub(hub, loc, 0)) {
                                 break search;
                             }
@@ -93,14 +92,14 @@ public class PathfinderAStar {
                     }
 
                     BlockPos loc1 = new BlockPos(MathHelper.floor(hub.getLoc().add(0, 1, 0).getX()), MathHelper.floor(hub.getLoc().add(0, 1, 0).getY()), MathHelper.floor(hub.getLoc().add(0, 1, 0).getZ()));
-                    if (!air ? checkPositionValidity(loc1, false) : checkPositionValidity(loc1, true)) {
+                    if (!type.equals(TYPE.AIR) ? checkPositionValidity(loc1, false) : checkPositionValidity(loc1, true)) {
                         if (addHub(hub, loc1, 0)) {
                             break search;
                         }
                     }
 
                     BlockPos loc2 = new BlockPos(MathHelper.floor(hub.getLoc().add(0, -1, 0).getX()), MathHelper.floor(hub.getLoc().add(0, -1, 0).getY()), MathHelper.floor(hub.getLoc().add(0, -1, 0).getZ()));
-                    if (!air ? checkPositionValidity(loc2, false) : checkPositionValidity(loc2, true)) {
+                    if (!type.equals(TYPE.AIR) ? checkPositionValidity(loc2, false) : checkPositionValidity(loc2, true)) {
                         if (addHub(hub, loc2, 0)) {
                             break search;
                         }
@@ -122,11 +121,14 @@ public class PathfinderAStar {
         BlockPos block1 = new BlockPos(x, y, z);
         BlockPos block2 = new BlockPos(x, y + 1, z);
         BlockPos block3 = new BlockPos(x, y - 1, z);
-        if (air) {
+        if (type.equals(TYPE.AIR)) {
             return mc.world.getBlockState(block1).getBlock().equals(Blocks.AIR) && mc.world.getBlockState(block2).getBlock().equals(Blocks.AIR) && mc.world.getBlockState(block3).getBlock().equals(Blocks.AIR);
-        } else {
+        } else if (type.equals(TYPE.GROUND)) {
             return !isBlockSolid(block1) && !isBlockSolid(block2) && (isBlockSolid(block3) || !checkGround) && isSafeToWalkOn(block3);
+        } else if (type.equals(TYPE.ELYTRA)) {
+            return !isBlockSolid(block1) && !isBlockSolid(block2) && !isBlockSolid(block3) && isBlockAboveAir(block3.add(0, -2, 0));
         }
+        return false;
     }
 
     private static boolean isBlockSolid(BlockPos block) {
@@ -277,11 +279,6 @@ public class PathfinderAStar {
             RenderUtils.drawArrow(new Vec3d(blockPosArrayList.get(i).getX() + 0.5, blockPosArrayList.get(i).getY(), blockPosArrayList.get(i).getZ() + 0.5), new Vec3d(blockPosArrayList.get(i + 1).getX() + 0.5, blockPosArrayList.get(i + 1).getY(), blockPosArrayList.get(i + 1).getZ() + 0.5));
             GL11.glEnd();
         }
-
-        GL11.glColor4f(pathRed, pathGreen, pathBlue, 1F);
-        GL11.glBegin(GL11.GL_LINE);
-        RenderUtils.drawNode(BlockUtils.getBoundingBox(blockPosArrayList.get(blockPosArrayList.size() - 1)));
-        GL11.glEnd();
 
         GL11.glPopMatrix();
 
@@ -469,7 +466,7 @@ public class PathfinderAStar {
     // Check if a block is reachable (assuming no block needs to be mined)
     public static boolean isBlockReachable(BlockPos blockPos, EntityPlayer entityPlayer) {
         PathfinderAStar pathfinderAStar;
-        pathfinderAStar = new PathfinderAStar(entityPlayer.getPosition(), blockPos, air);
+        pathfinderAStar = new PathfinderAStar(entityPlayer.getPosition(), blockPos, type);
         pathfinderAStar.compute();
         return pathfinderAStar.getPath().size() > 0;
     }
@@ -478,7 +475,7 @@ public class PathfinderAStar {
     // Check if a block is reachable (assuming no block needs to be mined)
     private static boolean ibra(BlockPos blockPos, EntityPlayer entityPlayer) {
         PathfinderAStar pathfinderAStar;
-        pathfinderAStar = new PathfinderAStar(entityPlayer.getPosition(), blockPos, air);
+        pathfinderAStar = new PathfinderAStar(entityPlayer.getPosition(), blockPos, type);
         pathfinderAStar.compute(1, 1); // Its so resource intensive we must use 1 loop 1 depth.
         return pathfinderAStar.getPath().size() > 0;
     }
@@ -509,5 +506,11 @@ public class PathfinderAStar {
     private static boolean isBlockAboveAir(BlockPos pos) {
         Block block = mc.world.getBlockState(pos).getBlock();
         return block.equals(Blocks.AIR);
+    }
+
+    public static enum TYPE {
+        GROUND,
+        AIR,
+        ELYTRA;
     }
 }

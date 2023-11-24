@@ -122,7 +122,7 @@ public final class AutoMine extends Hack {
 					if (mc.player.getDistance(targPos.getX(), targPos.getY(), targPos.getZ()) > 3) {
 						if (!a || !PathfinderAStar.isOnPath(path)) {
 							a = true;
-							pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), targPos, false);
+							pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), targPos, PathfinderAStar.TYPE.GROUND);
 							pathfinderAStar.compute();
 							path = pathfinderAStar.getPath();
 						}

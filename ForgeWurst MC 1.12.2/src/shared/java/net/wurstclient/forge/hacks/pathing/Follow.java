@@ -71,7 +71,7 @@ public final class Follow extends Hack {
 				PathfinderAStar pathfinderAStar;
 
 				if (!PathfinderAStar.isOnPath(blockPosArrayList) || blockPosArrayList.isEmpty() || PathfinderAStar.isEntityMoving(closestEntity)) {
-					pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), closestEntity.getPosition(), false);
+					pathfinderAStar = new PathfinderAStar(mc.player.getPosition(), closestEntity.getPosition(), PathfinderAStar.TYPE.GROUND);
 					pathfinderAStar.compute();
 					blockPosArrayList = pathfinderAStar.getPath();
 				}
