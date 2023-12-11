@@ -58,6 +58,7 @@ public final class Flight extends Hack
 		MinecraftForge.EVENT_BUS.unregister(this);
 	}
 
+	private boolean a = true;
 	@SubscribeEvent
 	public void onUpdate(WUpdateEvent event) {
 		if (mode.getSelected() == Mode.NCP) {
@@ -116,14 +117,12 @@ public final class Flight extends Hack
 			if (!mc.gameSettings.keyBindJump.isKeyDown() && !mc.gameSettings.keyBindSneak.isKeyDown()) {
 				mc.player.motionY = 0;
 				MathUtils.setSpeed(baseSpeed.getValueF());
-				if (mc.player.ticksExisted % 2 == 0) {
-					for (int i = 0; i < 10000; i ++) {
-						mc.player.setPosition(mc.player.lastTickPosX, mc.player.lastTickPosY + 0.01, mc.player.lastTickPosZ);
-					}
+				if (a) {
+					mc.player.setPosition(mc.player.lastTickPosX, mc.player.lastTickPosY + 0.025, mc.player.lastTickPosZ);
+					a = false;
 				} else {
-					for (int i = 0; i < 10000; i ++) {
-						mc.player.setPosition(mc.player.lastTickPosX, mc.player.lastTickPosY - 0.01, mc.player.lastTickPosZ);
-					}
+					mc.player.setPosition(mc.player.lastTickPosX, mc.player.lastTickPosY - 0.025, mc.player.lastTickPosZ);
+					a = true;
 				}
 			} else if (mc.gameSettings.keyBindJump.isKeyDown()) {
 				mc.player.motionY = upSpeed.getValue();

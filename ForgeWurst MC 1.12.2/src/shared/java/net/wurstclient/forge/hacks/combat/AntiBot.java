@@ -8,7 +8,9 @@
 package net.wurstclient.forge.hacks.combat;
 
 import com.google.common.collect.Ordering;
+import com.mojang.authlib.GameProfile;
 import net.minecraft.client.gui.GuiPlayerTabOverlay;
+import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -25,6 +27,7 @@ import net.wurstclient.forge.utils.ChatUtils;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public final class AntiBot extends Hack {
@@ -129,9 +132,30 @@ public final class AntiBot extends Hack {
 								}
 							}
 							if (tabCheck.isChecked()) {
-								if (!getTabPlayerList().contains(e.getName())) {
-									bots.add((EntityPlayer) e);
-									ChatUtils.message("[AB] We removed a bot:" + " " + e.getName());
+								EntityPlayer player = (EntityPlayer) e;
+								if (!getTabPlayerList().contains(player)) {
+									bots.add(player);
+									ChatUtils.message("[AB] We removed a bot: " + player.getName());
+								}
+
+								NetHandlerPlayClient netHandler = mc.getConnection();
+
+								if (netHandler != null) {
+									Collection<NetworkPlayerInfo> players = netHandler.getPlayerInfoMap();
+
+									for (NetworkPlayerInfo playerInfo : players) {
+										GameProfile gameProfile = playerInfo.getGameProfile();
+										if (gameProfile.getId().equals(e.getUniqueID())) {
+											// Found a matching player in the tab list
+											EntityPlayer p = mc.world.getPlayerEntityByUUID(e.getUniqueID());
+
+											if (p != null) {
+												bots.add(p);
+												ChatUtils.message("[AB] We removed a bot: " + p.getName());
+												break;  // Break out of the loop since you found a match
+											}
+										}
+									}
 								}
 							}
 						}

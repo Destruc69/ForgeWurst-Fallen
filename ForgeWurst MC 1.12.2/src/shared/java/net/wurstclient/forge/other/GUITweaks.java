@@ -138,6 +138,8 @@ public class GUITweaks {
             return "Its International Men's Day!";
         } else if (month == 1 && day == 26) {
             return "Happy Australia Day! Fallen is Australian Made.";
+        } else if (month == 2 && day == 9) {
+            return "Happy Birthday Alexander! Thank you for wurst.";
         } else {
             return "Upcoming events: " + getNearestEvent(month, day);
         }
@@ -157,9 +159,10 @@ public class GUITweaks {
         LocalDate christmasDay = LocalDate.of(LocalDate.now().getYear(), Month.DECEMBER, 25);
         LocalDate internationalMensDay = LocalDate.of(LocalDate.now().getYear(), Month.NOVEMBER, 19);
         LocalDate australiaDay = LocalDate.of(LocalDate.now().getYear(), Month.JANUARY, 26);
+        LocalDate alexandersBirthday = LocalDate.of(LocalDate.now().getYear(), Month.FEBRUARY, 9);
 
         LocalDate[] eventDates = {terryDavisBirth, terryDavisDeath, fallenEstablished, paulBirthday, rickMondyBirthday,
-                funnyBirthday, zamplexBirthday, newYearsDay, christmasDay, internationalMensDay, australiaDay};
+                funnyBirthday, zamplexBirthday, newYearsDay, christmasDay, internationalMensDay, australiaDay, alexandersBirthday};
 
         LocalDate nearestEventDate = null;
         long nearestEventDays = Long.MAX_VALUE;
@@ -194,6 +197,8 @@ public class GUITweaks {
                 return "International Men's Day" + " | " + internationalMensDay;
             } else if (nearestEventDate.equals(australiaDay)) {
                 return "Australia Day" + " | " + australiaDay;
+            } else if (nearestEventDate.equals(alexandersBirthday)) {
+                return "Alexanders Birthday" + " | " + alexandersBirthday;
             }
         }
 
