@@ -17,7 +17,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.utils.ChatUtils;
+import net.wurstclient.forge.utils.RotationUtils;
 
 public final class Surround extends Hack {
 
@@ -49,21 +49,33 @@ public final class Surround extends Hack {
 				mc.playerController.processRightClickBlock(mc.player, mc.world, bp1, EnumFacing.DOWN, new Vec3d(0.5, 0, 0.5), EnumHand.MAIN_HAND);
 				mc.player.swingArm(EnumHand.MAIN_HAND);
 			}
+			float[] rot = RotationUtils.getNeededRotations(new Vec3d(bp1.getX(), bp1.getY(), bp1.getZ()));
+			mc.player.rotationYaw = rot[0];
+			mc.player.rotationPitch = rot[1];
 		} else if (mc.world.getBlockState(bp2).getBlock().equals(Blocks.AIR)) {
 			if (mc.player.ticksExisted % 2 == 0) {
 				mc.playerController.processRightClickBlock(mc.player, mc.world, bp2, EnumFacing.DOWN, new Vec3d(0.5, 0, 0.5), EnumHand.MAIN_HAND);
 				mc.player.swingArm(EnumHand.MAIN_HAND);
 			}
+			float[] rot = RotationUtils.getNeededRotations(new Vec3d(bp2.getX(), bp2.getY(), bp2.getZ()));
+			mc.player.rotationYaw = rot[0];
+			mc.player.rotationPitch = rot[1];
 		} else if (mc.world.getBlockState(bp3).getBlock().equals(Blocks.AIR)) {
 			if (mc.player.ticksExisted % 2 == 0) {
 				mc.playerController.processRightClickBlock(mc.player, mc.world, bp3, EnumFacing.DOWN, new Vec3d(0.5, 0, 0.5), EnumHand.MAIN_HAND);
 				mc.player.swingArm(EnumHand.MAIN_HAND);
 			}
+			float[] rot = RotationUtils.getNeededRotations(new Vec3d(bp3.getX(), bp3.getY(), bp3.getZ()));
+			mc.player.rotationYaw = rot[0];
+			mc.player.rotationPitch = rot[1];
 		} else if (mc.world.getBlockState(bp4).getBlock().equals(Blocks.AIR)) {
 			if (mc.player.ticksExisted % 2 == 0) {
 				mc.playerController.processRightClickBlock(mc.player, mc.world, bp4, EnumFacing.DOWN, new Vec3d(0.5, 0, 0.5), EnumHand.MAIN_HAND);
 				mc.player.swingArm(EnumHand.MAIN_HAND);
 			}
+			float[] rot = RotationUtils.getNeededRotations(new Vec3d(bp4.getX(), bp4.getY(), bp4.getZ()));
+			mc.player.rotationYaw = rot[0];
+			mc.player.rotationPitch = rot[1];
 		} else {
 			setEnabled(false);
 		}

@@ -37,7 +37,7 @@ public final class InvMove extends Hack {
 
 	@SubscribeEvent
 	public void onInput(InputUpdateEvent event) {
-		if (!(mc.currentScreen instanceof GuiChat) && !(mc.currentScreen instanceof GuiEditSign)) {
+		if (!(mc.currentScreen instanceof GuiChat) && !(mc.currentScreen instanceof GuiEditSign) && mc.currentScreen != null) {
 			if (Keyboard.isKeyDown(mc.gameSettings.keyBindForward.getKeyCode())) {
 				event.getMovementInput().moveForward = 1;
 				event.getMovementInput().forwardKeyDown = true;

@@ -2,9 +2,9 @@ package net.wurstclient.forge.other.customs;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.clickgui.ClickGuiScreen;
-import org.lwjgl.opengl.GL11;
 
 public class ClickGUIButtonMainMenu extends GuiButton  {
 
@@ -21,7 +21,6 @@ public class ClickGUIButtonMainMenu extends GuiButton  {
 
         if (mouseX >= regionX && mouseX < regionX + regionWidth &&
                 mouseY >= regionY && mouseY < regionY + regionHeight) {
-            mc.renderGlobal.loadRenderers();
             mc.displayGuiScreen(new ClickGuiScreen(ForgeWurst.getForgeWurst().getGui()));
             return true;
         }

@@ -8,6 +8,7 @@
 package net.wurstclient.forge;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
@@ -150,8 +151,11 @@ public final class IngameHUD {
 					theColor = Color.YELLOW.getRGB();
 				}
 
-				WMinecraft.getFontRenderer().drawString(color, ClickGuiHack.arrayListX.getValueI(), y, (int) textColor, false);
+				if (ClickGuiHack.blockArrayList.isChecked()) {
+					drawBorderedRect(ClickGuiHack.arrayListX.getValueI() - 2, y - 2, mc.fontRenderer.getStringWidth(color) + 4, 12, 1);
+				}
 
+				WMinecraft.getFontRenderer().drawString(color, ClickGuiHack.arrayListX.getValueI(), y, (int) textColor, false);
 				y += 9;
 			}
 		}
@@ -161,5 +165,11 @@ public final class IngameHUD {
 			GL11.glEnable(GL11.GL_BLEND);
 		else
 			GL11.glDisable(GL11.GL_BLEND);
+	}
+
+	// Helper method to draw a bordered rectangle
+	private void drawBorderedRect(int x, int y, int width, int height, int borderWidth) {
+		//Gui.drawRect(x, y, x + width, y + height, boxColor);
+		Gui.drawRect(x - borderWidth, y - borderWidth, x + width + borderWidth, y + height + borderWidth, -1072689136);
 	}
 }

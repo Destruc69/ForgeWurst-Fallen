@@ -7,15 +7,10 @@
  */
 package net.wurstclient.forge.hacks.player;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.play.client.CPacketConfirmTeleport;
 import net.minecraft.network.play.client.CPacketConfirmTransaction;
-import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.network.play.client.CPacketKeepAlive;
-import net.minecraft.network.play.server.SPacketCustomPayload;
-import net.minecraft.network.play.server.SPacketKeepAlive;
+import net.minecraft.network.play.server.SPacketConfirmTransaction;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
-import net.minecraft.network.status.client.CPacketPing;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WPacketInputEvent;
@@ -26,34 +21,29 @@ import net.wurstclient.forge.settings.CheckboxSetting;
 
 public final class Disabler extends Hack {
 
-	private final CheckboxSetting pingSpoof =
-			new CheckboxSetting("PingSpoof",
+	private final CheckboxSetting cPacketKeepAlive =
+			new CheckboxSetting("CPacketKeepAlive",
 					true);
 
-	private final CheckboxSetting confirmPositions =
-			new CheckboxSetting("ConfirmPositions",
-					true);
-
-	private final CheckboxSetting declineTransactions =
-			new CheckboxSetting("DeclineTransactions",
-					true);
-
-	private final CheckboxSetting cancelAllCustomPayloads =
-			new CheckboxSetting("CancelAllCustomPayloads",
+	private final CheckboxSetting cPacketConfirmTransaction =
+			new CheckboxSetting("CPacketConfirmTransaction",
 					true);
 
 	private final CheckboxSetting antiFlag =
 			new CheckboxSetting("AntiFlag",
 					true);
 
+	private final CheckboxSetting sPacketConfirmTransaction =
+			new CheckboxSetting("SPacketConfirmTransaction",
+					true);
+
 	public Disabler() {
 		super("Disabler", "Bypass anti cheats.");
 		setCategory(Category.PLAYER);
-		addSetting(pingSpoof);
-		addSetting(confirmPositions);
-		addSetting(declineTransactions);
-		addSetting(cancelAllCustomPayloads);
+		addSetting(cPacketKeepAlive);
+		addSetting(cPacketConfirmTransaction);
 		addSetting(antiFlag);
+		addSetting(sPacketConfirmTransaction);
 	}
 
 	@Override
@@ -68,21 +58,16 @@ public final class Disabler extends Hack {
 
 	@SubscribeEvent
 	public void onPacketOut(WPacketOutputEvent event) {
-		if (declineTransactions.isChecked()) {
+		if (cPacketKeepAlive.isChecked()) {
+			if (event.getPacket() instanceof CPacketKeepAlive) {
+				mc.player.connection.sendPacket(new CPacketKeepAlive(Integer.MIN_VALUE + Math.round(Math.random() * 100)));
+				event.setCanceled(true);
+			}
+		}
+		if (cPacketConfirmTransaction.isChecked()) {
 			if (event.getPacket() instanceof CPacketConfirmTransaction) {
 				CPacketConfirmTransaction confirmTransaction = (CPacketConfirmTransaction) event.getPacket();
-				CPacketConfirmTransaction cPacketConfirmTransaction = new CPacketConfirmTransaction(confirmTransaction.getWindowId(), confirmTransaction.getUid(), false);
-				event.setPacket(cPacketConfirmTransaction);
-			}
-		}
-		if (pingSpoof.isChecked()) {
-			if (event.getPacket() instanceof CPacketPing) {
-				CPacketPing cPacketPing = new CPacketPing(0);
-				event.setPacket(cPacketPing);
-			}
-		}
-		if (cancelAllCustomPayloads.isChecked()) {
-			if (event.getPacket() instanceof CPacketCustomPayload) {
+				mc.player.connection.sendPacket(new CPacketConfirmTransaction(Integer.MAX_VALUE, confirmTransaction.getUid(), false));
 				event.setCanceled(true);
 			}
 		}
@@ -90,28 +75,18 @@ public final class Disabler extends Hack {
 
 	@SubscribeEvent
 	public void onPacketIn(WPacketInputEvent event) {
-		if (confirmPositions.isChecked()) {
-			if (event.getPacket() instanceof SPacketPlayerPosLook) {
-				SPacketPlayerPosLook sPacketPlayerPosLook = (SPacketPlayerPosLook) event.getPacket();
-				mc.player.connection.sendPacket(new CPacketConfirmTeleport(sPacketPlayerPosLook.getTeleportId()));
-			}
-		}
-		if (pingSpoof.isChecked()) {
-			if (event.getPacket() instanceof SPacketKeepAlive) {
-				SPacketKeepAlive sPacketKeepAlive = (SPacketKeepAlive) event.getPacket();
-				mc.player.connection.sendPacket(new CPacketKeepAlive(sPacketKeepAlive.getId() + Minecraft.getDebugFPS() / 2));
-				event.setCanceled(true);
-			}
-		}
 		if (antiFlag.isChecked()) {
 			if (event.getPacket() instanceof SPacketPlayerPosLook) {
 				SPacketPlayerPosLook sPacketPlayerPosLook = (SPacketPlayerPosLook) event.getPacket();
-				event.setPacket(new SPacketPlayerPosLook(sPacketPlayerPosLook.getX(), sPacketPlayerPosLook.getY() - 255, sPacketPlayerPosLook.getZ(), sPacketPlayerPosLook.getYaw(), sPacketPlayerPosLook.getPitch(), sPacketPlayerPosLook.getFlags(), sPacketPlayerPosLook.getTeleportId()));
+				event.setPacket(new SPacketPlayerPosLook(sPacketPlayerPosLook.getX(), sPacketPlayerPosLook.getY() - Integer.MAX_VALUE, sPacketPlayerPosLook.getZ(), sPacketPlayerPosLook.getYaw(), sPacketPlayerPosLook.getPitch(), sPacketPlayerPosLook.getFlags(), sPacketPlayerPosLook.getTeleportId()));
 			}
 		}
-		if (cancelAllCustomPayloads.isChecked()) {
-			if (event.getPacket() instanceof SPacketCustomPayload) {
-				event.setCanceled(true);
+		if (sPacketConfirmTransaction.isChecked()) {
+			if (event.getPacket() instanceof SPacketConfirmTransaction) {
+				SPacketConfirmTransaction sPacketConfirmTransaction = (SPacketConfirmTransaction) event.getPacket();
+				if (sPacketConfirmTransaction.getActionNumber() < 0) {
+					event.setCanceled(true);
+				}
 			}
 		}
 	}

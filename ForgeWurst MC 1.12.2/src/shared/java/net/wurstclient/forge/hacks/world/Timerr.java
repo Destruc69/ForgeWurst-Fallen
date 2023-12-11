@@ -7,19 +7,21 @@
  */
 package net.wurstclient.forge.hacks.world;
 
-import java.lang.reflect.Field;
-
+import net.minecraft.client.gui.GuiMainMenu;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
-import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
+import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.compatibility.WMinecraft;
-import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.settings.SliderSetting.ValueDisplay;
+
+import java.lang.reflect.Field;
 
 public final class Timerr extends Hack {
 	private final SliderSetting timerSpeed =
@@ -73,6 +75,30 @@ public final class Timerr extends Hack {
 		}catch(ReflectiveOperationException e)
 		{
 			throw new RuntimeException(e);
+		}
+	}
+
+	@SubscribeEvent
+	public void onGuiOpen(GuiOpenEvent event) {
+		if (event.getGui() instanceof GuiMainMenu) {
+			GuiMainMenu mainMenu = (GuiMainMenu) event.getGui();
+
+			// You may need to adjust these coordinates and dimensions based on your needs
+			int backgroundX = 0;
+			int backgroundY = 0;
+			int backgroundWidth = mainMenu.width;
+			int backgroundHeight = mainMenu.height;
+
+			mainMenu.drawModalRectWithCustomSizedTexture(
+					backgroundX, backgroundY, 0, 0, backgroundWidth, backgroundHeight, backgroundWidth, backgroundHeight);
+
+			// Draw the new background image
+			mainMenu.mc.getTextureManager().bindTexture(new ResourceLocation(ForgeWurst.MODID, "background.png"));
+			mainMenu.drawTexturedModalRect(
+					backgroundX, backgroundY, 0, 0, backgroundWidth, backgroundHeight);
+
+			// Cancel the default rendering to avoid overlapping backgrounds
+			event.setCanceled(true);
 		}
 	}
 }
