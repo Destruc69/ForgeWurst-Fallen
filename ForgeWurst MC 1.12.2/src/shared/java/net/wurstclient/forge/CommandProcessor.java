@@ -8,15 +8,15 @@
 package net.wurstclient.forge;
 
 
-import java.io.IOException;
-import java.util.Arrays;
-
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.fmlevents.WChatOutputEvent;
 import net.wurstclient.forge.Command.CmdException;
 import net.wurstclient.forge.hacks.ClickGuiHack;
 import net.wurstclient.forge.utils.ChatUtils;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 public final class CommandProcessor
 {
@@ -37,7 +37,6 @@ public final class CommandProcessor
 		} else {
 			if (!message.startsWith("-"))
 				return;
-
 		}
 		event.setCanceled(true);
 		Minecraft.getMinecraft().ingameGUI.getChatGUI()

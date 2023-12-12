@@ -46,6 +46,7 @@ public final class ForgeWurst
 	private KeybindList keybinds;
 	private ClickGui gui;
 	private FriendsList friends;
+	private NotePad notePad;
 
 	private GUITweaks guiTweaks;
 	private AutoJoin autoJoin;
@@ -91,6 +92,9 @@ public final class ForgeWurst
 
 		friends = new FriendsList(configFolder.resolve("friends.json"));
 		friends.init();
+
+		notePad = new NotePad(configFolder.resolve("notes.json"));
+		notePad.init();
 
 		hud = new IngameHUD(hax, gui);
 		MinecraftForge.EVENT_BUS.register(hud);
@@ -148,4 +152,6 @@ public final class ForgeWurst
 	public FriendsList getFriendsList() {
 		return friends;
 	}
+
+	public NotePad getNotePad(){return notePad;}
 }

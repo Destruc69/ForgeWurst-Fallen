@@ -97,7 +97,7 @@ public final class AutoPilot extends Hack {
 					mc.player.motionX = toMove[0];
 					mc.player.motionZ = toMove[1];
 
-					jump(PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY() > mc.player.lastTickPosY && mc.player.onGround || mc.player.isInWater());
+					jump(PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY() > mc.player.lastTickPosY && mc.player.onGround || (mc.player.isInWater() && !mc.player.collidedHorizontally) );
 				}
 			} else if (PathfinderModule.actionTypeEnumSetting.getSelected() == PathfinderModule.ActionType.AIR || PathfinderModule.actionTypeEnumSetting.getSelected() == PathfinderModule.ActionType.ELYTRA) {
 				if (PathfinderModule.actionTypeEnumSetting.getSelected() == PathfinderModule.ActionType.AIR) {
@@ -117,20 +117,28 @@ public final class AutoPilot extends Hack {
 				}
 
 				if (PathfinderModule.isAuto()) {
-					if (mc.player.posY > PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY()) {
-						mc.player.motionY = -mc.player.getDistance(mc.player.posX, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY(), mc.player.posZ);
-						mc.player.motionX = 0;
-						mc.player.motionZ = 0;
-					} else if (mc.player.posY < PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY()) {
-						mc.player.motionY = mc.player.getDistance(mc.player.posX, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY(), mc.player.posZ);
-						mc.player.motionX = 0;
-						mc.player.motionZ = 0;
-					} else {
-						mc.player.motionY = 0;
-					}
+					//if (mc.player.posY > PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY()) {
+					//	mc.player.motionY = -mc.player.getDistance(mc.player.posX, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY(), mc.player.posZ);
+					//	mc.player.motionX = 0;
+					//	mc.player.motionZ = 0;
+					//} else if (mc.player.posY < PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY()) {
+					//	mc.player.motionY = mc.player.getDistance(mc.player.posX, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY(), mc.player.posZ);
+					//	mc.player.motionX = 0;
+					//	mc.player.motionZ = 0;
+					//} else {
+					//	mc.player.motionY = 0;
+					//}
 					double[] toMove = PathfinderAStar.calculateMotion(blockPosArrayList, mc.player.rotationYaw, PathfinderModule.airPathfinderBaseSpeed.getValue());
 					mc.player.motionX = toMove[0];
 					mc.player.motionZ = toMove[1];
+
+					if (mc.player.lastTickPosY < PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY()) {
+						mc.player.motionY = mc.player.getDistance(mc.player.lastTickPosX, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY(), mc.player.lastTickPosZ);
+					} else if (mc.player.lastTickPosY > PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY()) {
+						mc.player.motionY = -mc.player.getDistance(mc.player.lastTickPosX, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY(), mc.player.lastTickPosZ);
+					} else {
+						mc.player.motionY = 0;
+					}
 				}
 			}
 		} else {

@@ -67,7 +67,6 @@ public final class Criticals extends Hack {
 					doCrits();
 				}
 			}
-
 		}
 	}
 

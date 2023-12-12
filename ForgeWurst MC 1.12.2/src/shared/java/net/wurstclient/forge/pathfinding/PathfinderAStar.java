@@ -350,53 +350,45 @@ public class PathfinderAStar {
     public static double[] calculateMotion(ArrayList<BlockPos> path, double rotationYaw, double speed) {
         double playerX = mc.player.posX;
         double playerZ = mc.player.posZ;
+        double velocityX = mc.player.motionX;
+        double velocityZ = mc.player.motionZ;
 
         rotationYaw = Math.toRadians(rotationYaw);
-
-        if (path.isEmpty()) {
-            return new double[]{0.0, 0.0};
-        }
 
         int closestBlockIndex = 0;
         double closestBlockDistance = Double.POSITIVE_INFINITY;
 
         for (int i = 0; i < path.size(); i++) {
-            double deltaX = path.get(i).getX() + 0.5 - playerX;
-            double deltaZ = path.get(i).getZ() + 0.5 - playerZ;
-
-            double distanceSquared = deltaX * deltaX + deltaZ * deltaZ;
-
-            if (distanceSquared < closestBlockDistance) {
-                closestBlockDistance = distanceSquared;
+            double distance = mc.player.getDistanceSq(path.get(i));
+            if (distance < closestBlockDistance) {
+                closestBlockDistance = distance;
                 closestBlockIndex = i;
             }
         }
 
+        BlockPos closestBlock = path.get(closestBlockIndex);
+
         // Ensure we don't exceed the array size when accessing nextBlock
-        int nextBlockIndex = Math.min(closestBlockIndex + 1, path.size() - 1);
-        BlockPos nextBlock = path.get(nextBlockIndex);
+        BlockPos nextBlock = (closestBlockIndex == path.size() - 1) ? closestBlock : path.get(closestBlockIndex + 1);
 
         // Adjust delta values based on player's velocity
-        double deltaX = nextBlock.getX() + 0.5 - playerX;
-        double deltaZ = nextBlock.getZ() + 0.5 - playerZ;
+
+        double deltaX = nextBlock.getX() + 0.5 - playerX + velocityX;
+        double deltaZ = nextBlock.getZ() + 0.5 - playerZ + velocityZ;
 
         // Calculate the target rotationYaw based on angle difference
         double targetAngle = Math.atan2(deltaZ, deltaX);
         double playerAngle = Math.toRadians(rotationYaw);
 
-        // The difference in angle
+        // Smoothly adjust the player's rotationYaw
         double angleDifference = targetAngle - playerAngle;
 
-        // Combine trigonometric functions
-        double cosValue = Math.cos(angleDifference);
-        double sinValue = Math.sin(angleDifference);
-
-        // Calculate the distance to the target position (using squared distance)
+        // Calculate the distance to the target position
         double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
 
-        // Calculate the motion components (motionX, motionY, and motionZ)
-        double motionX = cosValue * distance;
-        double motionZ = sinValue * distance;
+        // Calculate the motion components (motionX and motionZ)
+        double motionX = Math.cos(angleDifference) * distance;
+        double motionZ = Math.sin(angleDifference) * distance;
 
         // Apply motion limits based on speed
         double motionMagnitude = Math.sqrt(motionX * motionX + motionZ * motionZ);
@@ -406,6 +398,17 @@ public class PathfinderAStar {
         }
 
         return new double[]{motionX, motionZ};
+    }
+
+    // Helper function to normalize angles to [-pi, pi] range
+    private static double normalizeAngle(double angle) {
+        while (angle > Math.PI) {
+            angle -= 2 * Math.PI;
+        }
+        while (angle <= -Math.PI) {
+            angle += 2 * Math.PI;
+        }
+        return angle;
     }
 
     public static BlockPos getTargetPositionInPathArray(ArrayList<BlockPos> path) {
@@ -506,7 +509,7 @@ public class PathfinderAStar {
     }
 
     private static boolean isBlockAboveAir(BlockPos pos) {
-        Block block = mc.world.getBlockState(pos).getBlock();
+        Block block = mc.world.getBlockState(pos.add(0, 1, 0)).getBlock();
         return block.equals(Blocks.AIR);
     }
 

@@ -21,6 +21,7 @@ public final class CommandList extends WCommandList
 	public final FBotCMD fBotCMD = register(new FBotCMD());
 	public final HelpCmd helpCmd = register(new HelpCmd());
 	public final SayCmd sayCmd = register(new SayCmd());
+	public final NotePadCmd notePadCmd = register(new NotePadCmd());
 	public final SetCheckboxCmd setCheckboxCmd = register(new SetCheckboxCmd());
 	public final SetEnumCmd setEnumCmd = register(new SetEnumCmd());
 	public final SetSliderCmd setSliderCmd = register(new SetSliderCmd());

@@ -4,9 +4,11 @@ import net.minecraft.block.Block;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -104,7 +106,7 @@ public final class AutoMine extends Hack {
 
 				int percentage = (blockPosArrayList.size() * 100) / getAllBlocksBetween(posA, posB).size();
 				if (mc.isSingleplayer()) {
-					mc.ingameGUI.setOverlayMessage(blockPosArraySorted.size() + "/" + getAllBlocksBetween(posA, posB).size() + " | " + percentage + "%", true);
+					mc.ingameGUI.setOverlayMessage(blockPosArraySorted.size() + "/" + getAllBlocksBetween(posA, posB).size() + " | " + percentage + "%", false);
 				} else {
 					if (save != percentage) {
 						save = percentage;
@@ -137,10 +139,13 @@ public final class AutoMine extends Hack {
 							mc.player.motionZ = toMove[1];
 						}
 
-						KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY() > mc.player.lastTickPosY && mc.player.onGround || mc.player.isInWater());
+						KeyBindingUtils.setPressed(mc.gameSettings.keyBindJump, PathfinderAStar.getTargetPositionInPathArray(blockPosArrayList).getY() > mc.player.lastTickPosY);
 					} else {
 						mc.playerController.onPlayerDamageBlock(targPos, EnumFacing.DOWN);
 						mc.player.swingArm(EnumHand.MAIN_HAND);
+
+						float[] rot = RotationUtils.getNeededRotations(new Vec3d(targPos.add(0.5, 0.5, 0.5)));
+						mc.player.connection.sendPacket(new CPacketPlayer.Rotation(rot[0], rot[1], mc.player.onGround));
 						a = false;
 					}
 				}
