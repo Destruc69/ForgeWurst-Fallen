@@ -4,6 +4,10 @@ import net.wurstclient.forge.Command;
 import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.utils.ChatUtils;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 public class NotePadCmd extends Command {
 
     public NotePadCmd() {
@@ -47,13 +51,13 @@ public class NotePadCmd extends Command {
     }
 
     private void add(String[] args) throws CmdException {
-        if (args.length != 2) {
+        if (args.length < 2) {
             throw new CmdSyntaxError("Missing note text.");
         }
 
-        String note = args[1];
+        String note = obfuscate( String.join(" ", Arrays.copyOfRange(args, 1, args.length)) );
         ForgeWurst.getForgeWurst().getNotePad().add(note);
-        ChatUtils.message("Note added: " + note);
+        ChatUtils.message("Note added: " + decode( note ));
     }
 
     private void remove(String[] args) throws CmdException {
@@ -67,9 +71,9 @@ public class NotePadCmd extends Command {
                 throw new CmdSyntaxError("Invalid note index: " + index);
             }
 
-            String removedNote = ForgeWurst.getForgeWurst().getNotePad().get(index);
+            String removedNote = obfuscate( ForgeWurst.getForgeWurst().getNotePad().get(index - 1) );
             ForgeWurst.getForgeWurst().getNotePad().remove(removedNote);
-            ChatUtils.message("Note removed: " + removedNote);
+            ChatUtils.message("Note removed: " + decode( removedNote ));
         } catch (NumberFormatException e) {
             throw new CmdSyntaxError("Not a valid number: " + args[1]);
         }
@@ -97,7 +101,7 @@ public class NotePadCmd extends Command {
 
         ChatUtils.message("Notes: Page " + currentPage + " of " + totalPages);
         for (int i = (currentPage - 1) * notesPerPage; i < Math.min(currentPage * notesPerPage, ForgeWurst.getForgeWurst().getNotePad().size()); i++) {
-            ChatUtils.message(i + 1 + ". " + ForgeWurst.getForgeWurst().getNotePad().get(i));
+            ChatUtils.message(i + 1 + ". " + decode( ForgeWurst.getForgeWurst().getNotePad().get(i)) );
         }
     }
 
@@ -110,7 +114,7 @@ public class NotePadCmd extends Command {
                 throw new CmdSyntaxError("Invalid note index: " + index);
             }
 
-            String note = ForgeWurst.getForgeWurst().getNotePad().get(index - 1);
+            String note = decode( ForgeWurst.getForgeWurst().getNotePad().get(index - 1) );
             ChatUtils.message("Note " + index + ": " + note);
 
         } catch (NumberFormatException e) {
@@ -123,5 +127,61 @@ public class NotePadCmd extends Command {
                 throw new CmdSyntaxError("No note found with identifier: " + args[1]);
             }
         }
+    }
+
+    // Method to obfuscate the content of the notepad
+    private String obfuscate(String note) {
+        Map<Character, Character> substitutionMap = generateSubstitutionMap();
+        StringBuilder obfuscatedNote = new StringBuilder();
+
+        for (char character : note.toCharArray()) {
+            obfuscatedNote.append(substitutionMap.getOrDefault(character, character));
+        }
+
+        return obfuscatedNote.toString();
+    }
+
+    private String decode(String obfuscatedNote) {
+        Map<Character, Character> substitutionMap = generateSubstitutionMap();
+        StringBuilder decodedNote = new StringBuilder();
+
+        for (char character : obfuscatedNote.toCharArray()) {
+            if (character == ' ') {
+                // Handle spaces
+                decodedNote.append(' ');
+            } else {
+                // Handle other characters using the substitution map
+                boolean found = false;
+                for (Map.Entry<Character, Character> entry : substitutionMap.entrySet()) {
+                    if (entry.getValue() == character) {
+                        decodedNote.append(entry.getKey());
+                        found = true;
+                        break;
+                    }
+                }
+
+                // If the character is not found in the substitution map, append it as is
+                if (!found) {
+                    decodedNote.append(character);
+                }
+            }
+        }
+
+        return decodedNote.toString();
+    }
+
+    private Map<Character, Character> generateSubstitutionMap() {
+        Map<Character, Character> substitutionMap = new HashMap<>();
+
+        // Define pairs of characters
+        char[] originalChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
+        char[] substituteChars = "VD0oeBtPb6whKJRUnCqLNvzIGOAs8jZXkS4Q25H9racyxigmlufM3dYE7Wp1TF".toCharArray();
+
+        // Populate the substitution map
+        for (int i = 0; i < originalChars.length; i++) {
+            substitutionMap.put(originalChars[i], substituteChars[i]);
+        }
+
+        return substitutionMap;
     }
 }
