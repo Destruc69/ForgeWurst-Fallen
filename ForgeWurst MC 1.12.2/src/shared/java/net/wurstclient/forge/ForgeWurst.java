@@ -20,6 +20,7 @@ import net.wurstclient.forge.other.AutoJoin;
 import net.wurstclient.forge.other.GUITweaks;
 import net.wurstclient.forge.other.customs.notifications.NotificationManager;
 import net.wurstclient.forge.update.WurstUpdater;
+import net.wurstclient.forge.waypoints.Waypoints;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -47,6 +48,7 @@ public final class ForgeWurst
 	private ClickGui gui;
 	private FriendsList friends;
 	private NotePad notePad;
+	private Waypoints waypoints;
 
 	private GUITweaks guiTweaks;
 	private AutoJoin autoJoin;
@@ -95,6 +97,9 @@ public final class ForgeWurst
 
 		notePad = new NotePad(configFolder.resolve("notes.json"));
 		notePad.init();
+
+		waypoints = new Waypoints(configFolder.resolve("waypoints.json"));
+		waypoints.init();
 
 		hud = new IngameHUD(hax, gui);
 		MinecraftForge.EVENT_BUS.register(hud);

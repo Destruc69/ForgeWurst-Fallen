@@ -1,6 +1,9 @@
-package net.wurstclient.forge;
+package net.wurstclient.forge.waypoints;
 
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
 import net.wurstclient.forge.utils.JsonUtils;
 
@@ -12,21 +15,22 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.TreeSet;
 
-public class NotePad {
-
+public class Waypoints {
     private final Path path;
-    private final TreeSet<String> notes = new TreeSet<>();
+    private final TreeSet<Waypoint> vectors = new TreeSet<>();
 
-    public NotePad(Path path) {
+    public Waypoints(Path path) {
         this.path = path;
     }
 
     public void init() {
         try {
             try (JsonReader reader = new JsonReader(new FileReader(path.toFile()))) {
-                notes.clear();
-                for (JsonElement s : JsonUtils.jsonParser.parse(reader).getAsJsonArray()) {
-                    notes.add(s.getAsString());
+                vectors.clear();
+                for (JsonElement element : JsonUtils.jsonParser.parse(reader).getAsJsonArray()) {
+                    // Assuming Waypoint has appropriate methods for deserialization
+                    Waypoint vector = Waypoint.fromJsonElement(element);
+                    vectors.add(vector);
                 }
             } catch (IOException | JsonIOException | JsonSyntaxException e) {
                 e.printStackTrace();
@@ -38,8 +42,8 @@ public class NotePad {
     }
 
     public void loadDefaults() {
-        notes.clear();
-        // You can add default friends here if needed
+        vectors.clear();
+        // You can add default vectors here if needed
         save();
     }
 
@@ -54,39 +58,40 @@ public class NotePad {
 
     private JsonArray createJson() {
         JsonArray json = new JsonArray();
-        notes.forEach(json::add);
+        vectors.forEach(vector -> json.add(vector.toJsonElement()));
         return json;
     }
 
     public int size() {
-        return notes.size();
+        return vectors.size();
     }
 
-    public String get(int index) {
+    public Waypoint get(int index) {
         // Converting TreeSet to an ArrayList for compatibility with the original structure
-        return new ArrayList<>(notes).get(index);
+        return new ArrayList<>(vectors).get(index);
     }
 
-    public boolean contains(String str) {
-        return notes.contains(str);
+    public boolean contains(Waypoint vector) {
+        return vectors.contains(vector);
     }
 
-    public void add(String note) {
-        notes.add(note);
+    public void add(Waypoint vector) {
+        vectors.add(vector);
         save();
     }
 
-    public void remove(String note) {
-        notes.remove(note);
+    public void remove(Waypoint vector) {
+        vectors.remove(vector);
         save();
     }
 
     public void removeAll() {
-        notes.clear();
+        vectors.clear();
         save();
     }
 
-    public TreeSet<String> getNotes() {
-        return notes;
+    public TreeSet<Waypoint> getVectors() {
+        return vectors;
     }
 }
+
