@@ -19,6 +19,7 @@ import net.wurstclient.forge.Category;
 import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.pathfinding.PathfinderAStar;
+import net.wurstclient.forge.utils.ChatUtils;
 import net.wurstclient.forge.utils.RenderUtils;
 import net.wurstclient.forge.waypoints.Waypoint;
 import org.lwjgl.opengl.GL11;
@@ -29,13 +30,17 @@ import java.util.List;
 public final class WaypointsModule extends Hack {
 
     public WaypointsModule() {
-        super("Pointer", "Lets you save temporary points.");
+        super("Waypoints", "Lets you save locations, with handy line to guide you.");
         setCategory(Category.RENDER);
     }
 
     @Override
     protected void onEnable() {
         MinecraftForge.EVENT_BUS.register(this);
+
+        if (ForgeWurst.getForgeWurst().getWaypoints().getVectors().size() <= 0) {
+            ChatUtils.message("To add waypoints, use the .waypoints command.");
+        }
     }
 
     @Override

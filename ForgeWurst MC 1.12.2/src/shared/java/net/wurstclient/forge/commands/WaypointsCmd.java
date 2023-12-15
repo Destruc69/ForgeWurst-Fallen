@@ -15,7 +15,7 @@ public class WaypointsCmd extends Command {
     public WaypointsCmd() {
         super("waypoints", "Manages your waypoints.",
                 ".waypoints add <x> <z>",
-                ".waypoints remove <x> <z>",
+                ".waypoints remove <index>",
                 ".waypoints remove-all",
                 ".waypoints show-all");
     }
@@ -26,7 +26,7 @@ public class WaypointsCmd extends Command {
         }
 
         switch (args[0].toLowerCase()) {
-            case "show-all": // corrected case
+            case "show-all":
                 showAll(args);
                 break;
 
@@ -41,13 +41,14 @@ public class WaypointsCmd extends Command {
             case "remove-all":
                 removeAll(args);
                 break;
+
             default:
                 throw new CmdSyntaxError("Unknown subcommand: " + args[0]);
         }
     }
 
     private void add(String[] args) throws CmdException {
-        if (args.length < 3) {  // Corrected the condition
+        if (args.length < 3) {
             throw new CmdSyntaxError("Missing waypoint coordinates.");
         }
 
@@ -56,23 +57,24 @@ public class WaypointsCmd extends Command {
 
         Waypoint waypoint = new Waypoint(obfuscate(x), obfuscate(z));
         ForgeWurst.getForgeWurst().getWaypoints().add(waypoint);
-        ChatUtils.message("Waypoint added: " + decode(x) + " " + decode(z));
+        ChatUtils.message("Waypoint added: " + decode(obfuscate(x)) + " " + decode(obfuscate(z)));
     }
 
     private void showAll(String[] args) throws CmdException {
-        // Check if there are no waypoints
-        if (ForgeWurst.getForgeWurst().getWaypoints().size() <= 0) {  // Corrected the condition
+        List<Waypoint> waypoints = getVectors();
+
+        if (waypoints.isEmpty()) {
             ChatUtils.message("No waypoints available.");
             return;
         }
 
         int currentPage = 1;
         int waypointsPerPage = 10;
-        int totalPages = (int) Math.ceil((double) ForgeWurst.getForgeWurst().getWaypoints().size() / waypointsPerPage);
+        int totalPages = (int) Math.ceil((double) waypoints.size() / waypointsPerPage);
 
         ChatUtils.message("Waypoints: Page " + currentPage + " of " + totalPages);
-        for (int i = (currentPage - 1) * waypointsPerPage; i < Math.min(currentPage * waypointsPerPage, ForgeWurst.getForgeWurst().getWaypoints().size()); i++) {
-            ChatUtils.message(i + 1 + ". " + decode(ForgeWurst.getForgeWurst().getWaypoints().get(i).getX()) + " " + decode(ForgeWurst.getForgeWurst().getWaypoints().get(i).getZ()));
+        for (int i = (currentPage - 1) * waypointsPerPage; i < Math.min(currentPage * waypointsPerPage, waypoints.size()); i++) {
+            ChatUtils.message(i + 1 + ". " + decode(waypoints.get(i).getX()) + " " + decode(waypoints.get(i).getZ()));
         }
     }
 
@@ -83,26 +85,21 @@ public class WaypointsCmd extends Command {
 
         int index = Integer.parseInt(args[1]);
 
-        List<Waypoint> waypoints = getVectors();  // Removed the unnecessary method
-
-        if (index < 0 || index >= waypoints.size()) {
+        if (index < 0 || index >= ForgeWurst.getForgeWurst().getWaypoints().getVectors().size()) {
             throw new CmdSyntaxError("Invalid waypoint index.");
         }
 
-        Waypoint removedWaypoint = waypoints.get(index);
-        waypoints.remove(removedWaypoint);
+        Waypoint removedWaypoint = ForgeWurst.getForgeWurst().getWaypoints().get(index);
         ChatUtils.message("Waypoint removed: " + decode(removedWaypoint.getX()) + " " + decode(removedWaypoint.getZ()));
     }
 
     private void removeAll(String[] args) throws CmdException {
-        List<Waypoint> waypoints = getVectors();
-
-        if (waypoints.isEmpty()) {
+        if (ForgeWurst.getForgeWurst().getWaypoints().getVectors().isEmpty()) {
             ChatUtils.message("No waypoints to remove.");
             return;
         }
 
-        waypoints.clear();
+        ForgeWurst.getForgeWurst().getWaypoints().removeAll();
         ChatUtils.message("All waypoints removed.");
     }
 
