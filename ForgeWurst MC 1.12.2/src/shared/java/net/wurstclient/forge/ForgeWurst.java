@@ -159,4 +159,6 @@ public final class ForgeWurst
 	}
 
 	public NotePad getNotePad(){return notePad;}
+
+	public Waypoints getWaypoints(){return waypoints;}
 }

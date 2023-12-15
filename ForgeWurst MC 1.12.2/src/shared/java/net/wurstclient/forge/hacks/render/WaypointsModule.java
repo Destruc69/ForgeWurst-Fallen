@@ -15,32 +15,22 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.wurstclient.fmlevents.WUpdateEvent;
 import net.wurstclient.forge.Category;
+import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.pathfinding.PathfinderAStar;
-import net.wurstclient.forge.settings.CheckboxSetting;
-import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.RenderUtils;
+import net.wurstclient.forge.waypoints.Waypoint;
 import org.lwjgl.opengl.GL11;
 
-public final class Pointer extends Hack {
+import java.util.ArrayList;
+import java.util.List;
 
-    public static final SliderSetting x =
-            new SliderSetting("X", 0, -32000000, 32000000, 1, SliderSetting.ValueDisplay.INTEGER);
+public final class WaypointsModule extends Hack {
 
-    public static final SliderSetting z =
-            new SliderSetting("Z", 0, -32000000, 32000000, 1, SliderSetting.ValueDisplay.INTEGER);
-
-    private final CheckboxSetting setToCurrentPos =
-            new CheckboxSetting("SetToCurrentPos", "Sets the X and Z slider to the players current coordinate.",
-                    false);
-    public Pointer() {
+    public WaypointsModule() {
         super("Pointer", "Lets you save temporary points.");
         setCategory(Category.RENDER);
-        addSetting(x);
-        addSetting(z);
-        addSetting(setToCurrentPos);
     }
 
     @Override
@@ -54,56 +44,55 @@ public final class Pointer extends Hack {
     }
 
     @SubscribeEvent
-    public void onUpdate(WUpdateEvent event) {
-        if (setToCurrentPos.isChecked()) {
-            x.setValue(mc.player.lastTickPosX);
-            z.setValue(mc.player.lastTickPosZ);
-            setToCurrentPos.setChecked(false);
-        }
-    }
-
-    @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
-        try {
-            // GL settings
-            GL11.glEnable(GL11.GL_BLEND);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            GL11.glEnable(GL11.GL_LINE_SMOOTH);
-            GL11.glLineWidth(2);
-            GL11.glDisable(GL11.GL_TEXTURE_2D);
-            GL11.glEnable(GL11.GL_CULL_FACE);
-            GL11.glDisable(GL11.GL_DEPTH_TEST);
+        if (ForgeWurst.getForgeWurst().getWaypoints().size() > 0) {
+            try {
+                // GL settings
+                GL11.glEnable(GL11.GL_BLEND);
+                GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+                GL11.glEnable(GL11.GL_LINE_SMOOTH);
+                GL11.glLineWidth(2);
+                GL11.glDisable(GL11.GL_TEXTURE_2D);
+                GL11.glEnable(GL11.GL_CULL_FACE);
+                GL11.glDisable(GL11.GL_DEPTH_TEST);
 
-            GL11.glPushMatrix();
-            GL11.glTranslated(-TileEntityRendererDispatcher.staticPlayerX,
-                    -TileEntityRendererDispatcher.staticPlayerY,
-                    -TileEntityRendererDispatcher.staticPlayerZ);
+                GL11.glPushMatrix();
+                GL11.glTranslated(-TileEntityRendererDispatcher.staticPlayerX,
+                        -TileEntityRendererDispatcher.staticPlayerY,
+                        -TileEntityRendererDispatcher.staticPlayerZ);
 
-            GL11.glColor4f(0, 1, 0, 1F);
-            GL11.glBegin(GL11.GL_LINE);
-            RenderUtils.drawArrow(new Vec3d(x.getValue(), 0, z.getValue()), new Vec3d(x.getValue(), 255, z.getValue()));
-            GL11.glEnd();
+                for (Waypoint waypoint : getVectors()) {
+                    GL11.glColor4f(0, 1, 0, 1F);
+                    GL11.glBegin(GL11.GL_LINE);
+                    RenderUtils.drawArrow(new Vec3d(waypoint.getX(), 0, waypoint.getZ()), new Vec3d(waypoint.getX(), 256, waypoint.getZ()));
+                    GL11.glEnd();
 
-            GL11.glColor4f(0, 1, 0, 1F);
-            GL11.glBegin(GL11.GL_LINE);
-            RenderUtils.drawArrow(new Vec3d(mc.player.lastTickPosX, mc.player.lastTickPosY - 1, mc.player.lastTickPosZ), new Vec3d(x.getValue(), mc.player.lastTickPosY - 1, z.getValue()));
-            GL11.glEnd();
+                    GL11.glColor4f(0, 1, 0, 1F);
+                    GL11.glBegin(GL11.GL_LINE);
+                    RenderUtils.drawArrow(new Vec3d(mc.player.lastTickPosX, mc.player.lastTickPosY - 1, mc.player.lastTickPosZ), new Vec3d(waypoint.getX(), mc.player.lastTickPosY - 1, waypoint.getZ()));
+                    GL11.glEnd();
 
-            drawNametags(String.valueOf(Math.round(mc.player.getDistance(x.getValue(), mc.player.lastTickPosY, z.getValue()))), PathfinderAStar.getClosestSolidBlock(new BlockPos(x.getValue(), mc.player.lastTickPosY, z.getValue())).getX(), mc.player.lastTickPosY, PathfinderAStar.getClosestSolidBlock(new BlockPos(x.getValue(), mc.player.lastTickPosY, z.getValue())).getZ());
+                    drawNametags(String.valueOf(Math.round(mc.player.getDistance(waypoint.getX(), mc.player.lastTickPosY, waypoint.getZ()))), waypoint.getX(), mc.player.lastTickPosY, waypoint.getZ());
+                }
 
-            GL11.glPopMatrix();
+                GL11.glPopMatrix();
 
-            // GL resets
-            GL11.glColor4f(1, 1, 1, 1);
-            GL11.glEnable(GL11.GL_DEPTH_TEST);
-            GL11.glEnable(GL11.GL_TEXTURE_2D);
-            GL11.glDisable(GL11.GL_BLEND);
-            GL11.glDisable(GL11.GL_LINE_SMOOTH);
-        } catch (Exception ignored) {
+                // GL resets
+                GL11.glColor4f(1, 1, 1, 1);
+                GL11.glEnable(GL11.GL_DEPTH_TEST);
+                GL11.glEnable(GL11.GL_TEXTURE_2D);
+                GL11.glDisable(GL11.GL_BLEND);
+                GL11.glDisable(GL11.GL_LINE_SMOOTH);
+            } catch (Exception ignored) {
+            }
         }
     }
 
     public void drawNametags(String content, double x, double y, double z) {
+        BlockPos blockPos = PathfinderAStar.getClosestSolidBlock(new BlockPos(x, y, z));
+        x = blockPos.getX();
+        y = blockPos.getY();
+        z = blockPos.getZ();
         try {
             float distance = (float) mc.player.getDistance(x, y, z);
             float var13 = (distance / 5 <= 2 ? 2.0F : distance / 5) * 0.7F;
@@ -143,5 +132,9 @@ public final class Pointer extends Hack {
             GlStateManager.popMatrix();
         } catch (Exception ignored) {
         }
+    }
+
+    public List<Waypoint> getVectors() {
+        return new ArrayList<>(ForgeWurst.getForgeWurst().getWaypoints().getVectors());
     }
 }

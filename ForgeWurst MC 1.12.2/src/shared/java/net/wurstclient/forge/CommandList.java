@@ -16,7 +16,6 @@ public final class CommandList extends WCommandList
 	public final BindsCmd bindsCmd = register(new BindsCmd());
 	public final ClearCmd clearCmd = register(new ClearCmd());
 	public final GmCmd gmCmd = register(new GmCmd());
-	public final FBlockCmd fBlockCmd = register(new FBlockCmd());
 	public final NBTCommand nbtCommand = register(new NBTCommand());
 	public final FBotCMD fBotCMD = register(new FBotCMD());
 	public final HelpCmd helpCmd = register(new HelpCmd());
@@ -26,6 +25,7 @@ public final class CommandList extends WCommandList
 	public final SetEnumCmd setEnumCmd = register(new SetEnumCmd());
 	public final SetSliderCmd setSliderCmd = register(new SetSliderCmd());
 	public final TCmd tCmd = register(new TCmd());
+	public final WaypointsCmd waypointsCmd = register(new WaypointsCmd());
 	public final FriendsCmd friendsCmd = register(new FriendsCmd());
 	public final DupeCmd dupeCmd = register(new DupeCmd());
 	public final GetSettingCMD getSettingCMD = register(new GetSettingCMD());

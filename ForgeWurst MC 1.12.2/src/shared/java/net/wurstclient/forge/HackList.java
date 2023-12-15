@@ -94,7 +94,7 @@ public final class HackList extends WHackList
 	public final Flight flight = register(new Flight());
 	public final AntiCollide antiCollide = register(new AntiCollide());
 	public final FastBow fastBow = register(new FastBow());
-	public final Pointer pointer = register(new Pointer());
+	public final WaypointsModule pointer = register(new WaypointsModule());
 	public final Stability stability = register(new Stability());
 	public final CPvPViewer cPvPViewer = register(new CPvPViewer());
 	public final Killaura killaura = register(new Killaura());
