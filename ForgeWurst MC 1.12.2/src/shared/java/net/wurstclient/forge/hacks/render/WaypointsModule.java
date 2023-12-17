@@ -11,16 +11,14 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.Hack;
-import net.wurstclient.forge.pathfinding.PathfinderAStar;
+import net.wurstclient.forge.commands.WaypointsCmd;
 import net.wurstclient.forge.utils.ChatUtils;
-import net.wurstclient.forge.utils.RenderUtils;
 import net.wurstclient.forge.waypoints.Waypoint;
 import org.lwjgl.opengl.GL11;
 
@@ -67,17 +65,7 @@ public final class WaypointsModule extends Hack {
                         -TileEntityRendererDispatcher.staticPlayerZ);
 
                 for (Waypoint waypoint : getVectors()) {
-                    GL11.glColor4f(0, 1, 0, 1F);
-                    GL11.glBegin(GL11.GL_LINE);
-                    RenderUtils.drawArrow(new Vec3d(waypoint.getX(), 0, waypoint.getZ()), new Vec3d(waypoint.getX(), 256, waypoint.getZ()));
-                    GL11.glEnd();
-
-                    GL11.glColor4f(0, 1, 0, 1F);
-                    GL11.glBegin(GL11.GL_LINE);
-                    RenderUtils.drawArrow(new Vec3d(mc.player.lastTickPosX, mc.player.lastTickPosY - 1, mc.player.lastTickPosZ), new Vec3d(waypoint.getX(), mc.player.lastTickPosY - 1, waypoint.getZ()));
-                    GL11.glEnd();
-
-                    drawNametags(String.valueOf(Math.round(mc.player.getDistance(waypoint.getX(), mc.player.lastTickPosY, waypoint.getZ()))), waypoint.getX(), mc.player.lastTickPosY, waypoint.getZ());
+                    drawNametags(String.valueOf(Math.round(mc.player.getDistance(WaypointsCmd.decode(waypoint.getX()), mc.player.lastTickPosY, WaypointsCmd.decode(waypoint.getZ())))) + " x" + WaypointsCmd.decode(Math.round(waypoint.getX())) + " " + "z" + WaypointsCmd.decode(Math.round(waypoint.getZ())), WaypointsCmd.decode(waypoint.getX()), mc.player.lastTickPosY, WaypointsCmd.decode(waypoint.getZ()));
                 }
 
                 GL11.glPopMatrix();
@@ -94,14 +82,13 @@ public final class WaypointsModule extends Hack {
     }
 
     public void drawNametags(String content, double x, double y, double z) {
-        BlockPos blockPos = PathfinderAStar.getClosestSolidBlock(new BlockPos(x, y, z));
+        BlockPos blockPos = getClosestSolidBlock(new BlockPos(x, y, z));
         x = blockPos.getX();
-        y = blockPos.getY();
         z = blockPos.getZ();
         try {
             float distance = (float) mc.player.getDistance(x, y, z);
             float var13 = (distance / 5 <= 2 ? 2.0F : distance / 5) * 0.7F;
-            float var14 = 0.066666668F * var13;
+            float var14 = 0.044444446F * var13;
             GlStateManager.pushMatrix();
             RenderHelper.enableStandardItemLighting();
             GlStateManager.translate(x, y, z);
@@ -141,5 +128,28 @@ public final class WaypointsModule extends Hack {
 
     public List<Waypoint> getVectors() {
         return new ArrayList<>(ForgeWurst.getForgeWurst().getWaypoints().getVectors());
+    }
+
+    private BlockPos getClosestSolidBlock(BlockPos targetPos) {
+        int renderDistanceChunks = mc.gameSettings.renderDistanceChunks;
+
+        assert targetPos != null;
+
+        double closestDistance = Double.MAX_VALUE;
+        BlockPos closestBlock = null;
+        for (int x = mc.player.chunkCoordX - renderDistanceChunks; x <= mc.player.chunkCoordX + renderDistanceChunks; x++) {
+            for (int z = mc.player.chunkCoordZ - renderDistanceChunks; z <= mc.player.chunkCoordZ + renderDistanceChunks; z++) {
+                for (int y = 0; y <= 256; y++) {
+                    BlockPos blockPos = new BlockPos(x * 16, y, z * 16);
+                    double distance = blockPos.distanceSq(targetPos);
+                    if (distance < closestDistance) {
+                        closestDistance = distance;
+                        closestBlock = blockPos;
+                    }
+                }
+            }
+        }
+        assert closestBlock != null;
+        return closestBlock;
     }
 }

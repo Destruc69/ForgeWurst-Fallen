@@ -7,8 +7,6 @@
  */
 package net.wurstclient.forge.hacks.player;
 
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.util.EnumHand;
 import net.minecraftforge.client.event.RenderSpecificHandEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -16,6 +14,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.wurstclient.forge.Category;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.settings.SliderSetting;
+import org.lwjgl.opengl.GL11;
 
 public final class Animations extends Hack {
 
@@ -60,16 +59,12 @@ public final class Animations extends Hack {
 
 	@SubscribeEvent
 	public void onRenderHand(RenderSpecificHandEvent event) {
-		ItemRenderer ir = mc.getItemRenderer();
-
 		if (event.getHand() == EnumHand.MAIN_HAND) {
-			GlStateManager.translate(rhxv.getValueF(), rhyv.getValueF(), rhzv.getValueF());
-			ir.updateEquippedItem();
+			GL11.glTranslated(rhxv.getValueF(), rhyv.getValueF(), rhzv.getValueF());
 		}
 
 		if (event.getHand() == EnumHand.OFF_HAND) {
-			GlStateManager.translate(lhxv.getValueF(), lhyv.getValueF(), lhzv.getValueF());
-			ir.updateEquippedItem();
+			GL11.glTranslated(lhxv.getValueF(), lhyv.getValueF(), lhzv.getValueF());
 		}
 	}
 }

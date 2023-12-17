@@ -115,7 +115,7 @@ public class WaypointsCmd extends Command {
         return Integer.parseInt(obfuscatedNote.toString());
     }
 
-    private Integer decode(int integers) {
+    public static Integer decode(int integers) {
         Map<Character, Character> substitutionMap = generateSubstitutionMap();
         StringBuilder decodedNote = new StringBuilder();
 
@@ -144,7 +144,7 @@ public class WaypointsCmd extends Command {
         return Integer.parseInt(decodedNote.toString());
     }
 
-    private Map<Character, Character> generateSubstitutionMap() {
+    private static Map<Character, Character> generateSubstitutionMap() {
         Map<Character, Character> substitutionMap = new HashMap<>();
 
         // Define pairs of characters
