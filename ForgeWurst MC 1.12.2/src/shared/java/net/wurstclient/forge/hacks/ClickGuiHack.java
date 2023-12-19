@@ -99,11 +99,6 @@ public final class ClickGuiHack extends Hack
             "How fast are the particles?", 1, 0.5, 3, 0.5,
             ValueDisplay.DECIMAL);
 
-    public static final CheckboxSetting blockArrayList =
-            new CheckboxSetting("BlockArrayList",
-                    "A more classy and blocky array list.",
-                    false);
-
     public static final EnumSetting<PrefixEnum> prefixEnumEnumSetting =
             new EnumSetting<>("Prefix", PrefixEnum.values(), PrefixEnum.DOT);
 
@@ -136,9 +131,9 @@ public final class ClickGuiHack extends Hack
             "The Y coordinate for the notifications", 3, 0, mc.displayHeight, 1,
             ValueDisplay.DECIMAL);
 
-    public static final CheckboxSetting addDummyNotification =
-            new CheckboxSetting("AddDummyNotification",
-                    "Adds a dummy notifications so you can position.",
+    public static final CheckboxSetting animateNotifications =
+            new CheckboxSetting("AnimateNotifications",
+                    "Animates notifications.",
                     false);
 
     public ClickGuiHack()
@@ -165,7 +160,6 @@ public final class ClickGuiHack extends Hack
         addSetting(maxParticles);
         addSetting(particleSpawnRate);
         addSetting(particleSpeed);
-        addSetting(blockArrayList);
         addSetting(prefixEnumEnumSetting);
         addSetting(customFont);
         addSetting(arrayListX);
@@ -174,7 +168,7 @@ public final class ClickGuiHack extends Hack
         addSetting(titleY);
         addSetting(notificationX);
         addSetting(notificationY);
-        addSetting(addDummyNotification);
+        addSetting(animateNotifications);
 
         MinecraftForge.EVENT_BUS.register(new InventoryButtonAdder());
     }

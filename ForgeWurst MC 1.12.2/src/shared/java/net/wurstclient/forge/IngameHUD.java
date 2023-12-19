@@ -151,14 +151,11 @@ public final class IngameHUD {
 					theColor = Color.YELLOW.getRGB();
 				}
 
-				if (ClickGuiHack.blockArrayList.isChecked()) {
-					drawBorderedRect(ClickGuiHack.arrayListX.getValueI() - 2, y - 2, mc.fontRenderer.getStringWidth(color) + 4, 12, 1);
-				}
-
 				WMinecraft.getFontRenderer().drawString(color, ClickGuiHack.arrayListX.getValueI(), y, (int) textColor, false);
 				y += 9;
 			}
 		}
+
 		if (!(mc.currentScreen instanceof ClickGuiScreen))
 			clickGui.renderPinnedWindows(event.getPartialTicks());
 		if (blend)

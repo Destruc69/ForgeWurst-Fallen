@@ -23,6 +23,8 @@ public abstract class Hack extends WForgeRegistryEntry<Hack>
 {
 	protected static final ForgeWurst wurst = ForgeWurst.getForgeWurst();
 	protected static final Minecraft mc = Minecraft.getMinecraft();
+
+	private boolean prevState;
 	
 	private final String name;
 	private final String description;
@@ -122,5 +124,13 @@ public abstract class Hack extends WForgeRegistryEntry<Hack>
 	public static @interface DontSaveState
 	{
 		
+	}
+
+	public boolean getPrevState() {
+		return this.prevState;
+	}
+
+	public void setPrevState(boolean b) {
+		this.prevState = b;
 	}
 }
