@@ -21,7 +21,6 @@ import net.wurstclient.forge.settings.BlockListSetting;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.KeyBindingUtils;
-import net.wurstclient.forge.utils.TTSWrapper;
 
 import java.util.ArrayList;
 
