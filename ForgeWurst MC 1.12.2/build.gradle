@@ -11,9 +11,9 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
 
-version = "ForgeWurst-Fallen"
+version = "0.11-MC1.12.2"
 group = "com.yourname.modid" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "ForgeWurst-Fallen"
+archivesBaseName = "ForgeWurst"
 
 sourceSets {
     main {
@@ -29,7 +29,7 @@ compileJava {
 }
 
 minecraft {
-    version = "1.12.2-14.23.5.2768"
+    version = "1.12.2-14.23.5.2860"
     runDir = "run"
 
     // the mappings can be changed at any time, and must be in the following format.
