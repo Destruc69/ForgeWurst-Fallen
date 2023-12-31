@@ -5,10 +5,7 @@ import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.utils.ChatUtils;
 import net.wurstclient.forge.waypoints.Waypoint;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class WaypointsCmd extends Command {
 
@@ -73,7 +70,7 @@ public class WaypointsCmd extends Command {
         int totalPages = (int) Math.ceil((double) waypoints.size() / waypointsPerPage);
 
         ChatUtils.message("Waypoints: Page " + currentPage + " of " + totalPages);
-        for (int i = (currentPage - 1) * waypointsPerPage; i < Math.min(currentPage * waypointsPerPage, waypoints.size()); i++) {
+        for (int i = 0; i < Math.min(currentPage * waypointsPerPage, waypoints.size()); i++) {
             ChatUtils.message(i + 1 + ". " + decode(waypoints.get(i).getX()) + " " + decode(waypoints.get(i).getZ()));
         }
     }
