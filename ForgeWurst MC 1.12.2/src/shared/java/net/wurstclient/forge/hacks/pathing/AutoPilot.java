@@ -21,6 +21,7 @@ import net.wurstclient.forge.settings.BlockListSetting;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.SliderSetting;
 import net.wurstclient.forge.utils.KeyBindingUtils;
+import net.wurstclient.forge.utils.TTSWrapper;
 
 import java.util.ArrayList;
 
@@ -72,6 +73,7 @@ public final class AutoPilot extends Hack {
 	protected void onDisable() {
 		MinecraftForge.EVENT_BUS.unregister(this);
 		blockPosArrayList.clear();
+
 	}
 
 	@SubscribeEvent
@@ -83,6 +85,20 @@ public final class AutoPilot extends Hack {
 			setToCurrentPos.setChecked(false);
 			return;
 		}
+
+
+		//String save = "";
+		//String nextInstruction = PathfinderAStar.getNextInstruction(mc.player.getPosition(), blockPosArrayList);
+
+		//if (blockPosArrayList.size() > 0) {
+		//	if (!nextInstruction.equals(save)) {
+		//		// The instruction has changed, so you can trigger your event here
+		//		save = nextInstruction;
+
+		//		TTSWrapper.say(save);
+		//	}
+		//}
+
 		if (blockListSetting.getBlockNames().isEmpty()) {
 			if (PathfinderModule.actionTypeEnumSetting.getSelected() == PathfinderModule.ActionType.GROUND) {
 				if (!PathfinderAStar.isOnPath(blockPosArrayList) || a || mc.player.getDistance(blockPosArrayList.get(0).getX(), mc.player.posY, blockPosArrayList.get(0).getZ()) >= mc.gameSettings.renderDistanceChunks * 14 || mc.player.getDistance(blockPosArrayList.get(blockPosArrayList.size() - 1).getX(), mc.player.lastTickPosY, blockPosArrayList.get(blockPosArrayList.size() - 1).getZ()) <= 1) {

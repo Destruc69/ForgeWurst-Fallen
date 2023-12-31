@@ -518,4 +518,59 @@ public class PathfinderAStar {
         AIR,
         ELYTRA;
     }
+
+    private static int currentInstructionIndex = 1;
+
+    public static String getNextInstruction(BlockPos playerPos, ArrayList<BlockPos> path) {
+        if (path.size() < 2 || currentInstructionIndex >= path.size() - 1) {
+            return "You have reached your destination.";
+        }
+
+        int straightBlocks = 0;
+
+        for (int i = currentInstructionIndex + 1; i < path.size() - 1; i++) {
+            BlockPos currentBlock = path.get(i);
+            BlockPos nextBlock = path.get(i + 1);
+
+            int deltaX = nextBlock.getX() - currentBlock.getX();
+            int deltaZ = nextBlock.getZ() - currentBlock.getZ();
+
+            if (deltaX == 0 && deltaZ == 0) {
+                straightBlocks++;
+            } else {
+                // Found a turn
+                currentInstructionIndex = i;
+                if (straightBlocks > 0) {
+                    return String.format("In %d blocks, continue straight.", straightBlocks);
+                } else {
+                    return getNextTurnInstruction(playerPos, currentBlock, nextBlock);
+                }
+            }
+        }
+
+        return "You have reached your destination.";
+    }
+
+    private static String getNextTurnInstruction(BlockPos playerPos, BlockPos currentBlock, BlockPos nextBlock) {
+        int deltaX = nextBlock.getX() - currentBlock.getX();
+        int deltaZ = nextBlock.getZ() - currentBlock.getZ();
+
+        if (Math.abs(deltaX) > Math.abs(deltaZ)) {
+            if (deltaX > 0) {
+                return String.format("In %d blocks, turn right.", getDistanceToNextBlock(playerPos, nextBlock));
+            } else {
+                return String.format("In %d blocks, turn left.", getDistanceToNextBlock(playerPos, nextBlock));
+            }
+        } else {
+            if (deltaZ > 0) {
+                return String.format("In %d blocks, continue straight.", getDistanceToNextBlock(playerPos, nextBlock));
+            } else {
+                return String.format("In %d blocks, turn around.", getDistanceToNextBlock(playerPos, nextBlock));
+            }
+        }
+    }
+
+    private static int getDistanceToNextBlock(BlockPos currentPos, BlockPos nextBlock) {
+        return (int) Math.sqrt(currentPos.distanceSq(nextBlock));
+    }
 }
