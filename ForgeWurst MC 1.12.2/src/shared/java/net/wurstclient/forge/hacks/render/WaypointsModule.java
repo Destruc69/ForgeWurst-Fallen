@@ -10,7 +10,9 @@ package net.wurstclient.forge.hacks.render;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -18,7 +20,10 @@ import net.wurstclient.forge.Category;
 import net.wurstclient.forge.ForgeWurst;
 import net.wurstclient.forge.Hack;
 import net.wurstclient.forge.commands.WaypointsCmd;
+import net.wurstclient.forge.compatibility.WMinecraft;
+import net.wurstclient.forge.compatibility.WVec3d;
 import net.wurstclient.forge.utils.ChatUtils;
+import net.wurstclient.forge.utils.RotationUtils;
 import net.wurstclient.forge.waypoints.Waypoint;
 import org.lwjgl.opengl.GL11;
 
@@ -63,6 +68,8 @@ public final class WaypointsModule extends Hack {
                 GL11.glTranslated(-TileEntityRendererDispatcher.staticPlayerX,
                         -TileEntityRendererDispatcher.staticPlayerY,
                         -TileEntityRendererDispatcher.staticPlayerZ);
+
+                renderTracers();
 
                 for (Waypoint waypoint : getVectors()) {
                     drawNametags(String.valueOf(Math.round(mc.player.getDistance(WaypointsCmd.decode(waypoint.getX()), mc.player.lastTickPosY, WaypointsCmd.decode(waypoint.getZ())))) + " x" + WaypointsCmd.decode(Math.round(waypoint.getX())) + " " + "z" + WaypointsCmd.decode(Math.round(waypoint.getZ())), WaypointsCmd.decode(waypoint.getX()), mc.player.lastTickPosY, WaypointsCmd.decode(waypoint.getZ()));
@@ -127,7 +134,13 @@ public final class WaypointsModule extends Hack {
     }
 
     public List<Waypoint> getVectors() {
-        return new ArrayList<>(ForgeWurst.getForgeWurst().getWaypoints().getVectors());
+        List<Waypoint> waypointList = new ArrayList<>();
+
+        for (Waypoint waypoint : ForgeWurst.getForgeWurst().getWaypoints().getVectors()) {
+            waypointList.add(new Waypoint(WaypointsCmd.decode(waypoint.getX()), WaypointsCmd.decode(waypoint.getZ())));
+        }
+
+        return waypointList;
     }
 
     private BlockPos getClosestSolidBlock(BlockPos targetPos) {
@@ -151,5 +164,26 @@ public final class WaypointsModule extends Hack {
         }
         assert closestBlock != null;
         return closestBlock;
+    }
+
+    private void renderTracers()
+    {
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glDisable(GL11.GL_DEPTH_TEST);
+        GL11.glColor4f(1, 1, 0, 0.5F);
+
+        Vec3d start = new Vec3d(mc.player.lastTickPosX, mc.player.lastTickPosY - 1, mc.player.lastTickPosZ);
+
+        GL11.glBegin(GL11.GL_LINES);
+        for (Waypoint waypoint : getVectors()) {
+            Vec3d end = new Vec3d(waypoint.getX(), mc.player.lastTickPosY, waypoint.getZ());
+
+            GL11.glVertex3d(WVec3d.getX(start), WVec3d.getY(start),
+                    WVec3d.getZ(start));
+            GL11.glVertex3d(WVec3d.getX(end), WVec3d.getY(end),
+                    WVec3d.getZ(end));
+        }
+        GL11.glEnd();
     }
 }
