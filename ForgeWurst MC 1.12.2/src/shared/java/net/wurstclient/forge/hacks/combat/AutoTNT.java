@@ -48,6 +48,7 @@ public final class AutoTNT extends Hack {
 	public AutoTNT() {
 		super("AutoTNT", "Places TNT near entity's and ignites the TNT.");
 		setCategory(Category.COMBAT);
+		addSetting(mode);
 	}
 
 	@Override
@@ -126,7 +127,12 @@ public final class AutoTNT extends Hack {
 				mc.player.swingArm(EnumHand.MAIN_HAND);
 
 				float[] rot = RotationUtils.getNeededRotations(new Vec3d(tntPos.getX() + 0.5, tntPos.getY() + 0.5, tntPos.getZ() + 0.5));
-				mc.player.connection.sendPacket(new CPacketPlayer.Rotation(rot[0], rot[1], mc.player.onGround));
+				if (mode.getSelected() == Mode.PACKET) {
+					mc.player.connection.sendPacket(new CPacketPlayer.Rotation(rot[0], rot[1], mc.player.onGround));
+				} else {
+					mc.player.rotationYaw = rot[0];
+					mc.player.rotationPitch = rot[1];
+				}
 			}
 		} else {
 			mc.player.inventory.currentItem = getSlot(Item.getItemFromBlock(Blocks.TNT));
@@ -136,7 +142,12 @@ public final class AutoTNT extends Hack {
 				mc.player.swingArm(EnumHand.MAIN_HAND);
 
 				float[] rot = RotationUtils.getNeededRotations(new Vec3d(tntPos.getX() + 0.5, tntPos.getY(), tntPos.getZ() + 0.5));
-				mc.player.connection.sendPacket(new CPacketPlayer.Rotation(rot[0], rot[1], mc.player.onGround));
+				if (mode.getSelected() == Mode.PACKET) {
+					mc.player.connection.sendPacket(new CPacketPlayer.Rotation(rot[0], rot[1], mc.player.onGround));
+				} else {
+					mc.player.rotationYaw = rot[0];
+					mc.player.rotationPitch = rot[1];
+				}
 			}
 		}
 	}

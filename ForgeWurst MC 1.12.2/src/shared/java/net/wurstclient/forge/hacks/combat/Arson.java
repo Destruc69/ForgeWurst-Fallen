@@ -41,6 +41,7 @@ public final class Arson extends Hack {
 	public Arson() {
 		super("Arson", "Lights players on fire with a flint n' steel.");
 		setCategory(Category.COMBAT);
+		addSetting(mode);
 	}
 
 	@Override
@@ -65,7 +66,12 @@ public final class Arson extends Hack {
 					mc.player.swingArm(EnumHand.MAIN_HAND);
 
 					float[] rot = RotationUtils.getNeededRotations(new Vec3d(posToLight.getX() + 0.5, posToLight.getY(), posToLight.getZ() + 0.5));
-					mc.player.connection.sendPacket(new CPacketPlayer.Rotation(rot[0], rot[1], mc.player.onGround));
+					if (mode.getSelected() == Mode.PACKET) {
+						mc.player.connection.sendPacket(new CPacketPlayer.Rotation(rot[0], rot[1], mc.player.onGround));
+					} else {
+						mc.player.rotationYaw = rot[0];
+						mc.player.rotationPitch = rot[1];
+					}
 				}
 			} else {
 				int slot = getSlot(Items.FLINT_AND_STEEL);

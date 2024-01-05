@@ -34,6 +34,7 @@ public final class HackList extends WHackList
 	public final NoFall noFall = register(new NoFall());
 	public final Speed speed = register(new Speed());
 	public final Step step = register(new Step());
+	public final Gadgetry gadgetry = register(new Gadgetry());
 	public final AntiForge antiForge = register(new AntiForge());
 	public final AutoClutch autoClutch = register(new AutoClutch());
 	public final Arson arson = register(new Arson());
