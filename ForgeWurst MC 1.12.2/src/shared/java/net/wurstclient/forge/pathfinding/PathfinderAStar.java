@@ -376,12 +376,11 @@ public class PathfinderAStar {
         double deltaX = nextBlock.getX() + 0.5 - playerX + velocityX;
         double deltaZ = nextBlock.getZ() + 0.5 - playerZ + velocityZ;
 
-        // Calculate the target rotationYaw based on angle difference
         double targetAngle = Math.atan2(deltaZ, deltaX);
         double playerAngle = Math.toRadians(rotationYaw);
 
         // Smoothly adjust the player's rotationYaw
-        double angleDifference = targetAngle - playerAngle;
+        double angleDifference = (targetAngle - playerAngle + Math.PI) % (2 * Math.PI) - Math.PI;
 
         // Calculate the distance to the target position
         double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
@@ -398,17 +397,6 @@ public class PathfinderAStar {
         }
 
         return new double[]{motionX, motionZ};
-    }
-
-    // Helper function to normalize angles to [-pi, pi] range
-    private static double normalizeAngle(double angle) {
-        while (angle > Math.PI) {
-            angle -= 2 * Math.PI;
-        }
-        while (angle <= -Math.PI) {
-            angle += 2 * Math.PI;
-        }
-        return angle;
     }
 
     public static BlockPos getTargetPositionInPathArray(ArrayList<BlockPos> path) {

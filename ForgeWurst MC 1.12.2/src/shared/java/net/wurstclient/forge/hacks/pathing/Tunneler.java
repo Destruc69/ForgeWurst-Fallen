@@ -7,16 +7,7 @@
  */
 package net.wurstclient.forge.hacks.pathing;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-
-import net.minecraft.init.Items;
-import org.lwjgl.opengl.GL11;
-
 import com.mojang.realmsclient.gui.ChatFormatting;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFalling;
 import net.minecraft.block.BlockLiquid;
@@ -45,12 +36,13 @@ import net.wurstclient.forge.compatibility.WMinecraft;
 import net.wurstclient.forge.settings.CheckboxSetting;
 import net.wurstclient.forge.settings.EnumSetting;
 import net.wurstclient.forge.settings.SliderSetting;
-import net.wurstclient.forge.utils.BlockUtils;
-import net.wurstclient.forge.utils.ChatUtils;
-import net.wurstclient.forge.utils.KeyBindingUtils;
-import net.wurstclient.forge.utils.PlayerControllerUtils;
-import net.wurstclient.forge.utils.RenderUtils;
-import net.wurstclient.forge.utils.RotationUtils;
+import net.wurstclient.forge.utils.*;
+import org.lwjgl.opengl.GL11;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 
 @Hack.DontSaveState
 public final class Tunneler extends Hack
@@ -680,8 +672,7 @@ public final class Tunneler extends Hack
 	private enum TunnelSize
 	{
 		SIZE_1X2("1x2", new Vec3i(0, 1, 0), new Vec3i(0, 0, 0), 4, 13),
-
-		SIZE_3X3("3x3", new Vec3i(1, 2, 0), new Vec3i(-1, 0, 0), 4, 11),
+		SIZE_3X3("3x2", new Vec3i(1, 2, 0), new Vec3i(-1, 0, 0), 4, 11),
 		SIZE_4X3("4x3", new Vec3i(2, 2, 0), new Vec3i(-2, 0 ,0), 4, 12);
 
 		private final String name;

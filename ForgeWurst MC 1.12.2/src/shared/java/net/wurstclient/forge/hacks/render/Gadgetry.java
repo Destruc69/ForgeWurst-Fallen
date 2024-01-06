@@ -29,6 +29,14 @@ public final class Gadgetry extends Hack {
 			"When a desired tick is reached, calculations and sets will be engaged.",
 			500, 200, 5000, 100, SliderSetting.ValueDisplay.DECIMAL);
 
+	private final CheckboxSetting manageFPS =
+			new CheckboxSetting("ManageFPS", "Shall we manage your FPS? We set optimized values, Setting your FPS high can: \n" +
+					"1. Decreased performance. \n" +
+					"2. Increased power consumption and heat \n" +
+					"3. Diminishing returns" +
+					"4. Input lag",
+					true);
+
 	private double renderSetting = 0;
 	private double fpsLimit = 0;
 	private boolean extremityMode = false;
@@ -42,6 +50,7 @@ public final class Gadgetry extends Hack {
 		setCategory(Category.RENDER);
 		addSetting(debug);
 		addSetting(tick);
+		addSetting(manageFPS);
 	}
 
 	@Override
@@ -68,8 +77,13 @@ public final class Gadgetry extends Hack {
 			updateExtremityModeStatus();
 			updateRenderDistanceValue();
 			updateCalcBoolVar();
-			updateGameSettings();
 		}
+
+		if (ramUsage != Math.round(ramUsage)) {
+			ramUsage = Math.round(ramUsage);
+		}
+
+		updateGameSettings();
 	}
 
 	private void updateGameSettings() {
@@ -101,11 +115,13 @@ public final class Gadgetry extends Hack {
 				ChatUtils.message("NEW PARTICLE SETTING VALUE: " + renderSetting);
 			}
 		}
-		if (mc.gameSettings.limitFramerate != fpsLimit) {
-			mc.gameSettings.limitFramerate = (int) fpsLimit;
+		if (manageFPS.isChecked()) {
+			if (mc.gameSettings.limitFramerate != fpsLimit) {
+				mc.gameSettings.limitFramerate = (int) fpsLimit;
 
-			if (debug.isChecked()) {
-				ChatUtils.message("NEW LF SETTING VALUE: " + fpsLimit);
+				if (debug.isChecked()) {
+					ChatUtils.message("NEW LF SETTING VALUE: " + fpsLimit);
+				}
 			}
 		}
 		if (extremityMode && mc.gameSettings.fboEnable) {
@@ -125,15 +141,35 @@ public final class Gadgetry extends Hack {
 		}
 
 		if (boolSetting) {
-			mc.gameSettings.fancyGraphics = true;
-			mc.gameSettings.entityShadows = true;
-		} else {
-			mc.gameSettings.fancyGraphics = false;
-			mc.gameSettings.entityShadows = false;
-		}
+			if (!mc.gameSettings.fancyGraphics) {
+				mc.gameSettings.fancyGraphics = true;
 
-		if (debug.isChecked()) {
-			ChatUtils.message("RAM-Usage: " + Math.round(ramUsage));
+				if (debug.isChecked()) {
+					ChatUtils.message("NEW BOOL SETTING FANCY-G VAL: TRUE");
+				}
+			}
+			if (!mc.gameSettings.entityShadows) {
+				mc.gameSettings.entityShadows = true;
+
+				if (debug.isChecked()) {
+					ChatUtils.message("NEW BOOL SETTING E-SHADOWS VAL: TRUE");
+				}
+			}
+		} else {
+			if (mc.gameSettings.fancyGraphics) {
+				mc.gameSettings.fancyGraphics = false;
+
+				if (debug.isChecked()) {
+					ChatUtils.message("NEW BOOL SETTING FANCY-G VAL: FALSE");
+				}
+			}
+			if (mc.gameSettings.entityShadows) {
+				mc.gameSettings.entityShadows = false;
+
+				if (debug.isChecked()) {
+					ChatUtils.message("NEW BOOL SETTING E-SHADOWS VAL: FALSE");
+				}
+			}
 		}
 	}
 
