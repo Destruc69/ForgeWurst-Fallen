@@ -38,6 +38,7 @@ public final class HackList extends WHackList
 	public final AntiForge antiForge = register(new AntiForge());
 	public final AutoClutch autoClutch = register(new AutoClutch());
 	public final Arson arson = register(new Arson());
+	public final AutoGrief autoGrief = register(new AutoGrief());
 	public final AutoTNT autoTNT = register(new AutoTNT());
 	public final AutoMount autoMount = register(new AutoMount());
 	public final DataFuelModule dataFuelModule = register(new DataFuelModule());

@@ -385,4 +385,58 @@ public final class BlockUtils
 		return result != null && result.typeOfHit == RayTraceResult.Type.BLOCK;
 	}
 
+	public static BlockPos findNearestBlockPos(BlockPos center, Block targetBlock) {
+		// 1. Reduced search radius (adjust as needed)
+		int searchRadius = 16; // Example: reduced from render distance
+
+		BlockPos nearestBlockPos = null;
+		double nearestDistanceSq = Double.MAX_VALUE;
+
+		// 2. Optimized loop structure
+		IBlockState cachedState;
+		for (int x = -searchRadius; x <= searchRadius; x++) {
+			for (int z = -searchRadius; z <= searchRadius; z++) { // Loop through X and Z first
+				for (int y = -searchRadius; y <= searchRadius; y++) {
+					BlockPos pos = center.add(x, y, z);
+
+					// 3. Cached BlockState
+					cachedState = mc.world.getBlockState(pos);
+					if (cachedState.getBlock() == targetBlock) {
+						double distanceSq = center.distanceSq(pos);
+
+						if (distanceSq < nearestDistanceSq) {
+							nearestDistanceSq = distanceSq;
+							nearestBlockPos = pos;
+							break; // Break early if found
+						}
+					}
+				}
+			}
+		}
+
+		return nearestBlockPos;
+	}
+
+	public static List<BlockPos> findAllBlockPos(BlockPos center, Block targetBlock, int searchRadius) {
+		List<BlockPos> allBlockPosList = new ArrayList<>();
+
+		// Optimized loop structure
+		IBlockState cachedState;
+		for (int x = -searchRadius; x <= searchRadius; x++) {
+			for (int z = -searchRadius; z <= searchRadius; z++) { // Loop through X and Z first
+				for (int y = -searchRadius; y <= searchRadius; y++) {
+					BlockPos pos = center.add(x, y, z);
+
+					// Cached BlockState
+					cachedState = mc.world.getBlockState(pos);
+					if (cachedState.getBlock() == targetBlock) {
+						allBlockPosList.add(pos);
+					}
+				}
+			}
+		}
+
+		return allBlockPosList;
+	}
+
 }
